@@ -73,7 +73,7 @@ export function Navbar({ onInquiry }: Props) {
                 </span>
               )}
             </button>
-            <Button size="sm">
+            <Button size="sm" onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}>
               Sign In
             </Button>
           </div>
@@ -133,7 +133,7 @@ export function Navbar({ onInquiry }: Props) {
         </nav>
 
         <div className="mt-auto">
-          <Button className="w-full">
+          <Button className="w-full" onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}>
             Sign In
           </Button>
         </div>
