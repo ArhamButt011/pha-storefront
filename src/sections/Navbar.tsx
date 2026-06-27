@@ -73,6 +73,9 @@ export function Navbar({ onInquiry }: Props) {
                 </span>
               )}
             </button>
+            <Button size="sm" variant="outline" onClick={onInquiry}>
+              Enquire
+            </Button>
             <Button size="sm" onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}>
               Sign In
             </Button>
@@ -132,7 +135,10 @@ export function Navbar({ onInquiry }: Props) {
           ))}
         </nav>
 
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col gap-2">
+          <Button variant="outline" className="w-full" onClick={() => { setMenuOpen(false); onInquiry(); }}>
+            Enquire
+          </Button>
           <Button className="w-full" onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}>
             Sign In
           </Button>
