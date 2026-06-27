@@ -23,24 +23,45 @@ export function InquiryModal({ open, onOpenChange }: Props) {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleChange(field: keyof typeof form, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError(null);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/inquiry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone || undefined,
+          subject: form.subject,
+          message: form.message,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.message || "Something went wrong. Please try again.");
+      }
       setSent(true);
-    }, 1200);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleClose(o: boolean) {
     if (!o) {
       setTimeout(() => {
         setSent(false);
+        setError(null);
         setForm({ name: "", email: "", phone: "", subject: "", message: "" });
       }, 300);
     }
@@ -144,6 +165,10 @@ export function InquiryModal({ open, onOpenChange }: Props) {
                   required
                 />
               </div>
+
+              {error && (
+                <p className="text-sm text-danger">{error}</p>
+              )}
 
               <Button type="submit" className="w-full gap-2" disabled={loading}>
                 {loading ? (
