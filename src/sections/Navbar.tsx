@@ -51,7 +51,7 @@ export function Navbar({ onInquiry }: Props) {
           </a>
 
           {/* Desktop nav */}
-          <div className="hidden items-center gap-8 md:flex">
+          <div className="hidden items-center gap-6 lg:flex">
             {NAV_LINKS.map((l) => (
               <a
                 key={l.href}
@@ -64,7 +64,7 @@ export function Navbar({ onInquiry }: Props) {
           </div>
 
           {/* Right actions */}
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-3 lg:flex">
             <button className="relative p-2 text-fg-muted transition-colors hover:text-fg">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
@@ -83,7 +83,7 @@ export function Navbar({ onInquiry }: Props) {
 
           {/* Mobile hamburger */}
           <button
-            className="p-2 text-fg md:hidden"
+            className="p-2 text-fg lg:hidden"
             onClick={() => setMenuOpen(true)}
           >
             <Menu className="h-6 w-6" />
@@ -94,14 +94,14 @@ export function Navbar({ onInquiry }: Props) {
       {/* Mobile overlay */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={() => setMenuOpen(false)}
         />
       )}
 
       {/* Mobile drawer */}
       <div
-        className={`mobile-menu fixed right-0 top-0 z-50 flex h-full w-72 flex-col bg-bg-2 p-8 md:hidden ${menuOpen ? "open" : ""}`}
+        className={`mobile-menu fixed right-0 top-0 z-50 flex h-full w-72 flex-col bg-bg-2 p-8 lg:hidden ${menuOpen ? "open" : ""}`}
       >
         <div className="flex items-center justify-between mb-8">
           <a href="#home" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
