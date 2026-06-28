@@ -62,22 +62,22 @@ export function WhyChooseUs() {
           <div ref={imagesRef} className="reveal grid grid-cols-2 gap-4">
             <div className="mt-12 space-y-4">
               <img
-                src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=400&h=500&fit=crop"
-                alt="Mechanic at work"
+                src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=500&fit=crop"
+                alt="Car engine"
                 className="float h-64 w-full rounded-2xl border border-border object-cover"
                 loading="lazy"
               />
               <img
                 src="https://images.unsplash.com/photo-1493238792000-8113da705763?w=400&h=300&fit=crop"
-                alt="Car detail"
+                alt="Car at night"
                 className="h-44 w-full rounded-2xl border border-border object-cover"
                 loading="lazy"
               />
             </div>
             <div className="space-y-4">
               <img
-                src="https://images.unsplash.com/photo-1581092335878-2d9ff86ca2bf?w=400&h=300&fit=crop"
-                alt="Parts workshop"
+                src="https://images.unsplash.com/photo-1517524008697-84bbe3c3fd98?w=400&h=300&fit=crop"
+                alt="Mechanic working on car"
                 className="h-44 w-full rounded-2xl border border-border object-cover"
                 loading="lazy"
               />

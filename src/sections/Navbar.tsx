@@ -37,9 +37,9 @@ export function Navbar({ onInquiry }: Props) {
           {/* Logo */}
           <a href="#home" className="flex items-center gap-3 group">
             <img
-              src="/branding/logo.png"
+              src="/branding/logo.svg"
               alt="Parts Hub Australia"
-              className="h-12 w-12 rounded-xl object-contain transition-transform duration-300 group-hover:scale-110"
+              className="h-20 w-20 object-contain transition-transform duration-300 group-hover:scale-110"
             />
             <div className="hidden sm:block">
               <span className="font-display text-lg font-bold tracking-wider text-fg">
@@ -103,15 +103,12 @@ export function Navbar({ onInquiry }: Props) {
         className={`mobile-menu fixed right-0 top-0 z-50 flex h-full w-72 flex-col bg-bg-2 p-8 lg:hidden ${menuOpen ? "open" : ""}`}
       >
         <div className="flex items-center justify-between mb-8">
-          <a href="#home" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
+          <a href="#home" onClick={() => setMenuOpen(false)}>
             <img
-              src="/branding/logo.png"
+              src="/branding/logo.svg"
               alt="Parts Hub Australia"
-              className="h-10 w-10 rounded-xl object-contain"
+              className="h-10 w-10 object-contain"
             />
-            <span className="font-display text-sm font-bold tracking-wider text-fg">
-              PH<span className="text-accent">A</span>
-            </span>
           </a>
           <button
             onClick={() => setMenuOpen(false)}
