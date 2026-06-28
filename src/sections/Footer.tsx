@@ -35,7 +35,7 @@ export function Footer({ onInquiry }: Props) {
           {/* Brand column */}
           <div>
             <div className="mb-6 flex items-center gap-3">
-              <img src="/branding/logo.png" alt="Parts Hub Australia" className="h-12 w-12 rounded-xl object-contain" />
+              <img src="/branding/logo.svg" alt="Parts Hub Australia" className="h-20 w-20 rounded-xl object-contain" />
               <div>
                 <span className="font-display text-base font-bold tracking-wider text-fg">
                   PARTS HUB <span className="text-accent">AUSTRALIA</span>
