@@ -1,121 +1,93 @@
-import { useState } from "react";
-import { Heart, Plus, Check, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Heart, ShoppingCart, ArrowRight } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+
+const FEATURED = {
+  brand: "Brembo Performance",
+  title: "GT Series Braking System",
+  desc: "Ultimate stopping power for track and road use.",
+  tag: "PERFORMANCE PLUS",
+  price: "4,299.00",
+  img: "https://images.unsplash.com/photo-1573939843624-b22996c1a31c?w=900&h=900&fit=crop",
+};
 
 const PRODUCTS = [
   {
-    tag: "BESTSELLER",
-    tagColor: "bg-accent text-accent-fg",
-    img: "https://images.unsplash.com/photo-1542362567-b07e54358753?w=500&h=500&fit=crop",
-    title: "Performance Brake Kit",
-    desc: "Ceramic compound · Fits most SUVs",
-    rating: 5,
-    reviews: 248,
-    price: 289,
-    oldPrice: 350,
+    brand: "Garrett Performance",
+    title: "G-Series G25-660 Turbocharger",
+    price: "2,850.00",
+    img: "https://images.unsplash.com/photo-1673153597250-ae20d69e7fde?w=500&h=500&fit=crop",
   },
   {
-    tag: "IN STOCK",
-    tagColor: "bg-ok text-ok-fg",
-    img: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=500&h=500&fit=crop",
-    title: "High-Flow Air Filter",
-    desc: "Washable · Lifetime warranty",
-    rating: 4,
-    reviews: 186,
-    price: 89,
-    oldPrice: null,
+    brand: "KW Suspension",
+    title: "V3 Coilover Kit - BMW M3/M4",
+    price: "3,999.00",
+    img: "https://images.unsplash.com/photo-1760836395865-0c20fff2aefd?w=500&h=500&fit=crop",
   },
   {
-    tag: "NEW",
-    tagColor: "bg-purple-600 text-white",
-    img: "https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=500&h=500&fit=crop",
-    title: "Platinum Spark Plugs",
-    desc: "Set of 4 · 100k km lifespan",
-    rating: 5,
-    reviews: 312,
-    price: 45,
-    oldPrice: 60,
+    brand: "Bosch Genuine",
+    title: "Ultimate Major Service Kit",
+    price: "245.00",
+    img: "https://images.unsplash.com/photo-1590227763209-821c686b932f?w=500&h=500&fit=crop",
   },
   {
-    tag: "TOP RATED",
-    tagColor: "bg-blue-600 text-white",
-    img: "https://images.unsplash.com/photo-1606577924006-27d39b132ae2?w=500&h=500&fit=crop",
-    title: "Heavy Duty Battery",
-    desc: "750 CCA · 3 year warranty",
-    rating: 5,
-    reviews: 421,
-    price: 199,
-    oldPrice: null,
+    brand: "M-Performance",
+    title: "Carbon Fiber Front Splitter",
+    price: "1,250.00",
+    img: "https://images.unsplash.com/photo-1770172505231-2644765d984c?w=500&h=500&fit=crop",
   },
 ];
 
-function Stars({ rating }: { rating: number }) {
+function AddToCartButton() {
   return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <svg
-          key={i}
-          className={`h-3.5 w-3.5 ${i <= rating ? "text-accent" : "text-bg-3"}`}
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.26.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.55-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
+    <button className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg transition-all hover:brightness-110">
+      <ShoppingCart className="h-4 w-4" />
+    </button>
+  );
+}
+
+function FeaturedCard() {
+  return (
+    <div className="product-card group relative flex flex-col overflow-hidden rounded-2xl bg-bg-2 lg:col-span-2 lg:row-span-2">
+      <div className="relative h-64 overflow-hidden shine lg:h-full lg:min-h-70 lg:flex-1">
+        <img
+          src={FEATURED.img}
+          alt={FEATURED.title}
+          className="card-img h-full w-full object-cover"
+          loading="lazy"
+        />
+        <span className="absolute left-4 top-4 rounded-full bg-accent px-3 py-1 text-[10px] font-bold tracking-wide text-accent-fg">
+          {FEATURED.tag}
+        </span>
+        <button className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-colors hover:bg-accent hover:text-accent-fg">
+          <Heart className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="p-6">
+        <p className="text-xs font-semibold uppercase tracking-wider text-fg-muted">{FEATURED.brand}</p>
+        <h3 className="mt-1 text-xl font-bold text-fg">{FEATURED.title}</h3>
+        <p className="mt-1 text-sm text-fg-muted">{FEATURED.desc}</p>
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-2xl font-black text-accent">${FEATURED.price} <span className="text-sm font-semibold text-fg-muted">AUD</span></span>
+          <AddToCartButton />
+        </div>
+      </div>
     </div>
   );
 }
 
 function ProductCard({ product }: { product: (typeof PRODUCTS)[0] }) {
-  const [added, setAdded] = useState(false);
-  const [wishlisted, setWishlisted] = useState(false);
-
-  function handleAdd() {
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
-  }
-
   return (
-    <div className="product-card flex flex-col overflow-hidden rounded-2xl bg-bg-2">
-      <div className="relative h-60 overflow-hidden shine">
-        <img
-          src={product.img}
-          alt={product.title}
-          className="card-img h-full w-full object-cover"
-          loading="lazy"
-        />
-        <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold tracking-wide ${product.tagColor}`}>
-          {product.tag}
-        </span>
-        <button
-          onClick={() => setWishlisted((v) => !v)}
-          className={`absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-colors ${wishlisted ? "bg-accent text-accent-fg" : "bg-black/30 text-white hover:bg-accent hover:text-accent-fg"}`}
-        >
-          <Heart className={`h-4 w-4 ${wishlisted ? "fill-current" : ""}`} />
-        </button>
+    <div className="product-card flex items-center gap-4 rounded-2xl bg-bg-2 p-4">
+      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl">
+        <img src={product.img} alt={product.title} className="h-full w-full object-cover" loading="lazy" />
       </div>
-
-      <div className="flex flex-1 flex-col p-5">
-        <div className="mb-2 flex items-center gap-2">
-          <Stars rating={product.rating} />
-          <span className="text-[11px] text-fg-muted">({product.reviews})</span>
-        </div>
-        <h3 className="mb-1 font-bold text-fg transition-colors group-hover:text-accent">{product.title}</h3>
-        <p className="mb-4 text-xs text-fg-muted">{product.desc}</p>
-
-        <div className="mt-auto flex items-center justify-between">
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-accent">${product.price}</span>
-            {product.oldPrice && (
-              <span className="text-sm text-fg-muted/60 line-through">${product.oldPrice}</span>
-            )}
-          </div>
-          <button
-            onClick={handleAdd}
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition-all ${added ? "bg-ok text-ok-fg" : "bg-accent text-accent-fg hover:brightness-110"}`}
-          >
-            {added ? <Check className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-          </button>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-fg-muted">{product.brand}</p>
+        <h3 className="mt-0.5 truncate text-sm font-bold text-fg">{product.title}</h3>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="text-base font-black text-accent">${product.price}</span>
+          <AddToCartButton />
         </div>
       </div>
     </div>
@@ -127,21 +99,22 @@ export function Products() {
   const gridRef = useScrollReveal<HTMLDivElement>(0.1);
 
   return (
-    <section id="products" className="bg-bg-2/40 py-28">
+    <section id="products" className="bg-bg-2/40 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div ref={headRef} className="reveal mb-16 flex flex-col items-end justify-between gap-4 sm:flex-row">
+        <div ref={headRef} className="reveal mb-10 flex items-end justify-between gap-4">
           <div>
-            <h2 className="font-display text-3xl font-black tracking-wider text-fg sm:text-5xl">
-              FEATURED <span className="text-accent">PRODUCTS</span>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent">Precision Engineered</p>
+            <h2 className="mt-2 font-display text-2xl font-black tracking-wide text-fg sm:text-3xl">
+              Featured High-Performance Parts
             </h2>
-            <p className="mt-3 text-fg-muted">Top-rated parts handpicked by our experts</p>
           </div>
-          <button className="flex items-center gap-2 text-sm font-semibold text-accent transition-all hover:gap-3">
-            View All Products <ArrowRight className="h-4 w-4" />
-          </button>
+          <Link to="/products" className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-accent transition-all hover:gap-2.5">
+            Explore Shop <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
-        <div ref={gridRef} className="stagger grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div ref={gridRef} className="stagger grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
+          <FeaturedCard />
           {PRODUCTS.map((p) => (
             <ProductCard key={p.title} product={p} />
           ))}

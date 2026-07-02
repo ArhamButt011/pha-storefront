@@ -1,33 +1,29 @@
-import { useState } from "react";
-import { Navbar } from "@/sections/Navbar";
-import { Hero } from "@/sections/Hero";
-import { Search } from "@/sections/Search";
-import { Categories } from "@/sections/Categories";
-import { Brands } from "@/sections/Brands";
-import { WhyChooseUs } from "@/sections/WhyChooseUs";
-import { Testimonials } from "@/sections/Testimonials";
-import { Footer } from "@/sections/Footer";
-import { InquiryModal } from "@/components/InquiryModal";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Layout } from "@/components/layout/Layout";
+import { Home } from "@/pages/Home";
+import { CategoriesGrid } from "@/pages/CategoriesGrid";
+import { ProductsListing } from "@/pages/ProductsListing";
+import { ProductDetails } from "@/pages/ProductDetails";
+import { BundlesListing } from "@/pages/BundlesListing";
+import { Cart } from "@/pages/Cart";
+import { VehicleProvider } from "@/context/VehicleContext";
 
 export default function App() {
-  const [inquiryOpen, setInquiryOpen] = useState(false);
-
   return (
-    <>
-      <Navbar onInquiry={() => setInquiryOpen(true)} />
-
-      <main>
-        <Hero onInquiry={() => setInquiryOpen(true)} />
-        <Search />
-        <Categories />
-        <Brands />
-        <WhyChooseUs />
-        <Testimonials />
-      </main>
-
-      <Footer onInquiry={() => setInquiryOpen(true)} />
-
-      <InquiryModal open={inquiryOpen} onOpenChange={setInquiryOpen} />
-    </>
+    <VehicleProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/categories" element={<CategoriesGrid />} />
+            <Route path="/products" element={<ProductsListing />} />
+            <Route path="/products/:slug" element={<ProductsListing />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/bundles" element={<BundlesListing />} />
+            <Route path="/cart" element={<Cart />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </VehicleProvider>
   );
 }

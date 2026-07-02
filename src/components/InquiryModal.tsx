@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Send, CheckCircle2, ChevronDown } from "lucide-react";
+import { Send, CheckCircle2 } from "lucide-react";
 import { Modal, ModalContent, ModalHeader, ModalTitle, ModalDescription } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -137,20 +138,16 @@ export function InquiryModal({ open, onOpenChange }: Props) {
                 <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">
                   Subject <span className="text-accent">*</span>
                 </label>
-                <div className="relative">
-                  <select
-                    required
-                    value={form.subject}
-                    onChange={(e) => handleChange("subject", e.target.value)}
-                    className="w-full appearance-none rounded-lg border border-border bg-bg-2 py-3 pl-4 pr-10 text-sm text-fg outline-none transition focus:border-accent/60 focus:ring-2 focus:ring-accent/20"
-                  >
-                    <option value="" disabled>Select a subject…</option>
-                    {SUBJECTS.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted" />
-                </div>
+                <Select
+                  required
+                  value={form.subject}
+                  onChange={(e) => handleChange("subject", e.target.value)}
+                >
+                  <option value="" disabled>Select a subject…</option>
+                  {SUBJECTS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </Select>
               </div>
 
               <div className="space-y-1.5">
