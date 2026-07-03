@@ -6,7 +6,12 @@ function formatCurrency(value: number) {
   return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export function OrderSummary({ subtotal }: { subtotal: number }) {
+interface OrderSummaryProps {
+  subtotal: number;
+  onCheckout?: () => void;
+}
+
+export function OrderSummary({ subtotal, onCheckout }: OrderSummaryProps) {
   const shipping = SHIPPING_COST;
   const gst = (subtotal + shipping) * GST_RATE;
   const total = subtotal + shipping + gst;
@@ -38,7 +43,7 @@ export function OrderSummary({ subtotal }: { subtotal: number }) {
         <p className="text-right text-xs text-fg-muted">AUD Dollars</p>
       </div>
 
-      <Button size="lg" className="mt-6 w-full gap-2 uppercase tracking-wide">
+      <Button size="lg" className="mt-6 w-full gap-2 uppercase tracking-wide" onClick={onCheckout}>
         <Lock className="h-4 w-4" />
         Proceed to Secure Checkout
       </Button>

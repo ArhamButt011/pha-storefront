@@ -6,6 +6,9 @@ import { ProductsListing } from "@/pages/ProductsListing";
 import { ProductDetails } from "@/pages/ProductDetails";
 import { BundlesListing } from "@/pages/BundlesListing";
 import { Cart } from "@/pages/Cart";
+import { CheckoutShipping } from "@/pages/checkout/Shipping";
+import { OrderConfirmation } from "@/pages/checkout/Confirmation";
+import { Invoice } from "@/pages/checkout/Invoice";
 import { VehicleProvider } from "@/context/VehicleContext";
 
 export default function App() {
@@ -22,6 +25,9 @@ export default function App() {
             <Route path="/bundles" element={<BundlesListing />} />
             <Route path="/cart" element={<Cart />} />
           </Route>
+          <Route path="/checkout" element={<CheckoutShipping />} />
+          <Route path="/checkout/confirmation" element={<OrderConfirmation />} />
+          <Route path="/checkout/invoice" element={<Invoice />} />
         </Routes>
       </BrowserRouter>
     </VehicleProvider>

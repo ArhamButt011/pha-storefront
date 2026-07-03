@@ -74,7 +74,7 @@ export function ProductTabs({ product }: { product: Product }) {
 
   return (
     <div>
-      <div className="flex gap-6 overflow-x-auto border-b border-border">
+      <div className="scrollbar-hide flex gap-6 overflow-x-auto border-b border-border">
         {PRODUCT_TABS.map((tab) => (
           <button
             key={tab}

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { CartItemCard } from "@/components/cart/CartItemCard";
 import { OrderSummary } from "@/components/cart/OrderSummary";
@@ -7,6 +7,7 @@ import { useCart } from "@/hooks/useCart";
 
 export function Cart() {
   const { items, totalItems, totalPrice } = useCart();
+  const navigate = useNavigate();
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
@@ -35,7 +36,7 @@ export function Cart() {
             ))}
           </div>
           <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
-            <OrderSummary subtotal={totalPrice} />
+            <OrderSummary subtotal={totalPrice} onCheckout={() => navigate("/checkout")} />
           </div>
         </div>
       )}
