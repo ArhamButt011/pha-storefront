@@ -125,6 +125,9 @@
 /* ─── Custom utilities ────────────────────────────────────────────────────── */
 .font-display { font-family: "Orbitron", ui-sans-serif, system-ui, sans-serif; }
 
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 .glow-orange {
   text-shadow:
     0 0 20px hsl(var(--accent)/0.18),
@@ -199,6 +202,8 @@
 .stagger.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.15s; }
 .stagger.visible > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.25s; }
 .stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
+.stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.45s; }
+.stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.55s; }
 
 /* Nav link underline */
 .nav-link {
