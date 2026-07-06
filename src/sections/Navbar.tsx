@@ -1,22 +1,24 @@
 import { useEffect, useState } from "react";
-import { Menu, X, ShoppingCart } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Menu, X, ShoppingCart, Heart, User, Search as SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/useCart";
 
 interface Props {
   onInquiry: () => void;
 }
 
 const NAV_LINKS = [
-  { label: "Home", href: "#home" },
-  { label: "Categories", href: "#categories" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
+  { label: "Shop by Category", href: "/categories" },
+  { label: "Shop by Brand", href: "/#brands" },
+  { label: "Popular Bundles", href: "/bundles" },
+  { label: "About Us", href: "/#about" },
 ];
 
 export function Navbar({ onInquiry }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartCount] = useState(0);
+  const { totalItems: cartCount } = useCart();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -33,56 +35,67 @@ export function Navbar({ onInquiry }: Props) {
             : "bg-transparent"
         }`}
       >
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
-          <a href="#home" className="flex items-center gap-3 group">
+          <Link to="/" className="flex shrink-0 items-center gap-2 group">
             <img
               src="/branding/logo.svg"
               alt="Parts Hub Australia"
-              className="h-20 w-20 object-contain transition-transform duration-300 group-hover:scale-110"
+              className="h-10 w-10 object-contain transition-transform duration-300 group-hover:scale-110"
             />
-            <div className="hidden sm:block">
-              <span className="font-display text-lg font-bold tracking-wider text-fg">
-                PARTS HUB{" "}
-                <span className="text-accent">AUSTRALIA</span>
-              </span>
-            </div>
-          </a>
+            <span className="hidden font-display text-sm font-bold tracking-wider text-fg sm:block">
+              PARTS HUB <span className="text-accent">AUSTRALIA</span>
+            </span>
+          </Link>
 
           {/* Desktop nav */}
           <div className="hidden items-center gap-6 lg:flex">
             {NAV_LINKS.map((l) => (
-              <a
+              <Link
                 key={l.href}
-                href={l.href}
-                className="nav-link text-sm font-medium text-fg-muted transition-colors hover:text-fg"
+                to={l.href}
+                className="nav-link whitespace-nowrap text-sm font-medium text-fg-muted transition-colors hover:text-fg"
               >
                 {l.label}
-              </a>
+              </Link>
             ))}
           </div>
 
+          {/* Search */}
+          <div className="hidden flex-1 items-center gap-2 rounded-full border border-border bg-bg-2 px-4 py-2 lg:flex">
+            <SearchIcon className="h-4 w-4 shrink-0 text-fg-muted" />
+            <input
+              type="text"
+              placeholder="Search part number…"
+              className="w-full bg-transparent text-sm text-fg outline-none placeholder:text-fg-muted"
+            />
+          </div>
+
           {/* Right actions */}
-          <div className="hidden items-center gap-3 lg:flex">
-            <button className="relative p-2 text-fg-muted transition-colors hover:text-fg">
+          <div className="ml-auto hidden items-center gap-1 lg:flex">
+            <button className="p-2 text-fg-muted transition-colors hover:text-fg" aria-label="Wishlist">
+              <Heart className="h-5 w-5" />
+            </button>
+            <Link to="/cart" className="relative p-2 text-fg-muted transition-colors hover:text-fg" aria-label="Cart">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-fg">
+                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-fg">
                   {cartCount}
                 </span>
               )}
+            </Link>
+            <button
+              className="p-2 text-fg-muted transition-colors hover:text-fg"
+              aria-label="Account"
+              onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}
+            >
+              <User className="h-5 w-5" />
             </button>
-            <Button size="sm" variant="outline" onClick={onInquiry}>
-              Enquire
-            </Button>
-            <Button size="sm" onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}>
-              Sign In
-            </Button>
           </div>
 
           {/* Mobile hamburger */}
           <button
-            className="p-2 text-fg lg:hidden"
+            className="ml-auto p-2 text-fg lg:hidden"
             onClick={() => setMenuOpen(true)}
           >
             <Menu className="h-6 w-6" />
@@ -103,13 +116,13 @@ export function Navbar({ onInquiry }: Props) {
         className={`mobile-menu fixed right-0 top-0 z-50 flex h-full w-72 flex-col bg-bg-2 p-8 lg:hidden ${menuOpen ? "open" : ""}`}
       >
         <div className="flex items-center justify-between mb-8">
-          <a href="#home" onClick={() => setMenuOpen(false)}>
+          <Link to="/" onClick={() => setMenuOpen(false)}>
             <img
               src="/branding/logo.svg"
               alt="Parts Hub Australia"
               className="h-10 w-10 object-contain"
             />
-          </a>
+          </Link>
           <button
             onClick={() => setMenuOpen(false)}
             className="rounded-lg p-1.5 text-fg-muted hover:bg-bg-3 hover:text-fg"
@@ -120,14 +133,14 @@ export function Navbar({ onInquiry }: Props) {
 
         <nav className="flex flex-col gap-1">
           {NAV_LINKS.map((l) => (
-            <a
+            <Link
               key={l.href}
-              href={l.href}
+              to={l.href}
               onClick={() => setMenuOpen(false)}
               className="rounded-lg px-4 py-3 text-base font-medium text-fg-muted transition-colors hover:bg-bg-3 hover:text-accent"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
         </nav>
 

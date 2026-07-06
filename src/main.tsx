@@ -1,14 +1,20 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 import "./index.css";
 import App from "./App";
+import { store, persistor } from "@/store/store";
 
-// Always light mode — strip any previously stored theme
-document.documentElement.classList.remove("dark");
-localStorage.removeItem("pha-theme");
+// Default to dark mode
+document.documentElement.classList.add("dark");
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
   </StrictMode>,
 );
