@@ -1,14 +1,17 @@
-import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { VehicleChip } from "@/components/products/VehicleChip";
 import { FilterSidebar, type FacetOption } from "@/components/products/FilterSidebar";
 import { ResultsHeader } from "@/components/products/ResultsHeader";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Pagination } from "@/components/ui/pagination";
-import { getCategoryBySlug } from "@/data/categories";
-import { getProductsByCategory, type Product } from "@/data/products";
+import type { Product } from "@/data/products";
 import { useVehicle } from "@/context/VehicleContext";
+import { getCategory } from "@/lib/api/categories";
+import { getProducts } from "@/lib/api/product";
+import { mapApiProductToProduct } from "@/utils/mapApiProduct";
+import type { ApiCategory } from "@/types/category";
 
 const PAGE_SIZE = 9;
 
@@ -21,9 +24,15 @@ function countFacet(products: Product[], key: "brand" | "partType"): FacetOption
 }
 
 export function ProductsListing() {
-  const { slug } = useParams();
-  const category = slug ? getCategoryBySlug(slug) : undefined;
+  const { categoryId } = useParams();
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get("search")?.trim() ?? "";
   const { vehicle } = useVehicle();
+
+  const [category, setCategory] = useState<ApiCategory | null>(null);
+  const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedPartTypes, setSelectedPartTypes] = useState<string[]>([]);
@@ -32,7 +41,43 @@ export function ProductsListing() {
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
 
-  const categoryProducts = useMemo(() => getProductsByCategory(slug), [slug]);
+  // Fetch the category (for the title/breadcrumb) and its products whenever
+  // the :categoryId route param changes.
+ useEffect(() => {
+  let cancelled = false;
+
+  async function load() {
+    setLoading(true);
+    setError(null);
+    try {
+      const [categoryRes, productsRes] = await Promise.all([
+        categoryId ? getCategory(categoryId) : Promise.resolve(null),
+        getProducts({ categories: categoryId, search: searchTerm || undefined, limit: 100 }),
+      ]);
+
+      if (cancelled) return;
+      setCategory(categoryRes?.data ?? null);
+      setCategoryProducts(productsRes.data.items.map(mapApiProductToProduct));
+    } catch (err) {
+      if (!cancelled) setError("Failed to load products. Please try again.");
+      console.error(err);
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  }
+
+  load();
+  setSelectedBrands([]);
+  setSelectedPartTypes([]);
+  setPriceMin("");
+  setPriceMax("");
+  setSort("newest");
+  setPage(1);
+
+  return () => {
+    cancelled = true;
+  };
+}, [categoryId, searchTerm]);
 
   const vehicleFiltered = useMemo(() => {
     if (!vehicle?.make) return categoryProducts;
@@ -91,13 +136,21 @@ export function ProductsListing() {
     setPage(1);
   }
 
-  const title = category?.title ?? "All Parts";
-  const description = category?.description ?? "Browse our full range of performance parts for your vehicle.";
+  const title = searchTerm
+    ? `Search results for "${searchTerm}"`
+    : category?.name ?? "All Parts";
+  const description = searchTerm
+    ? `Showing parts matching "${searchTerm}"${category ? ` in ${category.name}` : ""}.`
+    : category
+    ? `Browse our full range of ${category.name.toLowerCase()} parts for your vehicle.`
+    : "Browse our full range of performance parts for your vehicle.";
   const breadcrumbItems = category
-    ? [{ label: "Home", href: "/" }, { label: category.breadcrumbParent, href: "/categories" }, { label: category.title }]
-    : [{ label: "Home", href: "/" }, { label: "All Parts" }];
+    ? [{ label: "Home", href: "/" }, { label: "Categories", href: "/categories" }, { label: category.name }]
+    : [{ label: "Home", href: "/" }, { label: searchTerm ? "Search Results" : "All Parts" }];
 
-  const vehicleLabel = vehicle?.make ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ") : undefined;
+const vehicleLabel = vehicle?.make
+  ? [vehicle.make, vehicle.model, vehicle.model_code].filter(Boolean).join(" ")
+  : undefined;
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-8 pt-28 sm:px-6 lg:px-8">
@@ -114,8 +167,8 @@ export function ProductsListing() {
       <div className="flex flex-col gap-8 lg:flex-row">
         <FilterSidebar
           brands={brandFacets}
-          selectedBrands={selectedBrands}
-          onToggleBrand={toggleBrand}
+          // selectedBrands={selectedBrands}
+          // onToggleBrand={toggleBrand}
           partTypes={partTypeFacets}
           selectedPartTypes={selectedPartTypes}
           onTogglePartType={togglePartType}
@@ -130,7 +183,15 @@ export function ProductsListing() {
         <div className="min-w-0 flex-1">
           <ResultsHeader count={sorted.length} sort={sort} onSortChange={setSort} />
 
-          {pageItems.length > 0 ? (
+          {loading ? (
+            <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
+              Loading parts…
+            </div>
+          ) : error ? (
+            <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
+              {error}
+            </div>
+          ) : pageItems.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {pageItems.map((p) => (
                 <ProductCard key={p.id} product={p} />

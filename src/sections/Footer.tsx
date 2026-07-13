@@ -14,7 +14,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-10 border-b border-border pb-12 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr]">
           {/* Brand column */}
-          <div>
+          {/* <div>
             <div className="mb-4 flex items-center gap-3">
               <img src="/branding/logo.svg" alt="Parts Hub Australia" className="h-12 w-12 rounded-lg object-contain" />
               <span className="font-display text-base font-bold tracking-wider text-accent">
@@ -42,7 +42,7 @@ export function Footer() {
                 <MapPin className="h-4 w-4" />
               </a>
             </div>
-          </div>
+          </div> */}
 
           {/* Customer Service */}
           <div>

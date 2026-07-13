@@ -1,5 +1,6 @@
 import { ArrowRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export function Hero() {
   return (
@@ -32,25 +33,15 @@ export function Hero() {
             <span className="text-accent glow-orange">Automotive Parts</span> Supplier
           </h1>
 
-          {/* Subtitle */}
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-fg-muted">
-            Genuine &amp; Aftermarket Parts for Thousands of Vehicles. Precision engineered
-            components for BMW, Mercedes, Tesla, and Porsche specialists.
-          </p>
-
           {/* CTAs */}
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" className="gap-2">
-              Shop Parts
-              <ArrowRight className="h-5 w-5" />
-            </Button>
-            <Button variant="outline" size="lg" className="gap-2" asChild>
-              <a href="#vehicle-selector">
-                <Search className="h-4 w-4" />
-                Find Your Vehicle
-              </a>
-            </Button>
-          </div>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+  <Button asChild size="lg" className="gap-2">
+    <Link to="/products">
+      Shop Parts
+      <ArrowRight className="h-5 w-5" />
+    </Link>
+  </Button>
+</div>
         </div>
       </div>
     </section>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Truck, PackageCheck, Send } from "lucide-react";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
@@ -9,23 +9,66 @@ import { ReviewsSection } from "@/components/product/ReviewsSection";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { StarRating } from "@/components/ui/star-rating";
 import { Button } from "@/components/ui/button";
-import { getProductById } from "@/data/products";
+import type { Product } from "@/data/products";
 import { getCategoryBySlug } from "@/data/categories";
+import { getProductBySlug } from "@/lib/api/product";
+import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
 
 export function ProductDetails() {
-  const { id } = useParams();
-  const product = getProductById(id);
+  const { slug } = useParams();
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
-  if (!product) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      if (!slug) {
+        setError("Product not found.");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await getProductBySlug(slug);
+        if (cancelled) return;
+        setProduct(mapApiProductToProduct(res.data));
+      } catch (err) {
+        if (!cancelled) setError("This part may have been removed or the link is incorrect.");
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <main className="mx-auto max-w-3xl px-4 pb-16 pt-32 text-center sm:px-6 lg:px-8">
+        <p className="text-fg-muted">Loading product…</p>
+      </main>
+    );
+  }
+
+  if (error || !product) {
     return (
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-32 text-center sm:px-6 lg:px-8">
         <h1 className="font-display text-2xl font-black text-fg">Product not found</h1>
-        <p className="mt-3 text-fg-muted">This part may have been removed or the link is incorrect.</p>
+        <p className="mt-3 text-fg-muted">{error ?? "This part may have been removed or the link is incorrect."}</p>
         <Link to="/products" className="mt-6 inline-block text-accent hover:underline">
           Back to all parts
         </Link>
@@ -38,7 +81,7 @@ export function ProductDetails() {
 
   const infoRows = [
     product.sku ? { label: "SKU #", value: product.sku } : null,
-    { label: "Brand", value: product.brandFull ?? product.brand },
+    // { label: "Brand", value: product.brandFull ?? product.brand },
     product.warranty ? { label: "Warranty", value: product.warranty } : null,
     product.material ? { label: "Material", value: product.material } : null,
   ].filter((row): row is { label: string; value: string } => row !== null);

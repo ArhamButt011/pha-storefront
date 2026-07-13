@@ -20,8 +20,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/categories" element={<CategoriesGrid />} />
             <Route path="/products" element={<ProductsListing />} />
-            <Route path="/products/:slug" element={<ProductsListing />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/products/:categoryId" element={<ProductsListing />} />
+            <Route path="/product/:slug" element={<ProductDetails />} />
             <Route path="/bundles" element={<BundlesListing />} />
             <Route path="/cart" element={<Cart />} />
           </Route>

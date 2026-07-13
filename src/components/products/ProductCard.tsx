@@ -23,7 +23,7 @@ const STOCK_DOT: Record<Product["stock"]["status"], string> = {
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
-
+console.log("product slug ", product)
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -31,7 +31,7 @@ export function ProductCard({ product }: { product: Product }) {
   }
 
   return (
-    <Link to={`/product/${product.id}`} className="product-card flex flex-col overflow-hidden rounded-2xl bg-bg-2">
+    <Link to={`/product/${product.slug}`} className="product-card flex flex-col overflow-hidden rounded-2xl bg-bg-2">
       <div className="relative h-48 overflow-hidden shine">
         <img src={product.img} alt={product.title} className="card-img h-full w-full object-cover" loading="lazy" />
         {product.badge && (
@@ -43,7 +43,7 @@ export function ProductCard({ product }: { product: Product }) {
 
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-1.5 flex items-center justify-between gap-2">
-          <span className="truncate text-xs font-semibold uppercase tracking-wider text-fg-muted">{product.brand}</span>
+          <span className="truncate text-xs font-semibold uppercase tracking-wider text-fg-muted">{product.make}</span>
           <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-fg-muted">
             <Star className="h-3.5 w-3.5 fill-accent text-accent" />
             {product.rating.toFixed(1)}

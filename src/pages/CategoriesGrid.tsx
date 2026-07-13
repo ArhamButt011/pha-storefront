@@ -1,15 +1,50 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { Input } from "@/components/ui/input";
-import { CATEGORIES } from "@/data/categories";
+import { getCategories } from "@/lib/api/categories";
+import { getCategoryImage } from "@/lib/categoryImages";
+import type { CategoryWithImage } from "@/types/category";
 
 export function CategoriesGrid() {
   const [query, setQuery] = useState("");
+  const [categories, setCategories] = useState<CategoryWithImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const categories = CATEGORIES.filter((c) =>
-    c.title.toLowerCase().includes(query.trim().toLowerCase()),
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await getCategories();
+        if (cancelled) return;
+
+        const withImages: CategoryWithImage[] = res.data.map((cat, index) => ({
+          ...cat,
+          img: getCategoryImage(cat.slug, index),
+        }));
+        setCategories(withImages);
+      } catch (err) {
+        if (!cancelled) setError("Failed to load categories. Please try again.");
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(
+    () => categories.filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase())),
+    [categories, query],
   );
 
   return (
@@ -37,10 +72,18 @@ export function CategoriesGrid() {
       </section>
 
       <div className="mt-10">
-        {categories.length > 0 ? (
+        {loading ? (
+          <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
+            Loading categories…
+          </div>
+        ) : error ? (
+          <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
+            {error}
+          </div>
+        ) : filtered.length > 0 ? (
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-            {categories.map((c) => (
-              <CategoryCard key={c.slug} category={c} />
+            {filtered.map((c) => (
+              <CategoryCard key={c._id} category={c} />
             ))}
           </div>
         ) : (

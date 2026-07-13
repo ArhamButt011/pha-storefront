@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Hero } from "@/sections/Hero";
 import { VehicleSelector } from "@/sections/VehicleSelector";
 import { Categories } from "@/sections/Categories";
-import { Brands } from "@/sections/Brands";
+// import { Brands } from "@/sections/Brands";
 import { Products } from "@/sections/Products";
 import { WhyChooseUs } from "@/sections/WhyChooseUs";
 import { LogisticsStats } from "@/sections/LogisticsStats";
@@ -22,7 +22,7 @@ export function Home() {
       <Hero />
       <VehicleSelector />
       <Categories />
-      <Brands />
+      {/* <Brands /> */}
       <Products />
       <WhyChooseUs />
       <LogisticsStats />

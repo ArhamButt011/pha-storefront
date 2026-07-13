@@ -16,7 +16,7 @@ function SpecificationsPanel({ product }: { product: Product }) {
   ];
 
   const specs = product.specs ?? [
-    { label: "Brand", value: product.brand },
+    // { label: "Brand", value: product.brand },
     { label: "Category", value: product.partType },
     { label: "Warranty", value: product.warranty ?? "12 Month" },
   ];

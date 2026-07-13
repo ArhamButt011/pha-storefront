@@ -9,8 +9,8 @@ export interface FacetOption {
 
 export interface FilterSidebarProps {
   brands: FacetOption[];
-  selectedBrands: string[];
-  onToggleBrand: (name: string) => void;
+  // selectedBrands: string[];
+  // onToggleBrand: (name: string) => void;
   partTypes: FacetOption[];
   selectedPartTypes: string[];
   onTogglePartType: (name: string) => void;
@@ -23,9 +23,9 @@ export interface FilterSidebarProps {
 }
 
 export function FilterSidebar({
-  brands,
-  selectedBrands,
-  onToggleBrand,
+  // brands,
+  // selectedBrands,
+  // onToggleBrand,
   partTypes,
   selectedPartTypes,
   onTogglePartType,
@@ -46,7 +46,7 @@ export function FilterSidebar({
           </button>
         </div>
 
-        {brands.length > 0 && (
+        {/* {brands.length > 0 && (
           <div className="border-t border-border pt-4">
             <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-fg-muted">Brand</h4>
             <div className="space-y-2.5">
@@ -61,7 +61,7 @@ export function FilterSidebar({
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         {partTypes.length > 0 && (
           <div className="mt-5 border-t border-border pt-4">
