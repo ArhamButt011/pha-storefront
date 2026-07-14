@@ -3,17 +3,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 
 export interface FacetOption {
+  id: string;
   name: string;
   count: number;
 }
 
 export interface FilterSidebarProps {
-  brands: FacetOption[];
-  selectedBrands: string[];
-  onToggleBrand: (name: string) => void;
   partTypes: FacetOption[];
-  selectedPartTypes: string[];
-  onTogglePartType: (name: string) => void;
+  selectedPartTypeIds: string[];
+  onTogglePartType: (id: string) => void;
   priceMin: string;
   priceMax: string;
   onPriceMinChange: (value: string) => void;
@@ -23,11 +21,8 @@ export interface FilterSidebarProps {
 }
 
 export function FilterSidebar({
-  brands,
-  selectedBrands,
-  onToggleBrand,
   partTypes,
-  selectedPartTypes,
+  selectedPartTypeIds,
   onTogglePartType,
   priceMin,
   priceMax,
@@ -46,31 +41,14 @@ export function FilterSidebar({
           </button>
         </div>
 
-        {brands.length > 0 && (
-          <div className="border-t border-border pt-4">
-            <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-fg-muted">Brand</h4>
-            <div className="space-y-2.5">
-              {brands.map((b) => (
-                <label key={b.name} className="flex cursor-pointer items-center justify-between gap-2 text-sm text-fg-muted transition-colors hover:text-fg">
-                  <span className="flex items-center gap-2">
-                    <Checkbox checked={selectedBrands.includes(b.name)} onChange={() => onToggleBrand(b.name)} />
-                    {b.name}
-                  </span>
-                  <span className="text-xs text-fg-muted">({b.count})</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        )}
-
         {partTypes.length > 0 && (
           <div className="mt-5 border-t border-border pt-4">
             <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-fg-muted">Part Type</h4>
             <div className="space-y-2.5">
               {partTypes.map((t) => (
-                <label key={t.name} className="flex cursor-pointer items-center justify-between gap-2 text-sm text-fg-muted transition-colors hover:text-fg">
+                <label key={t.id} className="flex cursor-pointer items-center justify-between gap-2 text-sm text-fg-muted transition-colors hover:text-fg">
                   <span className="flex items-center gap-2">
-                    <Checkbox checked={selectedPartTypes.includes(t.name)} onChange={() => onTogglePartType(t.name)} />
+                    <Checkbox checked={selectedPartTypeIds.includes(t.id)} onChange={() => onTogglePartType(t.id)} />
                     {t.name}
                   </span>
                   <span className="text-xs text-fg-muted">({t.count})</span>

@@ -1,13 +1,33 @@
 import { useState } from "react";
-import { Phone, Mail, MapPin, Send } from "lucide-react";
+import { Phone, Mail, MapPin, ArrowRight } from "lucide-react";
+import { toast } from "react-toastify";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { subscribeNewsletter } from "@/lib/api/newsletter";
 
 const CUSTOMER_SERVICE_LINKS = ["Returns Policy", "Shipping Info", "Track Order", "Warranty"];
 const LEGAL_LINKS = ["Privacy Policy", "Terms of Service", "Cookie Policy", "Compliance"];
 
 export function Footer() {
   const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubscribe(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    setSubmitting(true);
+    try {
+      const res = await subscribeNewsletter({ email: email.trim() });
+      toast.success(res.message || "Subscribed successfully.");
+      setEmail("");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Couldn't subscribe. Please try again.";
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <footer id="contact" className="border-t border-border bg-bg pt-16 pb-8">
@@ -37,8 +57,7 @@ export function Footer() {
                 href="https://maps.google.com/?q=34+Killara+Rd+Campbellfield+VIC+3061"
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-fg-muted transition-all hover:border-accent/50 hover:bg-accent/10 hover:text-accent"
-              >
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-fg-muted transition-all hover:border-accent/50 hover:bg-accent/10 hover:text-accent">
                 <MapPin className="h-4 w-4" />
               </a>
             </div>
@@ -70,25 +89,29 @@ export function Footer() {
 
           {/* Newsletter */}
           <div>
-            <h4 className="mb-5 font-display text-xs font-bold uppercase tracking-wider text-fg">Newsletter</h4>
+            <h4 className="mb-2 font-display text-sm font-bold text-fg">Subscribe to our newsletter</h4>
             <p className="mb-4 text-sm leading-relaxed text-fg-muted">
-              Stay updated on new arrivals and exclusive performance deals.
+              Get occasional product updates to your inbox.
             </p>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex gap-2"
-            >
+
+          
+            <form onSubmit={handleSubscribe} className="flex overflow-hidden rounded-md border border-border">
               <Input
                 type="email"
-                placeholder="Your Email"
+                placeholder="Your Email Address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="rounded-full"
+                disabled={submitting}
+                className="rounded-none border-0 focus-visible:ring-0 bg-transparent"
               />
-              <Button type="submit" size="icon" aria-label="Subscribe">
-                <Send className="h-4 w-4" />
-              </Button>
+<Button
+  type="submit"
+  className="rounded-r-sm rounded-l-none w-20 transition-none hover:scale-100 hover:translate-y-0"
+  aria-label="Subscribe"
+>
+  <ArrowRight className="h-4 w-4" />
+</Button>
             </form>
           </div>
         </div>

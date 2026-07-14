@@ -31,9 +31,9 @@ export function CheckoutShipping() {
 
   if (items.length === 0) return null;
 
-  const vehicleLabel = vehicle?.make
-    ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ")
-    : undefined;
+const vehicleLabel = vehicle?.make
+  ? [vehicle.make, vehicle.model, vehicle.model_code].filter(Boolean).join(" ")
+  : undefined;
 
   function updateShipping(patch: Partial<ShippingDetails>) {
     setShipping((prev) => ({ ...prev, ...patch }));

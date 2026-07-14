@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 export interface SelectedVehicle {
-  year: string;
   make: string;
   model: string;
-  engine: string;
+  model_code: string;
+  year_from: string;
+  year_to: string;
 }
 
 interface VehicleContextValue {
