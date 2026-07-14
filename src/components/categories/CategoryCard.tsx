@@ -4,7 +4,7 @@ import type { CategoryWithImage } from "@/types/category";
 export function CategoryCard({ category }: { category: CategoryWithImage }) {
   return (
     <Link
-      to={`/products/${category._id}`}
+      to={`/shop/${category._id}`}
       className="group overflow-hidden rounded-2xl border border-border bg-bg-2 transition-colors hover:border-accent/40"
     >
       <div className="h-36 overflow-hidden">

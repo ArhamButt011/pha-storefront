@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Truck, PackageCheck, Send } from "lucide-react";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ImageGallery } from "@/components/product/ImageGallery";
 import { FitmentBadge } from "@/components/product/FitmentBadge";
 import { ProductTabs } from "@/components/product/ProductTabs";
-import { ReviewsSection } from "@/components/product/ReviewsSection";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
-import { StarRating } from "@/components/ui/star-rating";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/data/products";
 import { getCategoryBySlug } from "@/data/categories";
@@ -42,7 +41,10 @@ export function ProductDetails() {
         if (cancelled) return;
         setProduct(mapApiProductToProduct(res.data));
       } catch (err) {
-        if (!cancelled) setError("This part may have been removed or the link is incorrect.");
+        if (!cancelled) {
+          setError("This part may have been removed or the link is incorrect.");
+          toast.error("Couldn't load this product. Please try again.");
+        }
         console.error(err);
       } finally {
         if (!cancelled) setLoading(false);
@@ -69,7 +71,7 @@ export function ProductDetails() {
       <main className="mx-auto max-w-3xl px-4 pb-16 pt-32 text-center sm:px-6 lg:px-8">
         <h1 className="font-display text-2xl font-black text-fg">Product not found</h1>
         <p className="mt-3 text-fg-muted">{error ?? "This part may have been removed or the link is incorrect."}</p>
-        <Link to="/products" className="mt-6 inline-block text-accent hover:underline">
+        <Link to="/shop" className="mt-6 inline-block text-accent hover:underline">
           Back to all parts
         </Link>
       </main>
@@ -88,9 +90,18 @@ export function ProductDetails() {
 
   function handleAddToCart() {
     if (!product) return;
-    addToCart(productToCartItem(product, qty));
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+
+    if (product.stock.status === "out-of-stock") {
+      return;
+    }
+
+    try {
+      addToCart(productToCartItem(product, qty));
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1500);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   return (
@@ -99,7 +110,7 @@ export function ProductDetails() {
         <Breadcrumb
           items={[
             { label: "Home", href: "/" },
-            ...(category ? [{ label: category.title, href: `/products/${category.slug}` }] : [{ label: "All Parts", href: "/products" }]),
+            ...(category ? [{ label: category.title, href: `/shop/${category.slug}` }] : [{ label: "All Parts", href: "/shop" }]),
             { label: product.title },
           ]}
         />
@@ -115,11 +126,11 @@ export function ProductDetails() {
                 {product.grade}
               </span>
             )}
-            <div className="ml-auto flex items-center gap-2 text-sm">
+            {/* <div className="ml-auto flex items-center gap-2 text-sm">
               <StarRating rating={product.rating} />
               <span className="font-semibold text-fg">{product.rating.toFixed(1)}</span>
               {product.reviewCount && <span className="text-fg-muted">({product.reviewCount} Reviews)</span>}
-            </div>
+            </div> */}
           </div>
 
           <h1 className="mt-3 font-display text-2xl font-black leading-tight text-fg sm:text-3xl">{product.title}</h1>
@@ -185,9 +196,6 @@ export function ProductDetails() {
         <ProductTabs product={product} />
       </div>
 
-      <div className="mt-16">
-        <ReviewsSection product={product} />
-      </div>
     </main>
   );
 }

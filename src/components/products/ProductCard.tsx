@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Star, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
@@ -44,10 +44,10 @@ console.log("product slug ", product)
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-1.5 flex items-center justify-between gap-2">
           <span className="truncate text-xs font-semibold uppercase tracking-wider text-fg-muted">{product.make}</span>
-          <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-fg-muted">
+          {/* <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-fg-muted">
             <Star className="h-3.5 w-3.5 fill-accent text-accent" />
             {product.rating.toFixed(1)}
-          </span>
+          </span> */}
         </div>
 
         <h3 className="mb-4 font-bold text-fg">{product.title}</h3>

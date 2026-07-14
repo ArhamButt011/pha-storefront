@@ -14,6 +14,13 @@ export interface ProductVehicleFit {
   year_to: number | null;
 }
 
+export interface VehicleFitmentRow {
+  make: string;
+  model: string;
+  series: string;
+  yearRange: string;
+}
+
 export interface ProductReview {
   name: string;
   rating: number;
@@ -48,6 +55,10 @@ make?: string | null;
   brandFull?: string;
   warranty?: string;
   material?: string;
+  condition?: string;
+  authenticity?: string;
+  productNote?: string;
+  vehicleFitments?: VehicleFitmentRow[];
   shortDescription?: string;
   engineeringNote?: string;
   features?: string[];

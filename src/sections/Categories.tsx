@@ -1,19 +1,64 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, SlidersVertical, Wrench, Gauge, Fan, Disc, Plug } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { CategoryCard } from "@/components/categories/CategoryCard";
+import { getCategories } from "@/lib/api/categories";
+import { getCategoryImage } from "@/lib/categoryImages";
+import type { CategoryWithImage } from "@/types/category";
 
-const CATEGORIES = [
-  { slug: "engine", title: "Engine", icon: SlidersVertical },
-  { slug: "suspension", title: "Suspension", icon: Wrench },
-  { slug: "turbo-systems", title: "Turbo Systems", icon: Gauge },
-  { slug: "cooling", title: "Cooling", icon: Fan },
-  { slug: "brakes", title: "Brakes", icon: Disc },
-  { slug: "electrical", title: "Electrical", icon: Plug },
-];
+const FEATURED_COUNT = 5;
+
+function CategoryCardSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-bg-2">
+      <div className="h-36 animate-pulse bg-bg-3" />
+      <div className="p-4 text-center">
+        <div className="mx-auto h-4 w-2/3 animate-pulse rounded bg-bg-3" />
+      </div>
+    </div>
+  );
+}
 
 export function Categories() {
   const headRef = useScrollReveal<HTMLDivElement>(0.2);
   const gridRef = useScrollReveal<HTMLDivElement>(0.1);
+
+  const [categories, setCategories] = useState<CategoryWithImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      try {
+        // The category API now honors limit/page server-side, so the top
+        // categories are requested directly instead of slicing a larger
+        // client-side batch.
+        const res = await getCategories({ limit: FEATURED_COUNT, page: 1 });
+        if (cancelled) return;
+
+        const withImages: CategoryWithImage[] = res.data.items.map((cat, index) => ({
+          ...cat,
+          img: getCategoryImage(cat.slug, index),
+        }));
+        setCategories(withImages);
+      } catch (err) {
+        if (!cancelled) setError("Failed to load categories.");
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <section id="categories" className="py-20">
@@ -30,23 +75,20 @@ export function Categories() {
           </Link>
         </div>
 
-        <div ref={gridRef} className="stagger grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <Link
-                key={cat.slug}
-                to={`/products/${cat.slug}`}
-                className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-bg-2 p-6 text-center transition-colors hover:border-accent/40"
-              >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-bg-3 text-accent transition-colors group-hover:bg-accent group-hover:text-accent-fg">
-                  <Icon className="h-6 w-6" />
-                </span>
-                <span className="text-sm font-semibold text-fg">{cat.title}</span>
-              </Link>
-            );
-          })}
-        </div>
+        {error ? (
+          <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
+            {error}
+          </div>
+        ) : (
+          <div
+            ref={gridRef}
+            className="stagger grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5"
+          >
+            {loading
+              ? Array.from({ length: FEATURED_COUNT }).map((_, i) => <CategoryCardSkeleton key={i} />)
+              : categories.map((c) => <CategoryCard key={c._id} category={c} />)}
+          </div>
+        )}
       </div>
     </section>
   );

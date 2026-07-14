@@ -7,6 +7,7 @@ import { productToCartItem } from "@/utils/productToCartItem";
 import { getProducts } from "@/lib/api/product";
 import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import type { Product } from "@/data/products";
+import { useVehicle } from "@/context/VehicleContext";
 
 const FEATURED_COUNT = 5;
 
@@ -77,7 +78,7 @@ function ProductCardSkeleton() {
 export function Products() {
   const headRef = useScrollReveal<HTMLDivElement>(0.2);
   const gridRef = useScrollReveal<HTMLDivElement>(0.1);
-
+ const { setVehicle } = useVehicle();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +117,7 @@ export function Products() {
               Featured Parts
             </h2>
           </div>
-          <Link to="/products" className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-accent transition-all hover:gap-2.5">
+          <Link to="/shop"  onClick={() => setVehicle(null)} className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-accent transition-all hover:gap-2.5">
             Explore Shop <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

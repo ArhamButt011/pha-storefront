@@ -12,21 +12,37 @@ import {
   getVehicleYears,
 } from "@/lib/api/vehicle-model";
 
+const EMPTY: SelectedVehicle = {
+  make: "",
+  model: "",
+  model_code: "",
+  year_from: "",
+  year_to: "",
+};
+
 export function VehicleSelector() {
   const { vehicle, setVehicle } = useVehicle();
   const navigate = useNavigate();
 
-  const make = vehicle?.make ?? "";
-  const model = vehicle?.model ?? "";
-  const model_code = vehicle?.model_code ?? "";
-  const year_from = vehicle?.year_from ?? "";
-  const year_to = vehicle?.year_to ?? "";
+  // Local draft — separate from the shared context. Selecting fields here
+  // only affects this component until "Find Parts" is clicked; that's the
+  // one place the selection becomes the applied, persisted filter. This
+  // stops in-progress selections from leaking out if the user navigates
+  // away (Shop Parts / Shop nav link / Explore Shop) without submitting.
+  const [draft, setDraft] = useState<SelectedVehicle>(vehicle ?? EMPTY);
+
+  // If the applied vehicle gets cleared elsewhere (e.g. the "x" on the
+  // vehicle chip on the Shop page), reflect that back into the selector.
+  useEffect(() => {
+    setDraft(vehicle ?? EMPTY);
+  }, [vehicle]);
+
+  const { make, model, model_code, year_from } = draft;
 
   const [makes, setMakes] = useState<string[]>([]);
   const [models, setModels] = useState<string[]>([]);
   const [modelCodes, setModelCodes] = useState<string[]>([]);
 
-  // Load makes once on mount.
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -41,7 +57,6 @@ export function VehicleSelector() {
     return () => { cancelled = true; };
   }, []);
 
-  // Load models whenever the selected make changes.
   useEffect(() => {
     if (!make) { setModels([]); return; }
     let cancelled = false;
@@ -58,7 +73,6 @@ export function VehicleSelector() {
     return () => { cancelled = true; };
   }, [make]);
 
-  // Load model codes whenever the selected make/model changes.
   useEffect(() => {
     if (!make || !model) { setModelCodes([]); return; }
     let cancelled = false;
@@ -76,7 +90,7 @@ export function VehicleSelector() {
   }, [make, model]);
 
   function update(patch: Partial<SelectedVehicle>) {
-    setVehicle({ make, model, model_code, year_from, year_to, ...patch });
+    setDraft((prev) => ({ ...prev, ...patch }));
   }
 
   function handleMakeChange(nextMake: string) {
@@ -102,7 +116,8 @@ export function VehicleSelector() {
   }
 
   function handleFindParts() {
-    navigate("/products");
+    setVehicle(draft.make ? draft : null);
+    navigate("/shop");
   }
 
   return (

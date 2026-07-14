@@ -36,6 +36,7 @@ export interface ApiProduct {
   sku: string | null;
   brand: string | null;
   condition: string;
+  authenticity: string | null;
   vehicle: ApiVehicle;
   attachments: ApiAttachment[];
   categories: ApiCategoryRef[];

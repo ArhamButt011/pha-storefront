@@ -8,6 +8,13 @@ export interface ProductListParams {
   categories?: string;
   type?: string;
   limit?: number;
+  price_min?: number;
+  price_max?: number;
+  sort?: string;
+  make?: string;
+  model?: string;
+  model_code?: string;
+  year?: string | number;
 }
 
 export interface ProductListData {

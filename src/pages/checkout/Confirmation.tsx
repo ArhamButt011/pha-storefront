@@ -39,7 +39,7 @@ export function OrderConfirmation() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button size="lg">View Order Status</Button>
               <Button variant="outline" size="lg" asChild>
-                <Link to="/products">Continue Shopping</Link>
+                <Link to="/shop">Continue Shopping</Link>
               </Button>
             </div>
           </div>

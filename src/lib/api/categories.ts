@@ -1,9 +1,16 @@
 import { apiClient } from "./client";
-import type { BeResponse } from "./base";
+import type { BeResponse, PaginatedData } from "./base";
 import type { ApiCategory } from "@/types/category";
 
-export const getCategories = async () => {
-  const { data } = await apiClient.get<BeResponse<ApiCategory[]>>("/category");
+export interface CategoryListParams {
+  limit?: number;
+  page?: number;
+  search?: string;
+}
+export const getCategories = async (params: CategoryListParams = {}) => {
+  const { data } = await apiClient.get<BeResponse<PaginatedData<ApiCategory>>>("/category", {
+    params,
+  });
   return data;
 };
 
