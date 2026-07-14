@@ -19,7 +19,7 @@ export function Cart() {
           </span>
         </h1>
         <Link
-          to="/products"
+          to="/shop"
           className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-accent transition-all hover:gap-2.5"
         >
           <ArrowLeft className="h-4 w-4" /> Keep Shopping

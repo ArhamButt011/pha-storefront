@@ -1,27 +1,123 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CarFront, Search } from "lucide-react";
 import { Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useVehicle, type SelectedVehicle } from "@/context/VehicleContext";
-import { YEARS, MODELS_BY_MAKE, MAKES, ENGINES } from "@/data/vehicles";
+import {
+  getVehicleMakes,
+  getVehicleModels,
+  getVehicleModelCodes,
+  getVehicleYears,
+} from "@/lib/api/vehicle-model";
+
+const EMPTY: SelectedVehicle = {
+  make: "",
+  model: "",
+  model_code: "",
+  year_from: "",
+  year_to: "",
+};
 
 export function VehicleSelector() {
   const { vehicle, setVehicle } = useVehicle();
   const navigate = useNavigate();
 
-  const year = vehicle?.year ?? "";
-  const make = vehicle?.make ?? "";
-  const model = vehicle?.model ?? "";
-  const engine = vehicle?.engine ?? "";
+  // Local draft — separate from the shared context. Selecting fields here
+  // only affects this component until "Find Parts" is clicked; that's the
+  // one place the selection becomes the applied, persisted filter. This
+  // stops in-progress selections from leaking out if the user navigates
+  // away (Shop Parts / Shop nav link / Explore Shop) without submitting.
+  const [draft, setDraft] = useState<SelectedVehicle>(vehicle ?? EMPTY);
 
-  const models = make ? MODELS_BY_MAKE[make] : Object.values(MODELS_BY_MAKE).flat();
+  // If the applied vehicle gets cleared elsewhere (e.g. the "x" on the
+  // vehicle chip on the Shop page), reflect that back into the selector.
+  useEffect(() => {
+    setDraft(vehicle ?? EMPTY);
+  }, [vehicle]);
+
+  const { make, model, model_code, year_from } = draft;
+
+  const [makes, setMakes] = useState<string[]>([]);
+  const [models, setModels] = useState<string[]>([]);
+  const [modelCodes, setModelCodes] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await getVehicleMakes();
+        if (!cancelled) setMakes(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!make) { setModels([]); return; }
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await getVehicleModels(make);
+        if (!cancelled) setModels(res.data);
+      } catch (err) {
+        if (!cancelled) setModels([]);
+        console.error(err);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [make]);
+
+  useEffect(() => {
+    if (!make || !model) { setModelCodes([]); return; }
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await getVehicleModelCodes(make, model);
+        if (!cancelled) setModelCodes(res.data);
+      } catch (err) {
+        if (!cancelled) setModelCodes([]);
+        console.error(err);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [make, model]);
 
   function update(patch: Partial<SelectedVehicle>) {
-    setVehicle({ year, make, model, engine, ...patch });
+    setDraft((prev) => ({ ...prev, ...patch }));
+  }
+
+  function handleMakeChange(nextMake: string) {
+    update({ make: nextMake, model: "", model_code: "", year_from: "", year_to: "" });
+  }
+
+  function handleModelChange(nextModel: string) {
+    update({ model: nextModel, model_code: "", year_from: "", year_to: "" });
+  }
+
+  async function handleModelCodeChange(nextModelCode: string) {
+    update({ model_code: nextModelCode, year_from: "", year_to: "" });
+    try {
+      const res = await getVehicleYears(make, model, nextModelCode);
+      update({
+        model_code: nextModelCode,
+        year_from: String(res.data.year_from),
+        year_to: res.data.year_to != null ? String(res.data.year_to) : "",
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function handleFindParts() {
-    navigate("/products");
+    setVehicle(draft.make ? draft : null);
+    navigate("/shop");
   }
 
   return (
@@ -35,25 +131,12 @@ export function VehicleSelector() {
           <h2 className="text-sm font-bold uppercase tracking-wider text-fg">Select Your Vehicle</h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-[1fr_1fr_1fr_1fr_auto] lg:items-end">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Year</label>
-            <Select value={year} onChange={(e) => update({ year: e.target.value })}>
-              <option value="">Select Year</option>
-              {YEARS.map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </Select>
-          </div>
-
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto] lg:items-end">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Make</label>
-            <Select
-              value={make}
-              onChange={(e) => update({ make: e.target.value, model: "", engine: "" })}
-            >
+            <Select value={make} onChange={(e) => handleMakeChange(e.target.value)}>
               <option value="">Select Make</option>
-              {MAKES.map((m) => (
+              {makes.map((m) => (
                 <option key={m} value={m}>{m}</option>
               ))}
             </Select>
@@ -61,10 +144,7 @@ export function VehicleSelector() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Model</label>
-            <Select
-              value={model}
-              onChange={(e) => update({ model: e.target.value })}
-            >
+            <Select value={model} onChange={(e) => handleModelChange(e.target.value)} disabled={!make}>
               <option value="">Select Model</option>
               {models.map((m) => (
                 <option key={m} value={m}>{m}</option>
@@ -72,14 +152,26 @@ export function VehicleSelector() {
             </Select>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Engine</label>
-            <Select value={engine} onChange={(e) => update({ engine: e.target.value })}>
-              <option value="">Select Engine</option>
-              {ENGINES.map((e) => (
-                <option key={e} value={e}>{e}</option>
+          <div className="col-span-2 space-y-1.5 lg:col-span-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Model Code</label>
+            <Select value={model_code} onChange={(e) => handleModelCodeChange(e.target.value)} disabled={!model}>
+              <option value="">Select Code</option>
+              {modelCodes.map((c) => (
+                <option key={c} value={c}>{c}</option>
               ))}
             </Select>
+          </div>
+
+          <div className="col-span-2 space-y-1.5 lg:col-span-1">
+            <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Year</label>
+            <Input
+              type="number"
+              min="1900"
+              max="2100"
+              value={year_from}
+              onChange={(e) => update({ year_from: e.target.value })}
+              placeholder="e.g. 2015"
+            />
           </div>
 
           <Button size="md" className="col-span-2 gap-2 lg:col-span-1" onClick={handleFindParts}>

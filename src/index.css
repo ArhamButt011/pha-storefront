@@ -79,6 +79,27 @@
   --ok-fg:     0 0% 100%;
 }
 
+.category-autosize {
+  display: inline-grid;
+}
+ 
+.category-autosize::after {
+  content: attr(data-label);
+  visibility: hidden;
+  white-space: pre;
+  grid-area: 1 / 1;
+  font: inherit;
+  font-size: 0.75rem;  /* matches text-xs */
+  font-weight: 600;    /* matches font-semibold */
+  padding: 0.5rem 1.75rem 0.5rem 0.75rem; /* matches py-2 pl-3 pr-7 */
+}
+ 
+.category-autosize select {
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 0;
+}
+
 /* ─── Dark mode ───────────────────────────────────────────────────────────── */
 .dark {
   --bg:        0 0% 4%;
@@ -220,6 +241,7 @@
   transition: width 0.3s ease;
 }
 .nav-link:hover::after { width: 100%; }
+.nav-link-active::after { width: 100%; }
 
 /* Product card */
 .product-card {

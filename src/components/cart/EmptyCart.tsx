@@ -13,7 +13,7 @@ export function EmptyCart() {
         Looks like you haven't added any parts yet. Browse our catalog to start building your setup.
       </p>
       <Button size="lg" className="mt-6" asChild>
-        <Link to="/products">Browse Parts</Link>
+        <Link to="/shop">Browse Parts</Link>
       </Button>
     </div>
   );
