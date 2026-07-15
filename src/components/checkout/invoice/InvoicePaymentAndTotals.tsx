@@ -39,7 +39,7 @@ export function InvoicePaymentAndTotals({ paymentMethod, subtotal, shipping, gst
             <span className="font-semibold text-fg">{formatCurrency(shipping)}</span>
           </div>
           <div className="flex items-center justify-between border-b border-border pb-2.5">
-            <span className="text-fg-muted">GST (10%)</span>
+            <span className="text-fg-muted">Includes GST</span>
             <span className="font-semibold text-fg">{formatCurrency(gst)}</span>
           </div>
         </div>

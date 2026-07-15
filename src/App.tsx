@@ -7,6 +7,7 @@ import { ProductDetails } from "@/pages/ProductDetails";
 import { BundlesListing } from "@/pages/BundlesListing";
 import { Cart } from "@/pages/Cart";
 import { CheckoutShipping } from "@/pages/checkout/Shipping";
+import { CheckoutPayment } from "@/pages/checkout/Payment";
 import { OrderConfirmation } from "@/pages/checkout/Confirmation";
 import { Invoice } from "@/pages/checkout/Invoice";
 import { VehicleProvider } from "@/context/VehicleContext";
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/cart" element={<Cart />} />
           </Route>
           <Route path="/checkout" element={<CheckoutShipping />} />
+          <Route path="/checkout/payment" element={<CheckoutPayment />} />
           <Route path="/checkout/confirmation" element={<OrderConfirmation />} />
           <Route path="/checkout/invoice" element={<Invoice />} />
         </Routes>

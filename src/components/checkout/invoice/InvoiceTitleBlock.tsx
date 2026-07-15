@@ -4,9 +4,10 @@ interface InvoiceTitleBlockProps {
   invoiceNumber: string;
   orderReference: string;
   date: string;
+  isPaid?: boolean;
 }
 
-export function InvoiceTitleBlock({ invoiceNumber, orderReference, date }: InvoiceTitleBlockProps) {
+export function InvoiceTitleBlock({ invoiceNumber, orderReference, date, isPaid = true }: InvoiceTitleBlockProps) {
   const formattedDate = new Date(date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 
   return (
@@ -19,8 +20,14 @@ export function InvoiceTitleBlock({ invoiceNumber, orderReference, date }: Invoi
       </div>
 
       <div className="text-right">
-        <span className="inline-block rounded-full bg-ok/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-ok">
-          Payment Status: Paid &amp; Secured
+        <span
+          className={
+            isPaid
+              ? "inline-block rounded-full bg-ok/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-ok"
+              : "inline-block rounded-full bg-accent/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-accent"
+          }
+        >
+          {isPaid ? "Payment Status: Paid & Secured" : "Payment Status: Pending"}
         </span>
         <dl className="mt-3 space-y-1 text-sm">
           <div className="flex items-center justify-end gap-2">
