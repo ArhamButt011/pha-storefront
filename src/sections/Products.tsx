@@ -19,7 +19,6 @@ function ProductCard({ product }: { product: Product }) {
     e.stopPropagation();
     addToCart(productToCartItem(product));
   }
-console.log("product slug ", product)
   return (
     <Link
       to={`/product/${product.slug}`}

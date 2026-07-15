@@ -272,9 +272,9 @@ export function Navbar({ onInquiry }: Props) {
         </nav>
 
         <div className="mt-auto flex flex-col gap-3">
-          <Button variant="outline" className="w-full" onClick={() => { setMenuOpen(false); onInquiry(); }}>
+          {/* <Button variant="outline" className="w-full" onClick={() => { setMenuOpen(false); onInquiry(); }}>
             Enquire
-          </Button>
+          </Button> */}
           <Button className="w-full" onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}>
             Sign In
           </Button>

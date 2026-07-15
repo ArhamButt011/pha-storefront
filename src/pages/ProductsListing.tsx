@@ -198,7 +198,7 @@ export function ProductsListing() {
     : undefined;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 pb-8 pt-28 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-7xl px-4 pb-8 lg:pt-28 pt-20 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Breadcrumb items={breadcrumbItems} />
         {vehicle?.make && <VehicleChip vehicle={vehicle} />}

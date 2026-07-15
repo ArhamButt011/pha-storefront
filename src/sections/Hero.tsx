@@ -9,7 +9,7 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative flex min-h-[85vh] items-center overflow-hidden pt-16"
+      className="relative flex min-h-[65vh] lg:min-h-[85vh] items-center overflow-hidden lg:pt-16 pt-0"
     >
       <div
         className="absolute inset-0 z-0 bg-cover bg-center"
@@ -18,7 +18,7 @@ export function Hero() {
       <div className="absolute inset-0 z-0 bg-gradient-to-t from-bg via-bg/80 to-bg/50" />
       <div className="absolute inset-0 z-0 bg-gradient-to-r from-bg via-bg/40 to-transparent" />
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-4 py-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />

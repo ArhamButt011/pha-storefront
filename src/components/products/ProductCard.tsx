@@ -23,7 +23,6 @@ const STOCK_DOT: Record<Product["stock"]["status"], string> = {
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
-console.log("product slug ", product)
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
