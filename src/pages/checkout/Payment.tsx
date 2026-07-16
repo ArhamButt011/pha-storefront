@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { Loader2, ShieldCheck } from "lucide-react";
 import {
   Elements,
@@ -14,7 +14,8 @@ import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { Button } from "@/components/ui/button";
 import { createPaymentIntent } from "@/lib/api/payments";
 import { stripePromise } from "@/lib/stripe";
-import type { RootState } from "@/store/store";
+import { setOrder } from "@/store/checkoutSlice";
+import type { AppDispatch, RootState } from "@/store/store";
 
 function PaymentForm({
   orderId,
@@ -93,18 +94,38 @@ function PaymentForm({
 
 export function CheckoutPayment() {
   const navigate = useNavigate();
-  const { orderId, guestToken, orderNumber } = useSelector((s: RootState) => s.checkout);
+  const dispatch = useDispatch<AppDispatch>();
+  const [searchParams] = useSearchParams();
+  const { orderId: sliceOrderId, guestToken: sliceGuestToken, orderNumber } = useSelector(
+    (s: RootState) => s.checkout,
+  );
+
+  // The slice is wiped on a hard refresh (it's excluded from redux-persist),
+  // but Shipping (and the cancelled-order retry path) always pass order_id
+  // and token as URL query params too — fall back to those so refreshing
+  // /checkout/payment resumes the same payment instead of bouncing to
+  // /checkout.
+  const paramOrderId = searchParams.get("order_id");
+  const paramGuestToken = searchParams.get("token");
+  const orderId = sliceOrderId ?? paramOrderId;
+  const guestToken = sliceGuestToken ?? paramGuestToken;
+
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // No in-flight checkout in the slice — either a direct/refreshed visit
-    // to this URL, or state genuinely doesn't exist. Send them back to
-    // start a new order rather than guessing at an intent to create.
+    // Neither the slice nor the URL carries an order reference — genuinely
+    // nothing to resume. Send them back to start a new order.
     if (!orderId || !guestToken) {
       navigate("/checkout", { replace: true });
       return;
+    }
+
+    // Slice was empty but the URL had what we needed — rehydrate it so the
+    // rest of the flow (e.g. the 3DS return_url built in PaymentForm) works.
+    if (!sliceOrderId || !sliceGuestToken) {
+      dispatch(setOrder({ orderId, guestToken, orderNumber: orderNumber ?? "" }));
     }
 
     let cancelled = false;
@@ -127,7 +148,7 @@ export function CheckoutPayment() {
     return () => {
       cancelled = true;
     };
-  }, [orderId, guestToken, navigate]);
+  }, [orderId, guestToken, sliceOrderId, sliceGuestToken, orderNumber, dispatch, navigate]);
 
   if (!orderId || !guestToken) return null;
 

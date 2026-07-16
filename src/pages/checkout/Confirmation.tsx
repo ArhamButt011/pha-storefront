@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Truck, Wrench, Loader2, AlertTriangle, XCircle } from "lucide-react";
 import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
@@ -10,8 +10,9 @@ import { PrecisionGuaranteedCard } from "@/components/checkout/confirmation/Prec
 import { ConfirmationSummaryLinks } from "@/components/checkout/confirmation/ConfirmationSummaryLinks";
 import { Button } from "@/components/ui/button";
 import { getOrder, type ApiOrder } from "@/lib/api/orders";
+import { ApiError } from "@/lib/api/client";
 import { clearCart } from "@/store/cartSlice";
-import { resetCheckout, setOrder } from "@/store/checkoutSlice";
+import { resetCheckout } from "@/store/checkoutSlice";
 import type { AppDispatch } from "@/store/store";
 import { WHATS_NEXT_ITEMS } from "@/constants/checkout";
 
@@ -27,7 +28,6 @@ export function OrderConfirmation() {
   // Source of truth is the URL, never Redux — stripe.confirmPayment() can do
   // a full-page 3DS redirect that wipes any in-memory/non-persisted state.
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const orderId = searchParams.get("order_id");
   const token = searchParams.get("token");
@@ -71,8 +71,23 @@ export function OrderConfirmation() {
         timer = setTimeout(poll, POLL_INTERVAL_MS);
       } catch (err) {
         if (cancelled) return;
-        setPhase("error");
-        setErrorMessage(err instanceof Error ? err.message : "Could not load your order.");
+
+        // A bad order_id/token is unrecoverable — fail fast. Anything else
+        // (a dropped connection, a transient 5xx) is likely momentary right
+        // after paying, so keep polling until the timeout instead of
+        // showing an error to someone who just successfully paid.
+        if (err instanceof ApiError && err.status === 404) {
+          setPhase("error");
+          setErrorMessage(err.message || "Could not load your order.");
+          return;
+        }
+
+        if (Date.now() - startedAt > POLL_TIMEOUT_MS) {
+          setPhase("timeout");
+          return;
+        }
+        setPhase("polling");
+        timer = setTimeout(poll, POLL_INTERVAL_MS);
       }
     }
 
@@ -91,12 +106,6 @@ export function OrderConfirmation() {
       dispatch(resetCheckout());
     }
   }, [phase, dispatch]);
-
-  function handleRetryPayment() {
-    if (!orderId || !token) return;
-    dispatch(setOrder({ orderId, guestToken: token, orderNumber: order?.order_number ?? "" }));
-    navigate(`/checkout/payment?order_id=${orderId}&token=${token}`);
-  }
 
   if (phase === "loading" || phase === "polling") {
     return (
@@ -141,12 +150,11 @@ export function OrderConfirmation() {
           <XCircle className="h-8 w-8 text-danger" />
           <h1 className="text-lg font-bold text-fg">This order was cancelled</h1>
           <p className="text-sm text-fg-muted">
-            Order #{order?.order_number ?? "—"} was cancelled before payment completed. You can try paying again, or
-            return to your cart.
+            Order #{order?.order_number ?? "—"} was cancelled before payment completed. Please return to your cart
+            to place a new order.
           </p>
           <div className="mt-2 flex gap-3">
-            <Button onClick={handleRetryPayment}>Try Payment Again</Button>
-            <Button variant="outline" asChild>
+            <Button asChild>
               <Link to="/cart">Return to Cart</Link>
             </Button>
           </div>
