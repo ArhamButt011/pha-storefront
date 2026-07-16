@@ -10,7 +10,7 @@ export function Cart() {
   const navigate = useNavigate();
 
   return (
-    <main className="mx-auto max-w-7xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-7xl px-4 pb-16  pt-20 lg:pt-28  sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-display text-2xl font-black tracking-wide text-fg sm:text-3xl">
           Your Performance Build{" "}

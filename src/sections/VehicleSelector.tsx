@@ -124,9 +124,16 @@ export function VehicleSelector() {
     }
   }
 
-  function handleFindParts() {
-    setVehicle(draft.make ? draft : null);
-    navigate("/shop");
+function handleFindParts() {
+    const params = new URLSearchParams();
+    if (draft.make) {
+      params.set("make", draft.make);
+      if (draft.model) params.set("model", draft.model);
+      if (draft.model_code) params.set("model_code", draft.model_code);
+      if (draft.year_from) params.set("year_from", draft.year_from);
+      if (draft.year_to) params.set("year_to", draft.year_to);
+    }
+    navigate(draft.make ? `/shop?${params.toString()}` : "/shop");
   }
 
   return (

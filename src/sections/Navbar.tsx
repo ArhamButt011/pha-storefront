@@ -19,7 +19,7 @@ const NAV_LINKS = [
   { label: "About Us", href: "/#about" },
 ];
 
-export function Navbar({ onInquiry }: Props) {
+export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { totalItems: cartCount } = useCart();
@@ -31,9 +31,6 @@ export function Navbar({ onInquiry }: Props) {
   const [searchCategory, setSearchCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Keeps the navbar's search input in sync with the URL — landing on (or
-  // navigating to) a URL like /shop?search=bonu should show "bonu" in
-  // the field, not just apply it silently on the results page.
   useEffect(() => {
     setSearchQuery(urlSearchParams.get("search") ?? "");
   }, [urlSearchParams]);
@@ -51,9 +48,6 @@ export function Navbar({ onInquiry }: Props) {
     let cancelled = false;
     async function load() {
       try {
-        // The category API now enforces limit/page server-side (it used to
-        // ignore them), so a generous limit is passed explicitly here to
-        // keep the nav dropdown showing the full category list.
         const res = await getCategories({ limit: 100, page: 1 });
         if (!cancelled) setCategories(res.data.items);
       } catch (err) {
@@ -66,11 +60,6 @@ export function Navbar({ onInquiry }: Props) {
     };
   }, []);
 
-  // Selecting a category filters via the /shop/:categoryId route (the
-  // same one CategoryCard uses) — that's what ProductsListing reads to call
-  // GET /category/:id and GET /product?categories=:id. Passing the category
-  // as a query string instead (the old behavior) was silently ignored,
-  // since the page never looked at a `categories` search param.
   function handleSearch() {
     setMenuOpen(false);
 
@@ -103,11 +92,11 @@ export function Navbar({ onInquiry }: Props) {
         }`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
-          <Link to="/" className="flex shrink-0 items-center gap-2 group">
+          <Link to="/" className="flex shrink-0 items-center gap-0 group">
             <img
               src="/branding/logo.svg"
               alt="Parts Hub Australia"
-              className="h-10 w-10 object-contain transition-transform duration-300 group-hover:scale-110"
+              className="h-16 w-16 object-contain transition-transform duration-300"
             />
             <span className="hidden font-display text-sm font-bold tracking-wider text-fg sm:block">
               PARTS HUB <span className="text-accent">AUSTRALIA</span>

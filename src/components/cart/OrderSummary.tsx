@@ -43,11 +43,11 @@ export function OrderSummary({ subtotal, onCheckout }: OrderSummaryProps) {
         <p className="text-right text-xs text-fg-muted">AUD Dollars</p>
       </div>
 
-      <Button size="lg" className="mt-6 w-full gap-2 uppercase tracking-wide" onClick={onCheckout}>
+      <Button size="sm" className="mt-6 w-full text-xs gap-2 uppercase tracking-wide" onClick={onCheckout}>
         <Lock className="h-4 w-4" />
         Proceed to Secure Checkout
       </Button>
-
+{/* 
       <div className="mt-5 flex items-start gap-3 rounded-xl border border-accent/25 bg-accent/10 px-4 py-3">
         <Crown className="h-5 w-5 shrink-0 text-accent" />
         <p className="text-xs">
@@ -56,7 +56,7 @@ export function OrderSummary({ subtotal, onCheckout }: OrderSummaryProps) {
             You're saving {formatCurrency(MEMBER_SHIPPING_SAVINGS)} on priority freight with your Pro status.
           </span>
         </p>
-      </div>
+      </div> */}
 
       <p className="mt-5 text-center text-xs leading-relaxed text-fg-muted">
         Secure 256-bit SSL encrypted checkout.
