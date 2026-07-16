@@ -21,11 +21,13 @@ export function ResultsHeader({ count, sort, onSortChange }: ResultsHeaderProps)
       </p>
       <div className="flex items-center gap-2">
         <span className="text-sm text-fg-muted">Sort By:</span>
-        <Select value={sort} onChange={(e) => onSortChange(e.target.value)} className="w-48 py-2">
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </Select>
+        <Select
+          value={sort}
+          onValueChange={onSortChange}
+          options={SORT_OPTIONS}
+          className="w-48"
+          isSearchable={false}
+        />
       </div>
     </div>
   );

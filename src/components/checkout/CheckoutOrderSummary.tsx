@@ -1,6 +1,6 @@
-import { ArrowRight, ShieldCheck, BadgeCheck, Headphones } from "lucide-react";
+import { ArrowRight, ShieldCheck, BadgeCheck, Headphones, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GST_RATE } from "@/constants/cart";
+import { GST_DIVISOR } from "@/constants/cart";
 import { TRUST_BADGES } from "@/constants/checkout";
 import type { CartItem } from "@/store/cartSlice";
 
@@ -15,11 +15,22 @@ interface CheckoutOrderSummaryProps {
   subtotal: number;
   vehicleMake?: string;
   onContinue?: () => void;
+  submitting?: boolean;
+  disabled?: boolean;
 }
 
-export function CheckoutOrderSummary({ items, subtotal, vehicleMake, onContinue }: CheckoutOrderSummaryProps) {
-  const gst = subtotal * GST_RATE;
-  const total = subtotal + gst;
+export function CheckoutOrderSummary({
+  items,
+  subtotal,
+  vehicleMake,
+  onContinue,
+  submitting = false,
+  disabled = false,
+}: CheckoutOrderSummaryProps) {
+  // Product prices are GST-inclusive (AU retail) — GST is extracted for
+  // display, never added on top of the subtotal.
+  const gst = subtotal / GST_DIVISOR;
+  const total = subtotal;
 
   return (
     <div className="rounded-2xl border border-border bg-bg-2 p-6">
@@ -51,7 +62,7 @@ export function CheckoutOrderSummary({ items, subtotal, vehicleMake, onContinue 
           <span className="font-semibold text-ok">FREE</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-fg-muted">Estimated GST</span>
+          <span className="text-fg-muted">Includes GST</span>
           <span className="font-semibold text-fg">{formatCurrency(gst)}</span>
         </div>
       </div>
@@ -61,9 +72,18 @@ export function CheckoutOrderSummary({ items, subtotal, vehicleMake, onContinue 
         <span className="font-display text-2xl font-black text-accent">{formatCurrency(total)}</span>
       </div>
 
-      <Button size="lg" className="mt-6 w-full gap-2" onClick={onContinue}>
-        Continue to Payment
-        <ArrowRight className="h-4 w-4" />
+      <Button size="lg" className="mt-6 w-full gap-2" onClick={onContinue} disabled={disabled || submitting}>
+        {submitting ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Placing Order…
+          </>
+        ) : (
+          <>
+            Continue to Payment
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
       </Button>
 
       <div className="mt-6 space-y-3">

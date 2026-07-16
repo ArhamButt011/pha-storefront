@@ -1,6 +1,13 @@
-import type { DummyOrderAddress } from "@/data/dummyOrder";
+export interface InvoiceAddress {
+  fullName: string;
+  address: string;
+  suburb: string;
+  state: string;
+  postcode: string;
+  country: string;
+}
 
-export function InvoiceAddressCard({ label, address }: { label: string; address: DummyOrderAddress }) {
+export function InvoiceAddressCard({ label, address }: { label: string; address: InvoiceAddress }) {
   return (
     <div className="rounded-2xl border border-border bg-bg-2 p-5">
       <p className="text-xs font-bold uppercase tracking-wider text-accent">{label}</p>

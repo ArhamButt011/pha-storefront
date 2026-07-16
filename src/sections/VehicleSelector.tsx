@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CarFront, Search } from "lucide-react";
 import { Select } from "@/components/ui/select";
@@ -24,15 +24,8 @@ export function VehicleSelector() {
   const { vehicle, setVehicle } = useVehicle();
   const navigate = useNavigate();
 
-  // Local draft — separate from the shared context. Selecting fields here
-  // only affects this component until "Find Parts" is clicked; that's the
-  // one place the selection becomes the applied, persisted filter. This
-  // stops in-progress selections from leaking out if the user navigates
-  // away (Shop Parts / Shop nav link / Explore Shop) without submitting.
   const [draft, setDraft] = useState<SelectedVehicle>(vehicle ?? EMPTY);
 
-  // If the applied vehicle gets cleared elsewhere (e.g. the "x" on the
-  // vehicle chip on the Shop page), reflect that back into the selector.
   useEffect(() => {
     setDraft(vehicle ?? EMPTY);
   }, [vehicle]);
@@ -89,6 +82,22 @@ export function VehicleSelector() {
     return () => { cancelled = true; };
   }, [make, model]);
 
+  // Stable references so <Select> (wrapped in React.memo) only re-renders
+  // its option list when the underlying data actually changes, not on
+  // every keystroke/render of this parent.
+  const makeOptions = useMemo(
+    () => makes.map((m) => ({ value: m, label: m })),
+    [makes],
+  );
+  const modelOptions = useMemo(
+    () => models.map((m) => ({ value: m, label: m })),
+    [models],
+  );
+  const modelCodeOptions = useMemo(
+    () => modelCodes.map((c) => ({ value: c, label: c })),
+    [modelCodes],
+  );
+
   function update(patch: Partial<SelectedVehicle>) {
     setDraft((prev) => ({ ...prev, ...patch }));
   }
@@ -134,32 +143,34 @@ export function VehicleSelector() {
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto] lg:items-end">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Make</label>
-            <Select value={make} onChange={(e) => handleMakeChange(e.target.value)}>
-              <option value="">Select Make</option>
-              {makes.map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </Select>
+            <Select
+              value={make}
+              onValueChange={handleMakeChange}
+              placeholder="Select Make"
+              options={makeOptions}
+            />
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Model</label>
-            <Select value={model} onChange={(e) => handleModelChange(e.target.value)} disabled={!make}>
-              <option value="">Select Model</option>
-              {models.map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </Select>
+            <Select
+              value={model}
+              onValueChange={handleModelChange}
+              placeholder="Select Model"
+              disabled={!make}
+              options={modelOptions}
+            />
           </div>
 
           <div className="col-span-2 space-y-1.5 lg:col-span-1">
             <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Model Code</label>
-            <Select value={model_code} onChange={(e) => handleModelCodeChange(e.target.value)} disabled={!model}>
-              <option value="">Select Code</option>
-              {modelCodes.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </Select>
+            <Select
+              value={model_code}
+              onValueChange={handleModelCodeChange}
+              placeholder="Select Code"
+              disabled={!model}
+              options={modelCodeOptions}
+            />
           </div>
 
           <div className="col-span-2 space-y-1.5 lg:col-span-1">
