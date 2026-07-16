@@ -49,10 +49,10 @@ function ProductCard({ product }: { product: Product }) {
         <h3 className="mt-1 line-clamp-2 text-sm font-bold text-fg">{product.title}</h3>
 
         <div className="mt-auto flex items-center gap-2 pt-3">
-          <span className="text-base font-black text-accent">${product.price.toLocaleString()}</span>
+          <span className="text-base font-black text-accent">A${product.price.toLocaleString()}</span>
           {product.oldPrice && (
             <span className="text-xs text-fg-muted/60 line-through">
-              ${product.oldPrice.toLocaleString()}
+              A${product.oldPrice.toLocaleString()}
             </span>
           )}
         </div>

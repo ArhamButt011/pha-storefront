@@ -2,7 +2,7 @@ import { Check, ShoppingCart } from "lucide-react";
 import type { Bundle } from "@/data/bundles";
 
 function formatPrice(value: number) {
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `A$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export function BundleCard({ bundle }: { bundle: Bundle }) {

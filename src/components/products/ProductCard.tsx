@@ -53,9 +53,9 @@ export function ProductCard({ product }: { product: Product }) {
 
         <div className="mt-auto flex items-center justify-between gap-2">
           <div className="flex items-baseline gap-2">
-            <span className="text-xl font-black text-accent">${product.price.toLocaleString()}</span>
+            <span className="text-xl font-black text-accent">A${product.price.toLocaleString()}</span>
             {product.oldPrice && (
-              <span className="text-sm text-fg-muted/60 line-through">${product.oldPrice.toLocaleString()}</span>
+              <span className="text-sm text-fg-muted/60 line-through">A${product.oldPrice.toLocaleString()}</span>
             )}
           </div>
           <button onClick={handleAdd} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg transition-all hover:brightness-110">

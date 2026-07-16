@@ -64,7 +64,7 @@ export function FilterSidebar({
             <Input
               type="number"
               inputMode="numeric"
-              placeholder="$ Min"
+              placeholder="A$ Min"
               value={priceMin}
               onChange={(e) => onPriceMinChange(e.target.value)}
               className="px-3 py-2 text-sm"
@@ -73,7 +73,7 @@ export function FilterSidebar({
             <Input
               type="number"
               inputMode="numeric"
-              placeholder="$ Max"
+              placeholder="A$ Max"
               value={priceMax}
               onChange={(e) => onPriceMaxChange(e.target.value)}
               className="px-3 py-2 text-sm"
