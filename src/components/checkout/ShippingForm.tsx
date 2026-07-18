@@ -85,11 +85,11 @@ export function ShippingForm({ values, onChange }: ShippingFormProps) {
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">State</label>
-            <Select value={values.state} onChange={(e) => onChange({ state: e.target.value })}>
-              {AU_STATES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </Select>
+            <Select
+              value={values.state}
+              onValueChange={(v) => onChange({ state: v })}
+              options={AU_STATES.map((s) => ({ value: s, label: s }))}
+            />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Postcode</label>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import ReactSelect, { type StylesConfig } from "react-select";
+import ReactSelect from "react-select";
 import { cn } from "@/utils/cn";
 
 export interface SelectOption {

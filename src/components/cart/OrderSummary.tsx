@@ -1,6 +1,6 @@
-import { Lock, Crown } from "lucide-react";
+import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SHIPPING_COST, GST_RATE, MEMBER_SHIPPING_SAVINGS } from "@/constants/cart";
+import { SHIPPING_COST, GST_RATE } from "@/constants/cart";
 
 function formatCurrency(value: number) {
   return `A$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

@@ -21,7 +21,7 @@ const EMPTY: SelectedVehicle = {
 };
 
 export function VehicleSelector() {
-  const { vehicle, setVehicle } = useVehicle();
+  const { vehicle } = useVehicle();
   const navigate = useNavigate();
 
   const [draft, setDraft] = useState<SelectedVehicle>(vehicle ?? EMPTY);

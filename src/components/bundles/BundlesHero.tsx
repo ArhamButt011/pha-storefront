@@ -27,12 +27,12 @@ export function BundlesHero({ vehicleValue, onVehicleChange, onFilter }: Bundles
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="space-y-1.5 sm:max-w-xs sm:flex-1">
           <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Year/Make/Model</label>
-          <Select value={vehicleValue} onChange={(e) => onVehicleChange(e.target.value)}>
-            <option value="">Select Vehicle</option>
-            {VEHICLE_OPTIONS.map((v) => (
-              <option key={v} value={v}>{v}</option>
-            ))}
-          </Select>
+          <Select
+            value={vehicleValue}
+            onValueChange={onVehicleChange}
+            placeholder="Select Vehicle"
+            options={VEHICLE_OPTIONS.map((v) => ({ value: v, label: v }))}
+          />
         </div>
         <Button onClick={onFilter} className="shrink-0 uppercase tracking-wide">
           Filter Bundles

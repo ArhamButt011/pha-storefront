@@ -139,15 +139,11 @@ export function InquiryModal({ open, onOpenChange }: Props) {
                   Subject <span className="text-accent">*</span>
                 </label>
                 <Select
-                  required
                   value={form.subject}
-                  onChange={(e) => handleChange("subject", e.target.value)}
-                >
-                  <option value="" disabled>Select a subject…</option>
-                  {SUBJECTS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </Select>
+                  onValueChange={(v) => handleChange("subject", v)}
+                  placeholder="Select a subject…"
+                  options={SUBJECTS.map((s) => ({ value: s, label: s }))}
+                />
               </div>
 
               <div className="space-y-1.5">

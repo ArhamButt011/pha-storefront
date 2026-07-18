@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Truck, PackageCheck, Send } from "lucide-react";
+import { Truck, PackageCheck } from "lucide-react";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ImageGallery } from "@/components/product/ImageGallery";
 import { FitmentBadge } from "@/components/product/FitmentBadge";
