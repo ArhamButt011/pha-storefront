@@ -21,14 +21,14 @@ export function ImageGallery({ images, alt }: { images: string[]; alt: string })
                 i === active ? "border-accent" : "border-transparent hover:border-border",
               )}
             >
-              <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" />
+              <img src={img} alt="" className="h-full w-full object-contain" loading="lazy" />
             </button>
           ))}
         </div>
       )}
 
       <div className="relative flex-1 aspect-square overflow-hidden rounded-2xl bg-bg-2">
-        <img src={images[active]} alt={alt} className="h-full w-full object-cover" />
+        <img src={images[active]} alt={alt} className="h-full w-full object-contain" />
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}

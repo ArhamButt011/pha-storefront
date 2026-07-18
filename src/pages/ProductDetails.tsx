@@ -157,12 +157,12 @@ export function ProductDetails() {
 
           <div className="mt-6 flex flex-wrap items-baseline gap-3">
             <span className="text-3xl font-black text-accent">
-              ${product.price.toLocaleString()}.00
+              A${product.price.toLocaleString()}.00
             </span>
             {product.oldPrice && (
               <>
                 <span className="text-base text-fg-muted/60 line-through">
-                  ${product.oldPrice.toLocaleString()}.00
+                  A${product.oldPrice.toLocaleString()}.00
                 </span>
                 <span className="rounded-full bg-ok/15 px-2.5 py-1 text-xs font-bold text-ok">
                   Save ${(product.oldPrice - product.price).toLocaleString()}.00

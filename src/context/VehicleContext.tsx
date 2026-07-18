@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useMemo, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
 
 export interface SelectedVehicle {
   make: string;
@@ -8,40 +9,52 @@ export interface SelectedVehicle {
   year_to: string;
 }
 
-interface VehicleContextValue {
-  vehicle: SelectedVehicle | null;
-  setVehicle: (vehicle: SelectedVehicle | null) => void;
+const VEHICLE_PARAM_KEYS = ["make", "model", "model_code", "year_from", "year_to"] as const;
+
+function vehicleFromSearchParams(params: URLSearchParams): SelectedVehicle | null {
+  const make = params.get("make") ?? "";
+  if (!make) return null;
+  return {
+    make,
+    model: params.get("model") ?? "",
+    model_code: params.get("model_code") ?? "",
+    year_from: params.get("year_from") ?? "",
+    year_to: params.get("year_to") ?? "",
+  };
 }
 
-const STORAGE_KEY = "pha-selected-vehicle";
-
-const VehicleContext = createContext<VehicleContextValue | null>(null);
-
-function readStoredVehicle(): SelectedVehicle | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as SelectedVehicle) : null;
-  } catch {
-    return null;
-  }
-}
-
+/** No longer holds any actual state — vehicle selection now lives entirely
+ * in the URL's query params via useSearchParams. Kept as a passthrough so
+ * existing <VehicleProvider> usage in App.tsx doesn't need to change. */
 export function VehicleProvider({ children }: { children: ReactNode }) {
-  const [vehicle, setVehicle] = useState<SelectedVehicle | null>(() => readStoredVehicle());
-
-  useEffect(() => {
-    if (vehicle) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicle));
-    } else {
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }, [vehicle]);
-
-  return <VehicleContext.Provider value={{ vehicle, setVehicle }}>{children}</VehicleContext.Provider>;
+  return children;
 }
 
 export function useVehicle() {
-  const ctx = useContext(VehicleContext);
-  if (!ctx) throw new Error("useVehicle must be used within a VehicleProvider");
-  return ctx;
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const vehicle = useMemo(() => vehicleFromSearchParams(searchParams), [searchParams]);
+
+  const setVehicle = useCallback(
+    (next: SelectedVehicle | null) => {
+      setSearchParams(
+        (prev) => {
+          const params = new URLSearchParams(prev);
+          VEHICLE_PARAM_KEYS.forEach((key) => params.delete(key));
+          if (next?.make) {
+            params.set("make", next.make);
+            if (next.model) params.set("model", next.model);
+            if (next.model_code) params.set("model_code", next.model_code);
+            if (next.year_from) params.set("year_from", next.year_from);
+            if (next.year_to) params.set("year_to", next.year_to);
+          }
+          return params;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  return { vehicle, setVehicle };
 }

@@ -4,7 +4,7 @@ import { useCart } from "@/hooks/useCart";
 import type { CartItem } from "@/store/cartSlice";
 
 function formatCurrency(value: number) {
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `A$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export function CartItemCard({ item }: { item: CartItem }) {
