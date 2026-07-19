@@ -62,6 +62,21 @@ export function TechnicalSpecifications({ product }: { product: Product }) {
             </div>
           )}
 
+          {product.conditionNotes && (
+            <div className="py-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">Condition Notes</p>
+              <p className="mt-1 text-sm leading-relaxed text-fg-muted">{product.conditionNotes}</p>
+            </div>
+          )}
+
+          {product.specs && product.specs.length > 0 && (
+            <div className="grid grid-cols-2 gap-6 py-4">
+              {product.specs.map((spec) => (
+                <SpecCell key={spec.label} {...spec} />
+              ))}
+            </div>
+          )}
+
           <div className="flex items-center gap-3 py-4">
             <ShieldCheck className="h-4 w-4 shrink-0 text-accent" />
             <p className="text-sm">

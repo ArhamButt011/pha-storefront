@@ -56,6 +56,7 @@ make?: string | null;
   warranty?: string;
   material?: string;
   condition?: string;
+  conditionNotes?: string;
   authenticity?: string;
   productNote?: string;
   vehicleFitments?: VehicleFitmentRow[];

@@ -92,7 +92,9 @@ export function ProductDetails() {
   const infoRows = [
     product.sku ? { label: "SKU #", value: product.sku } : null,
     // { label: "Brand", value: product.brandFull ?? product.brand },
-    product.warranty ? { label: "Warranty", value: product.warranty } : null,
+    // Warranty is shown in Technical Specifications below instead, which
+    // already has a consistent fallback — showing it here too would repeat
+    // the same fact twice on the page.
     product.material ? { label: "Material", value: product.material } : null,
   ].filter((row): row is { label: string; value: string } => row !== null);
 
