@@ -1,3 +1,5 @@
+import type { CSSObjectWithLabel } from "react-select";
+
 // Shared react-select config for <Select> and <MultiSelect> — every field
 // dropdown in the app needs to escape overflow-clipping ancestors (e.g. the
 // search modal's scrollable body) and survive being rendered inside a Radix
@@ -25,6 +27,10 @@ export const SELECT_MENU_PORTAL_PROPS = {
   // unclickable — it still renders and looks interactive, but every click
   // silently falls through to whatever's behind it.
   styles: {
-    menuPortal: (base: Record<string, unknown>) => ({ ...base, zIndex: 100, pointerEvents: "auto" }),
+    menuPortal: (base: CSSObjectWithLabel): CSSObjectWithLabel => ({
+      ...base,
+      zIndex: 100,
+      pointerEvents: "auto" as const,
+    }),
   },
 };
