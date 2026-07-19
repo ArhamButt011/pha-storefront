@@ -5,6 +5,7 @@ export interface ApiCategory {
   slug: string;
   parent: string | null;
   sort_order: number;
+  product_count: number;
 }
 
 export interface CategoryWithImage extends ApiCategory {

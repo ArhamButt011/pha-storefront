@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Truck, PackageCheck } from "lucide-react";
+import { Truck, PackageCheck, Zap } from "lucide-react";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ImageGallery } from "@/components/product/ImageGallery";
 import { FitmentBadge } from "@/components/product/FitmentBadge";
@@ -17,6 +17,7 @@ import { productToCartItem } from "@/utils/productToCartItem";
 
 export function ProductDetails() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -91,7 +92,9 @@ export function ProductDetails() {
   const infoRows = [
     product.sku ? { label: "SKU #", value: product.sku } : null,
     // { label: "Brand", value: product.brandFull ?? product.brand },
-    product.warranty ? { label: "Warranty", value: product.warranty } : null,
+    // Warranty is shown in Technical Specifications below instead, which
+    // already has a consistent fallback — showing it here too would repeat
+    // the same fact twice on the page.
     product.material ? { label: "Material", value: product.material } : null,
   ].filter((row): row is { label: string; value: string } => row !== null);
 
@@ -106,6 +109,18 @@ export function ProductDetails() {
       addToCart(productToCartItem(product, qty));
       setAdded(true);
       setTimeout(() => setAdded(false), 1500);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function handleBuyNow() {
+    if (!product) return;
+    if (product.stock.status === "out-of-stock") return;
+
+    try {
+      addToCart(productToCartItem(product, qty));
+      navigate("/checkout");
     } catch (err) {
       console.error(err);
     }
@@ -190,9 +205,23 @@ export function ProductDetails() {
               size="lg"
               disabled={product.stock.status === "out-of-stock"}
             >
-              {added ? "Added to Cart" : "Add to Cart"}
+              {product.stock.status === "out-of-stock"
+                ? "Out of Stock"
+                : added
+                ? "Added to Cart"
+                : "Add to Cart"}
             </Button>
           </div>
+          <Button
+            variant="outline"
+            size="lg"
+            className="mt-3 w-full gap-2"
+            onClick={handleBuyNow}
+            disabled={product.stock.status === "out-of-stock"}
+          >
+            <Zap className="h-4 w-4" />
+            Buy Now
+          </Button>
           {/* <Button variant="outline" size="lg" className="mt-3 w-full gap-2">
             <Send className="h-4 w-4" />
             Buy with Afterpay

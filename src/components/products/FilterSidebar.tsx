@@ -1,12 +1,18 @@
 import { CarFront } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import type { StockFilterValue } from "@/constants/shopFilters";
 
 export interface FacetOption {
   id: string;
   name: string;
   count: number;
 }
+
+const STOCK_OPTIONS: { value: StockFilterValue; label: string }[] = [
+  { value: "in_stock", label: "In Stock" },
+  { value: "out_of_stock", label: "Out of Stock" },
+];
 
 export interface FilterSidebarProps {
   partTypes: FacetOption[];
@@ -16,6 +22,8 @@ export interface FilterSidebarProps {
   priceMax: string;
   onPriceMinChange: (value: string) => void;
   onPriceMaxChange: (value: string) => void;
+  stock: StockFilterValue | null;
+  onStockChange: (value: StockFilterValue | null) => void;
   onClearAll: () => void;
   vehicleFitmentLabel?: string;
 }
@@ -28,6 +36,8 @@ export function FilterSidebar({
   priceMax,
   onPriceMinChange,
   onPriceMaxChange,
+  stock,
+  onStockChange,
   onClearAll,
   vehicleFitmentLabel,
 }: FilterSidebarProps) {
@@ -78,6 +88,21 @@ export function FilterSidebar({
               onChange={(e) => onPriceMaxChange(e.target.value)}
               className="px-3 py-2 text-sm"
             />
+          </div>
+        </div>
+
+        <div className="mt-5 border-t border-border pt-4">
+          <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-fg-muted">Stock</h4>
+          <div className="space-y-2.5">
+            {STOCK_OPTIONS.map((opt) => (
+              <label key={opt.value} className="flex cursor-pointer items-center gap-2 text-sm text-fg-muted transition-colors hover:text-fg">
+                <Checkbox
+                  checked={stock === opt.value}
+                  onChange={() => onStockChange(stock === opt.value ? null : opt.value)}
+                />
+                {opt.label}
+              </label>
+            ))}
           </div>
         </div>
 

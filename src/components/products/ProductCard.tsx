@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ShoppingCart, Zap } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
+import { STOCK_DOT } from "@/constants/stock";
 import type { Product } from "@/data/products";
 
 const BADGE_LABEL: Record<NonNullable<Product["badge"]>, string> = {
@@ -15,18 +16,24 @@ const BADGE_CLASS: Record<NonNullable<Product["badge"]>, string> = {
   sale: "bg-danger text-danger-fg",
 };
 
-const STOCK_DOT: Record<Product["stock"]["status"], string> = {
-  "in-stock": "bg-ok",
-  limited: "bg-accent",
-  "out-of-stock": "bg-danger",
-};
-
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const outOfStock = product.stock.status === "out-of-stock";
+
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (outOfStock) return;
     addToCart(productToCartItem(product));
+  }
+
+  function handleBuyNow(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (outOfStock) return;
+    addToCart(productToCartItem(product));
+    navigate("/checkout");
   }
 
   return (
@@ -58,9 +65,24 @@ export function ProductCard({ product }: { product: Product }) {
               <span className="text-sm text-fg-muted/60 line-through">A${product.oldPrice.toLocaleString()}</span>
             )}
           </div>
-          <button onClick={handleAdd} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg transition-all hover:brightness-110">
-            <ShoppingCart className="h-4 w-4" />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              onClick={handleAdd}
+              disabled={outOfStock}
+              title="Add to Cart"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-fg transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ShoppingCart className="h-4 w-4" />
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={outOfStock}
+              title="Buy Now"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-fg transition-all hover:border-accent/50 hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Zap className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <div className="mt-3 flex items-center gap-2 text-xs text-fg-muted">
