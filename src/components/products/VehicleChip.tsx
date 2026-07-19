@@ -1,9 +1,10 @@
-import { Link } from "react-router-dom";
 import { CarFront, Pencil, X } from "lucide-react";
 import { useVehicle, type SelectedVehicle } from "@/context/VehicleContext";
+import { useSearchModal } from "@/context/SearchModalContext";
 
 export function VehicleChip({ vehicle }: { vehicle: SelectedVehicle }) {
   const { setVehicle } = useVehicle();
+  const { openModal } = useSearchModal();
   const label = [vehicle.make, vehicle.model, vehicle.model_code].filter(Boolean).join(" ");
 
   return (
@@ -13,13 +14,14 @@ export function VehicleChip({ vehicle }: { vehicle: SelectedVehicle }) {
         <div className="text-[10px] font-semibold uppercase tracking-wider text-fg-muted">Your Vehicle</div>
         <div className="text-sm font-bold text-fg">{label}</div>
       </div>
-      <Link
-        to="/#vehicle-selector"
+      <button
+        type="button"
+        onClick={openModal}
         className="flex h-7 w-7 items-center justify-center rounded-full text-fg-muted transition-colors hover:bg-bg-3 hover:text-accent"
         aria-label="Change vehicle"
       >
         <Pencil className="h-3.5 w-3.5" />
-      </Link>
+      </button>
       <button
         type="button"
         onClick={() => setVehicle(null)}

@@ -1,18 +1,10 @@
 import { ShieldCheck } from "lucide-react";
+import { SpecCell } from "@/components/product/SpecCell";
 import type { Product } from "@/data/products";
 
 interface SpecRow {
   label: string;
   value: string;
-}
-
-function SpecCell({ label, value }: SpecRow) {
-  return (
-    <div className="py-4">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">{label}</p>
-      <p className="mt-1 font-semibold text-fg">{value}</p>
-    </div>
-  );
 }
 
 export function TechnicalSpecifications({ product }: { product: Product }) {
@@ -81,7 +73,7 @@ export function TechnicalSpecifications({ product }: { product: Product }) {
             <ShieldCheck className="h-4 w-4 shrink-0 text-accent" />
             <p className="text-sm">
               <span className="text-[10px] font-bold uppercase tracking-wider text-fg-muted">Warranty · </span>
-              <span className="font-semibold text-fg">{product.warranty ?? "12 Months · Australia Cover"}</span>
+              <span className="font-semibold text-fg">{product.warranty ?? "N/A"}</span>
             </p>
           </div>
         </div>

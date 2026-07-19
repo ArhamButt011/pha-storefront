@@ -2,13 +2,10 @@ import { ArrowRight, ShieldCheck, BadgeCheck, Headphones, Loader2 } from "lucide
 import { Button } from "@/components/ui/button";
 import { GST_DIVISOR } from "@/constants/cart";
 import { TRUST_BADGES } from "@/constants/checkout";
+import { formatCurrency } from "@/utils/currency";
 import type { CartItem } from "@/store/cartSlice";
 
 const BADGE_ICONS = [ShieldCheck, BadgeCheck, Headphones];
-
-function formatCurrency(value: number) {
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 interface CheckoutOrderSummaryProps {
   items: CartItem[];
@@ -30,7 +27,10 @@ export function CheckoutOrderSummary({
   // Product prices are GST-inclusive (AU retail) — GST is extracted for
   // display, never added on top of the subtotal.
   const gst = subtotal / GST_DIVISOR;
-  const total = subtotal;
+  // Real per-item shipping cost total from the backend, summed once per line
+  // (not multiplied by quantity), same as the cart page.
+  const shipping = items.reduce((sum, item) => sum + (item.shippingCost ?? 0), 0);
+  const total = subtotal + shipping;
 
   return (
     <div className="rounded-2xl border border-border bg-bg-2 p-6">
@@ -59,7 +59,9 @@ export function CheckoutOrderSummary({
         </div>
         <div className="flex items-center justify-between">
           <span className="text-fg-muted">Shipping (Express)</span>
-          <span className="font-semibold text-ok">FREE</span>
+          <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
+            {shipping > 0 ? formatCurrency(shipping) : "Free"}
+          </span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-fg-muted">Includes GST</span>

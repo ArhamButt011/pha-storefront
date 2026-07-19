@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
-import { VehicleChip } from "@/components/products/VehicleChip";
+import { ActiveFilters } from "@/components/products/ActiveFilters";
 import { FilterSidebar, type FacetOption } from "@/components/products/FilterSidebar";
 import { ResultsHeader } from "@/components/products/ResultsHeader";
 import { ProductCard } from "@/components/products/ProductCard";
+import { ProductGridSkeleton } from "@/components/products/ProductGridSkeleton";
 import { Pagination } from "@/components/ui/pagination";
 import type { Product } from "@/data/products";
 import { useVehicle } from "@/context/VehicleContext";
@@ -54,24 +55,25 @@ export function ProductsListing() {
   const [priceMinInput, setPriceMinInput] = useState(filters.priceMin);
   const [priceMaxInput, setPriceMaxInput] = useState(filters.priceMax);
 
+  // One combined debounce for both bounds (rather than a separate effect per
+  // input) so a change to both min and max always lands in a single
+  // setPriceRange call — two independent setPriceMin/setPriceMax calls can
+  // race, since React Router's setSearchParams builds its next value from
+  // the current render's searchParams closure rather than a live ref, so the
+  // second call's navigate() can silently overwrite the first (see
+  // setPriceRange's comment in useShopFilters for the full explanation).
   useEffect(() => {
     const timer = setTimeout(() => {
       // Skip no-op writes (e.g. on mount, before the user has typed anything) —
       // every filter setter also resets `page`, so writing back an unchanged
       // value would wipe out a page number restored from the URL on load.
-      if (priceMinInput !== filters.priceMin) filters.setPriceMin(priceMinInput);
+      if (priceMinInput !== filters.priceMin || priceMaxInput !== filters.priceMax) {
+        filters.setPriceRange(priceMinInput, priceMaxInput);
+      }
     }, PRICE_DEBOUNCE_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [priceMinInput]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (priceMaxInput !== filters.priceMax) filters.setPriceMax(priceMaxInput);
-    }, PRICE_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [priceMaxInput]);
+  }, [priceMinInput, priceMaxInput]);
 
   // Real, catalog-wide "Part Type" facet counts — fetched once on mount from
   // the categories API, independent of whatever other filters are active.
@@ -111,6 +113,10 @@ export function ProductsListing() {
             price_max: filters.priceMax ? Number(filters.priceMax) : undefined,
             sort: mapSortToApiParam(filters.sort),
             stock: filters.stock ?? undefined,
+            condition: filters.condition ?? undefined,
+            authenticity: filters.authenticity ?? undefined,
+            mpn: filters.mpn || undefined,
+            sku: filters.sku || undefined,
             make: vehicle?.make || undefined,
             model: vehicle?.model || undefined,
             model_code: vehicle?.model_code || undefined,
@@ -143,6 +149,10 @@ export function ProductsListing() {
     filters.priceMax,
     filters.sort,
     filters.stock,
+    filters.condition,
+    filters.authenticity,
+    filters.mpn,
+    filters.sku,
     filters.page,
     vehicle?.make,
     vehicle?.model,
@@ -150,11 +160,25 @@ export function ProductsListing() {
     vehicle?.year_from,
   ]);
 
-  function clearAll() {
+  // useCallback so this stays referentially stable across renders — passed
+  // to the memoized FilterSidebar as onClearAll, where a fresh function
+  // reference every render would defeat the memoization.
+  const clearAll = useCallback(() => {
     setPriceMinInput("");
     setPriceMaxInput("");
     filters.clearAll();
-  }
+  }, [filters.clearAll]);
+
+  // Removing the price pill needs to reset the sidebar's own local (debounced)
+  // input state too, not just the URL — otherwise the inputs keep showing the
+  // old typed value even though the price_min/price_max params are gone.
+  // Both bounds must clear via one setPriceRange call, not two separate
+  // setPriceMin/setPriceMax calls — see setPriceRange's comment for why.
+  const clearPrice = useCallback(() => {
+    setPriceMinInput("");
+    setPriceMaxInput("");
+    filters.setPriceRange("", "");
+  }, [filters.setPriceRange]);
 
   const title = filters.search
     ? `Search results for "${filters.search}"`
@@ -176,7 +200,7 @@ export function ProductsListing() {
     <main className="mx-auto max-w-7xl px-4 pb-8 lg:pt-28 pt-20 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Breadcrumb items={breadcrumbItems} />
-        {vehicle?.make && <VehicleChip vehicle={vehicle} />}
+        <ActiveFilters filters={filters} categories={partTypes} vehicle={vehicle} onClearPrice={clearPrice} />
       </div>
 
       <div className="mb-8">
@@ -203,9 +227,7 @@ export function ProductsListing() {
           <ResultsHeader count={total} sort={filters.sort} onSortChange={filters.setSort} />
 
           {loading ? (
-            <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
-              Loading parts…
-            </div>
+            <ProductGridSkeleton count={PAGE_SIZE} />
           ) : error ? (
             <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
               {error}

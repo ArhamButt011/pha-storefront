@@ -6,7 +6,7 @@ import { EmptyCart } from "@/components/cart/EmptyCart";
 import { useCart } from "@/hooks/useCart";
 
 export function Cart() {
-  const { items, totalItems, totalPrice } = useCart();
+  const { items, totalItems, totalPrice, totalShipping } = useCart();
   const navigate = useNavigate();
 
   return (
@@ -36,7 +36,7 @@ export function Cart() {
             ))}
           </div>
           <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
-            <OrderSummary subtotal={totalPrice} onCheckout={() => navigate("/checkout")} />
+            <OrderSummary subtotal={totalPrice} shipping={totalShipping} onCheckout={() => navigate("/checkout")} />
           </div>
         </div>
       )}

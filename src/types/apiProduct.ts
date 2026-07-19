@@ -41,6 +41,7 @@ export interface ApiMarketplaceListing {
   condition: string | null;
   condition_notes: string | null;
   warranty: string | null;
+  mpn: string | null;
   superseded_part_number: string[];
   authenticity: string | null;
   aspects: Record<string, string>;
@@ -55,6 +56,7 @@ export interface ApiProductDisplay {
   authenticity: string | null;
   warranty: string | null;
   condition_notes: string | null;
+  mpn: string | null;
   vehicle_fitments: ApiVehicle[];
 }
 
@@ -70,6 +72,8 @@ export interface ApiProduct {
   compare_price: number | null;
   cost_price: number | null;
   sku: string | null;
+  mpn: string | null;
+  shipping_cost: number | null;
   brand: string | null;
   condition: string;
   authenticity: string | null;

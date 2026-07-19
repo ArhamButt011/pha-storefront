@@ -1,12 +1,10 @@
+import { formatCurrency } from "@/utils/currency";
+
 export interface InvoiceItem {
   sku: string | null;
   name: string;
   quantity: number;
   unitPrice: number; // dollars
-}
-
-function formatCurrency(value: number) {
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export function InvoiceItemsTable({ items }: { items: InvoiceItem[] }) {

@@ -3,22 +3,12 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { CategoryCard } from "@/components/categories/CategoryCard";
+import { CategoryCardSkeleton } from "@/components/categories/CategoryCardSkeleton";
 import { getCategories } from "@/lib/api/categories";
 import { getCategoryImage } from "@/lib/categoryImages";
 import type { CategoryWithImage } from "@/types/category";
 
 const FEATURED_COUNT = 5;
-
-function CategoryCardSkeleton() {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-bg-2">
-      <div className="h-36 animate-pulse bg-bg-3" />
-      <div className="p-4 text-center">
-        <div className="mx-auto h-4 w-2/3 animate-pulse rounded bg-bg-3" />
-      </div>
-    </div>
-  );
-}
 
 export function Categories() {
   const headRef = useScrollReveal<HTMLDivElement>(0.2);

@@ -13,6 +13,10 @@ export interface CartItem {
   meta?: string;
   /** Delivery note, e.g. "Ships from AU Depot" */
   shippingNote?: string;
+  /** Per-item shipping surcharge from the backend, null/0 = free */
+  shippingCost?: number | null;
+  /** Available stock from the backend at add-to-cart time; null = untracked/unlimited */
+  maxQuantity?: number | null;
 }
 
 interface CartState {
@@ -25,12 +29,20 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
+    // The cart's quantity cap is enforced here, not just in the UI (stepper
+    // max, disabled buttons) — this is the single source of truth so the
+    // stored quantity can never exceed available stock regardless of which
+    // call site dispatched the change. `maxQuantity` null/undefined means
+    // untracked/unlimited stock, so no cap applies.
     addItem(state, action: PayloadAction<Omit<CartItem, "quantity"> & { quantity?: number }>) {
-      const quantity = action.payload.quantity ?? 1;
+      const requested = action.payload.quantity ?? 1;
+      const max = action.payload.maxQuantity;
       const existing = state.items.find((i) => i.id === action.payload.id);
       if (existing) {
-        existing.quantity += quantity;
+        const combined = existing.quantity + requested;
+        existing.quantity = max != null ? Math.min(combined, max) : combined;
       } else {
+        const quantity = max != null ? Math.min(requested, max) : requested;
         state.items.push({ ...action.payload, quantity });
       }
     },
@@ -43,7 +55,11 @@ const cartSlice = createSlice({
         return;
       }
       const item = state.items.find((i) => i.id === action.payload.id);
-      if (item) item.quantity = action.payload.quantity;
+      if (item) {
+        item.quantity = item.maxQuantity != null
+          ? Math.min(action.payload.quantity, item.maxQuantity)
+          : action.payload.quantity;
+      }
     },
     clearCart(state) {
       state.items = [];

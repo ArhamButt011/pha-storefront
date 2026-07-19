@@ -9,7 +9,8 @@ import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import type { Product } from "@/data/products";
 import { useVehicle } from "@/context/VehicleContext";
 
-const FEATURED_COUNT = 5;
+// Two full rows at the lg:grid-cols-4 breakpoint below.
+const FEATURED_COUNT = 8;
 
 function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
@@ -128,7 +129,7 @@ export function Products() {
         ) : (
           <div
             ref={gridRef}
-            className="stagger grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5"
+            className="stagger grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
           >
             {loading
               ? Array.from({ length: FEATURED_COUNT }).map((_, i) => <ProductCardSkeleton key={i} />)

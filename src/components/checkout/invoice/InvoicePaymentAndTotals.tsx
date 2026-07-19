@@ -1,9 +1,6 @@
 import { CreditCard } from "lucide-react";
 import { INVOICE_NOTE } from "@/constants/checkout";
-
-function formatCurrency(value: number) {
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+import { formatCurrency } from "@/utils/currency";
 
 interface InvoicePaymentAndTotalsProps {
   paymentMethod: { brand: string; last4: string };

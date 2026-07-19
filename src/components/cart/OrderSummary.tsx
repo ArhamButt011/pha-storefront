@@ -1,18 +1,16 @@
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SHIPPING_COST, GST_RATE } from "@/constants/cart";
-
-function formatCurrency(value: number) {
-  return `A$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+import { GST_RATE } from "@/constants/cart";
+import { formatCurrency } from "@/utils/currency";
 
 interface OrderSummaryProps {
   subtotal: number;
+  /** Real per-item shipping cost total from the backend, 0 = free */
+  shipping: number;
   onCheckout?: () => void;
 }
 
-export function OrderSummary({ subtotal, onCheckout }: OrderSummaryProps) {
-  const shipping = SHIPPING_COST;
+export function OrderSummary({ subtotal, shipping, onCheckout }: OrderSummaryProps) {
   const gst = (subtotal + shipping) * GST_RATE;
   const total = subtotal + shipping + gst;
 
@@ -27,7 +25,9 @@ export function OrderSummary({ subtotal, onCheckout }: OrderSummaryProps) {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-fg-muted">Express Shipping</span>
-          <span className="font-semibold text-accent">{formatCurrency(shipping)}</span>
+          <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
+            {shipping > 0 ? formatCurrency(shipping) : "Free"}
+          </span>
         </div>
         <div className="flex items-center justify-between border-b border-border pb-3">
           <span className="text-fg-muted">GST (10%)</span>

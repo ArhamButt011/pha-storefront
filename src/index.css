@@ -79,27 +79,6 @@
   --ok-fg:     0 0% 100%;
 }
 
-.category-autosize {
-  display: inline-grid;
-}
- 
-.category-autosize::after {
-  content: attr(data-label);
-  visibility: hidden;
-  white-space: pre;
-  grid-area: 1 / 1;
-  font: inherit;
-  font-size: 0.75rem;  /* matches text-xs */
-  font-weight: 600;    /* matches font-semibold */
-  padding: 0.5rem 1.75rem 0.5rem 0.75rem; /* matches py-2 pl-3 pr-7 */
-}
- 
-.category-autosize select {
-  grid-area: 1 / 1;
-  width: 100%;
-  min-width: 0;
-}
-
 /* ─── Dark mode ───────────────────────────────────────────────────────────── */
 .dark {
   --bg:        0 0% 4%;
@@ -225,6 +204,11 @@
 .stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
 .stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.45s; }
 .stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.55s; }
+/* Catch-all for anything beyond the 6th staggered item — without this, any
+   .stagger grid with more than 6 children (e.g. Featured Parts) leaves the
+   7th+ items stuck at opacity:0 forever, since no more specific rule ever
+   matches them. */
+.stagger.visible > *:nth-child(n+7) { opacity:1; transform:translateY(0); transition-delay:0.65s; }
 
 /* Nav link underline */
 .nav-link {

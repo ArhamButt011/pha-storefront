@@ -1,7 +1,11 @@
 import { apiClient } from "./client";
 import type { BeResponse } from "./base";
 import type { ApiProduct } from "@/types/apiProduct";
-import type { StockFilterValue } from "@/constants/shopFilters";
+import type {
+  AuthenticityFilterValue,
+  ConditionFilterValue,
+  StockFilterValue,
+} from "@/constants/shopFilters";
 
 export interface ProductListParams {
   page?: number;
@@ -17,6 +21,10 @@ export interface ProductListParams {
   model_code?: string;
   year?: string | number;
   stock?: StockFilterValue;
+  condition?: ConditionFilterValue;
+  authenticity?: AuthenticityFilterValue;
+  mpn?: string;
+  sku?: string;
 }
 
 export interface ProductListData {

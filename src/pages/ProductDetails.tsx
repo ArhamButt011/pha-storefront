@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { Truck, PackageCheck, Zap } from "lucide-react";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ImageGallery } from "@/components/product/ImageGallery";
+import { ProductDetailSkeleton } from "@/components/product/ProductDetailSkeleton";
 import { FitmentBadge } from "@/components/product/FitmentBadge";
 import { ProductTabs } from "@/components/product/ProductTabs";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
@@ -14,6 +15,7 @@ import { getProductBySlug } from "@/lib/api/product";
 import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
+import { formatCurrency } from "@/utils/currency";
 
 export function ProductDetails() {
   const { slug } = useParams();
@@ -28,6 +30,10 @@ export function ProductDetails() {
 
   useEffect(() => {
     let cancelled = false;
+    // Resets the picker back to 1 on every navigation between products —
+    // otherwise a quantity chosen on a high-stock product could visually
+    // exceed the next product's (lower) stock cap for a moment.
+    setQty(1);
 
     async function load() {
       if (!slug) {
@@ -60,11 +66,7 @@ export function ProductDetails() {
   }, [slug]);
 
   if (loading) {
-    return (
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-32 text-center sm:px-6 lg:px-8">
-        <p className="text-fg-muted">Loading product…</p>
-      </main>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (error || !product) {
@@ -90,11 +92,10 @@ export function ProductDetails() {
   const gallery = product.gallery ?? [product.img];
 
   const infoRows = [
-    product.sku ? { label: "SKU #", value: product.sku } : null,
     // { label: "Brand", value: product.brandFull ?? product.brand },
-    // Warranty is shown in Technical Specifications below instead, which
-    // already has a consistent fallback — showing it here too would repeat
-    // the same fact twice on the page.
+    // SKU and Warranty are shown further down (Part Identifiers / Technical
+    // Specifications) instead — showing them here too would repeat the same
+    // fact twice on the page.
     product.material ? { label: "Material", value: product.material } : null,
   ].filter((row): row is { label: string; value: string } => row !== null);
 
@@ -172,15 +173,15 @@ export function ProductDetails() {
 
           <div className="mt-6 flex flex-wrap items-baseline gap-3">
             <span className="text-3xl font-black text-accent">
-              A${product.price.toLocaleString()}.00
+              {formatCurrency(product.price)}
             </span>
             {product.oldPrice && (
               <>
                 <span className="text-base text-fg-muted/60 line-through">
-                  A${product.oldPrice.toLocaleString()}.00
+                  {formatCurrency(product.oldPrice)}
                 </span>
                 <span className="rounded-full bg-ok/15 px-2.5 py-1 text-xs font-bold text-ok">
-                  Save ${(product.oldPrice - product.price).toLocaleString()}.00
+                  Save {formatCurrency(product.oldPrice - product.price)}
                 </span>
               </>
             )}
@@ -188,8 +189,9 @@ export function ProductDetails() {
 
           <div className="mt-5 space-y-2 text-sm text-fg-muted">
             <div className="flex items-center gap-2">
-              <Truck className="h-4 w-4 shrink-0 text-accent" /> Fast Dispatch
-              from Melbourne HQ
+              <Truck className="h-4 w-4 shrink-0 text-accent" />
+              Fast Dispatch from Melbourne HQ —{" "}
+              {product.shippingCost ? formatCurrency(product.shippingCost) : "Free Shipping"}
             </div>
             <div className="flex items-center gap-2">
               <PackageCheck className="h-4 w-4 shrink-0 text-accent" />{" "}
@@ -198,7 +200,7 @@ export function ProductDetails() {
           </div>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <QuantityStepper value={qty} onChange={setQty} />
+            <QuantityStepper value={qty} onChange={setQty} max={product.stockCount ?? undefined} />
             <Button
               className="mt-2 w-full gap-2"
               onClick={handleAddToCart}

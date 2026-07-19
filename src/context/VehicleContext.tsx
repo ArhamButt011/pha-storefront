@@ -9,7 +9,7 @@ export interface SelectedVehicle {
   year_to: string;
 }
 
-const VEHICLE_PARAM_KEYS = ["make", "model", "model_code", "year_from", "year_to"] as const;
+export const VEHICLE_PARAM_KEYS = ["make", "model", "model_code", "year_from", "year_to"] as const;
 
 function vehicleFromSearchParams(params: URLSearchParams): SelectedVehicle | null {
   const make = params.get("make") ?? "";

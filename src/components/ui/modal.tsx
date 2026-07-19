@@ -24,14 +24,33 @@ const ModalOverlay = React.forwardRef<
 ));
 ModalOverlay.displayName = "ModalOverlay";
 
+// A <Select> menu portals to <body> (see select.tsx) so it can escape
+// overflow-clipping ancestors, but that means it's rendered OUTSIDE this
+// Dialog's own DOM subtree. Radix's outside-interaction detection is
+// containment-based, so without this guard it treats every click inside the
+// portaled menu as "outside the dialog" and swallows/dismisses it before
+// react-select's own option click handler ever runs — the option list opens
+// fine, but clicking an option silently does nothing.
+function isInsideSelectPortal(event: { target: EventTarget | null }) {
+  return event.target instanceof Element && event.target.closest(".rs__menu-portal") !== null;
+}
+
 const ModalContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, onPointerDownOutside, onInteractOutside, ...props }, ref) => (
   <DialogPrimitive.Portal>
     <ModalOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      onPointerDownOutside={(e) => {
+        if (isInsideSelectPortal(e)) e.preventDefault();
+        onPointerDownOutside?.(e);
+      }}
+      onInteractOutside={(e) => {
+        if (isInsideSelectPortal(e)) e.preventDefault();
+        onInteractOutside?.(e);
+      }}
       className={cn(
         "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2",
         "rounded-2xl border border-border bg-bg-2 p-8 shadow-2xl",

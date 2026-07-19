@@ -10,7 +10,7 @@ export function ImageGallery({ images, alt }: { images: string[]; alt: string })
   return (
     <div className="flex gap-4">
       {images.length > 1 && (
-        <div className="flex w-20 shrink-0 flex-col gap-3">
+        <div className="flex min-h-0 w-20 shrink-0 flex-col gap-3 overflow-y-auto">
           {images.map((img, i) => (
             <button
               key={img}

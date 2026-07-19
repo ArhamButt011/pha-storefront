@@ -18,6 +18,8 @@ export function mapApiStockStatus(status: ApiStockStatus | undefined): StockStat
 
 export function stockLabel(status: StockStatus, count: number | null): string {
   if (status === "out-of-stock") return "Out of Stock";
+  // Only the low-stock case (backend threshold: 1-3 units) exposes the exact
+  // count — plenty-in-stock just says "In Stock" without a number.
   if (status === "limited") return count ? `Low Stock (${count} left)` : "Low Stock";
   return "In Stock";
 }

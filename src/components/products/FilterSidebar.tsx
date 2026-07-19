@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { CarFront } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,11 @@ export interface FilterSidebarProps {
   vehicleFitmentLabel?: string;
 }
 
-export function FilterSidebar({
+// Memoized: ProductsListing re-renders on every price-input keystroke and
+// loading-state flip, most of which don't change any of this component's
+// props (partTypes/selectedPartTypeIds/stock/callbacks) — skip the re-render
+// (and the partTypes.map) when they haven't.
+export const FilterSidebar = memo(function FilterSidebar({
   partTypes,
   selectedPartTypeIds,
   onTogglePartType,
@@ -54,7 +59,7 @@ export function FilterSidebar({
         {partTypes.length > 0 && (
           <div className="mt-5 border-t border-border pt-4">
             <h4 className="mb-3 text-xs font-bold uppercase tracking-wider text-fg-muted">Part Type</h4>
-            <div className="space-y-2.5">
+            <div className="max-h-72 space-y-2.5 overflow-y-auto pr-1">
               {partTypes.map((t) => (
                 <label key={t.id} className="flex cursor-pointer items-center justify-between gap-2 text-sm text-fg-muted transition-colors hover:text-fg">
                   <span className="flex items-center gap-2">
@@ -118,4 +123,4 @@ export function FilterSidebar({
       </div>
     </aside>
   );
-}
+});
