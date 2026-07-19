@@ -127,7 +127,6 @@ export function Invoice() {
           paymentMethod={paymentMethod}
           subtotal={order.subtotal / 100}
           shipping={order.shipping_cost / 100}
-          gst={order.tax_amount / 100}
           total={order.total / 100}
         />
       </main>

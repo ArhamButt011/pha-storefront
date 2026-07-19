@@ -1,6 +1,5 @@
 import { ArrowRight, ShieldCheck, BadgeCheck, Headphones, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GST_DIVISOR } from "@/constants/cart";
 import { TRUST_BADGES } from "@/constants/checkout";
 import { formatCurrency } from "@/utils/currency";
 import type { CartItem } from "@/store/cartSlice";
@@ -24,12 +23,9 @@ export function CheckoutOrderSummary({
   submitting = false,
   disabled = false,
 }: CheckoutOrderSummaryProps) {
-  // Product prices are GST-inclusive (AU retail) — GST is extracted for
-  // display, never added on top of the subtotal.
-  const gst = subtotal / GST_DIVISOR;
-  // Real per-item shipping cost total from the backend, summed once per line
-  // (not multiplied by quantity), same as the cart page.
-  const shipping = items.reduce((sum, item) => sum + (item.shippingCost ?? 0), 0);
+  // Real per-item shipping cost from the backend, multiplied by quantity and
+  // summed across lines, same as the cart page.
+  const shipping = items.reduce((sum, item) => sum + (item.shippingCost ?? 0) * item.quantity, 0);
   const total = subtotal + shipping;
 
   return (
@@ -62,10 +58,6 @@ export function CheckoutOrderSummary({
           <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
             {shipping > 0 ? formatCurrency(shipping) : "Free"}
           </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-fg-muted">Includes GST</span>
-          <span className="font-semibold text-fg">{formatCurrency(gst)}</span>
         </div>
       </div>
 

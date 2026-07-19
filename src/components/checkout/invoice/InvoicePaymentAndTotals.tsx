@@ -6,11 +6,10 @@ interface InvoicePaymentAndTotalsProps {
   paymentMethod: { brand: string; last4: string };
   subtotal: number;
   shipping: number;
-  gst: number;
   total: number;
 }
 
-export function InvoicePaymentAndTotals({ paymentMethod, subtotal, shipping, gst, total }: InvoicePaymentAndTotalsProps) {
+export function InvoicePaymentAndTotals({ paymentMethod, subtotal, shipping, total }: InvoicePaymentAndTotalsProps) {
   return (
     <div className="grid gap-6 sm:grid-cols-2">
       <div className="rounded-2xl border border-border bg-bg-2 p-5">
@@ -31,13 +30,9 @@ export function InvoicePaymentAndTotals({ paymentMethod, subtotal, shipping, gst
             <span className="text-fg-muted">Subtotal</span>
             <span className="font-semibold text-fg">{formatCurrency(subtotal)}</span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-border pb-2.5">
             <span className="text-fg-muted">Shipping (Express Premium)</span>
             <span className="font-semibold text-fg">{formatCurrency(shipping)}</span>
-          </div>
-          <div className="flex items-center justify-between border-b border-border pb-2.5">
-            <span className="text-fg-muted">Includes GST</span>
-            <span className="font-semibold text-fg">{formatCurrency(gst)}</span>
           </div>
         </div>
         <div className="mt-3 flex items-baseline justify-between">

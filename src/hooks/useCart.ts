@@ -9,10 +9,9 @@ export function useCart() {
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  // Per-line-item shipping surcharge from the backend, summed once per line
-  // (not multiplied by quantity — it represents a per-product freight cost,
-  // not a per-unit one).
-  const totalShipping = items.reduce((sum, i) => sum + (i.shippingCost ?? 0), 0);
+  // Per-item shipping surcharge from the backend, multiplied by quantity and
+  // summed across lines.
+  const totalShipping = items.reduce((sum, i) => sum + (i.shippingCost ?? 0) * i.quantity, 0);
 
   function addToCart(item: Omit<CartItem, "quantity"> & { quantity?: number }) {
     try {

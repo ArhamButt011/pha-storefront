@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { subscribeNewsletter } from "@/lib/api/newsletter";
 
-const CUSTOMER_SERVICE_LINKS = ["Returns Policy", "Shipping Info", "Track Order", "Warranty"];
-const LEGAL_LINKS = ["Privacy Policy", "Terms of Service", "Cookie Policy", "Compliance"];
+const CUSTOMER_SERVICE_LINKS = ["Returns Policy", "Shipping Info"];
 
 export function Footer() {
   const [email, setEmail] = useState("");
@@ -32,7 +31,7 @@ export function Footer() {
   return (
     <footer id="contact" className="border-t border-border bg-bg pt-16 pb-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-10 border-b border-border pb-12 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr]">
+        <div className="grid gap-10 border-b border-border pb-12 lg:grid-cols-[1.6fr_1fr_1.2fr]">
           {/* Brand column */}
           <div>
             <div className="mb-4 flex items-center gap-3">
@@ -68,18 +67,6 @@ export function Footer() {
             <h4 className="mb-5 font-display text-xs font-bold uppercase tracking-wider text-fg">Customer Service</h4>
             <ul className="space-y-3">
               {CUSTOMER_SERVICE_LINKS.map((l) => (
-                <li key={l}>
-                  <a href="#" className="text-sm text-fg-muted transition-colors hover:text-accent">{l}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal & Privacy */}
-          <div>
-            <h4 className="mb-5 font-display text-xs font-bold uppercase tracking-wider text-fg">Legal &amp; Privacy</h4>
-            <ul className="space-y-3">
-              {LEGAL_LINKS.map((l) => (
                 <li key={l}>
                   <a href="#" className="text-sm text-fg-muted transition-colors hover:text-accent">{l}</a>
                 </li>
