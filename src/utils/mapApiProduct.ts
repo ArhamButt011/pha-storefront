@@ -1,5 +1,6 @@
 import type { ApiProduct } from "@/types/apiProduct";
 import type { Product } from "@/data/products";
+import { mapApiStockStatus, stockLabel } from "@/constants/stock";
 
 const PLACEHOLDER_IMG =
   "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?w=500&h=500&fit=crop";
@@ -47,7 +48,10 @@ export function mapApiProductToProduct(item: ApiProduct): Product {
     price: item.price,
     oldPrice: hasDiscount ? item.compare_price! : undefined,
     badge: hasDiscount ? "sale" : undefined,
-    stock: { status: "in-stock", label: "In Stock" },
+    stock: (() => {
+      const status = mapApiStockStatus(item.stock_status);
+      return { status, label: stockLabel(status, item.stock_count) };
+    })(),
    fits: item.vehicle?.make ? [item.vehicle.make] : "all",
    make: item.vehicle?.make ?? null,
    model: item.vehicle?.model ?? null,

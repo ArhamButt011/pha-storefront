@@ -1,6 +1,7 @@
 import { apiClient } from "./client";
 import type { BeResponse } from "./base";
 import type { ApiProduct } from "@/types/apiProduct";
+import type { StockFilterValue } from "@/constants/shopFilters";
 
 export interface ProductListParams {
   page?: number;
@@ -15,6 +16,7 @@ export interface ProductListParams {
   model?: string;
   model_code?: string;
   year?: string | number;
+  stock?: StockFilterValue;
 }
 
 export interface ProductListData {

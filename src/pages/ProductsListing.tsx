@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { VehicleChip } from "@/components/products/VehicleChip";
 import { FilterSidebar, type FacetOption } from "@/components/products/FilterSidebar";
@@ -8,15 +8,16 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Pagination } from "@/components/ui/pagination";
 import type { Product } from "@/data/products";
 import { useVehicle } from "@/context/VehicleContext";
-import { getCategory } from "@/lib/api/categories";
+import { useShopFilters } from "@/hooks/useShopFilters";
+import { getCategory, getCategories } from "@/lib/api/categories";
 import { getProducts } from "@/lib/api/product";
 import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import type { ApiCategory } from "@/types/category";
-import type { ApiProduct } from "@/types/apiProduct";
 
 const PAGE_SIZE = 9;
 
-// Debounce delay (ms) before price min/max typing triggers a real API call.
+// Debounce delay (ms) before price min/max typing triggers a real API call
+// (and gets written into the price_min/price_max query params).
 const PRICE_DEBOUNCE_MS = 400;
 
 // Maps the UI's sort options to the backend's `sort` query values. "newest"
@@ -34,111 +35,82 @@ function mapSortToApiParam(sort: string): string | undefined {
   }
 }
 
-// Builds the "Part Type" facet from each product's real categories array
-// (not just its primary category), so counts reflect every category a
-// product belongs to and the ids are real backend category ids.
-function buildCategoryFacets(products: ApiProduct[]): FacetOption[] {
-  const counts = new Map<string, { name: string; count: number }>();
-  for (const p of products) {
-    for (const c of p.categories ?? []) {
-      const entry = counts.get(c._id);
-      if (entry) entry.count += 1;
-      else counts.set(c._id, { name: c.name, count: 1 });
-    }
-  }
-  return Array.from(counts.entries()).map(([id, v]) => ({ id, name: v.name, count: v.count }));
-}
-
 export function ProductsListing() {
   const { categoryId } = useParams();
-  const [searchParams] = useSearchParams();
-  const searchTerm = searchParams.get("search")?.trim() ?? "";
+  const filters = useShopFilters(categoryId);
   const { vehicle } = useVehicle();
 
   const [category, setCategory] = useState<ApiCategory | null>(null);
-  const [rawProducts, setRawProducts] = useState<ApiProduct[]>([]);
+  const [partTypes, setPartTypes] = useState<FacetOption[]>([]);
   const [categoryProducts, setCategoryProducts] = useState<Product[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedPartTypeIds, setSelectedPartTypeIds] = useState<string[]>([]);
-  const [priceMin, setPriceMin] = useState("");
-  const [priceMax, setPriceMax] = useState("");
-  const [sort, setSort] = useState("newest");
-  const [page, setPage] = useState(1);
-
-  // Debounced price inputs — the fields update instantly for typing, but the
-  // API call (and the price_min/price_max query params) only fire after the
+  // Price inputs update instantly for typing, but only get written into the
+  // price_min/price_max query params (and trigger a real API call) after the
   // person pauses, instead of on every keystroke.
-  const [debouncedPriceMin, setDebouncedPriceMin] = useState("");
-  const [debouncedPriceMax, setDebouncedPriceMax] = useState("");
+  const [priceMinInput, setPriceMinInput] = useState(filters.priceMin);
+  const [priceMaxInput, setPriceMaxInput] = useState(filters.priceMax);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedPriceMin(priceMin), PRICE_DEBOUNCE_MS);
+    const timer = setTimeout(() => {
+      // Skip no-op writes (e.g. on mount, before the user has typed anything) —
+      // every filter setter also resets `page`, so writing back an unchanged
+      // value would wipe out a page number restored from the URL on load.
+      if (priceMinInput !== filters.priceMin) filters.setPriceMin(priceMinInput);
+    }, PRICE_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [priceMin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [priceMinInput]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedPriceMax(priceMax), PRICE_DEBOUNCE_MS);
+    const timer = setTimeout(() => {
+      if (priceMaxInput !== filters.priceMax) filters.setPriceMax(priceMaxInput);
+    }, PRICE_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [priceMax]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [priceMaxInput]);
 
-  const prevFilterKey = useRef<string>("");
-
-  // Everything except `page` that should reset pagination back to page 1
-  // when it changes (new category/search, a Part Type toggle, a price
-  // range edit, a sort change, or applying/clearing the selected vehicle
-  // via "Find Parts").
-  const filterKey = [
-    categoryId ?? "",
-    searchTerm,
-    selectedPartTypeIds.join(","),
-    debouncedPriceMin,
-    debouncedPriceMax,
-    sort,
-    vehicle?.make ?? "",
-    vehicle?.model ?? "",
-    vehicle?.model_code ?? "",
-    vehicle?.year_from ?? "",
-  ].join("|");
-
-  // Fetches the category (title/breadcrumb) + products whenever the route,
-  // search term, selected Part Type checkboxes, price range, sort, or
-  // applied vehicle fitment change. All of these are sent straight through
-  // to GET /product as real query params rather than filtered/sorted
-  // client-side.
+  // Real, catalog-wide "Part Type" facet counts — fetched once on mount from
+  // the categories API, independent of whatever other filters are active.
   useEffect(() => {
     let cancelled = false;
+    getCategories({ limit: 100 })
+      .then((res) => {
+        if (cancelled) return;
+        setPartTypes(
+          res.data.items.map((c) => ({ id: c._id, name: c.name, count: c.product_count ?? 0 })),
+        );
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-    const filterChanged = prevFilterKey.current !== filterKey;
-    prevFilterKey.current = filterKey;
-    const effectivePage = filterChanged ? 1 : page;
-
-    if (filterChanged && page !== 1) {
-      setPage(1);
-    }
+  // Fetches the category (title/breadcrumb) + products whenever any filter
+  // (categories, search, price range, sort, stock, page) or the applied
+  // vehicle fitment changes — everything is a real GET /product query param.
+  useEffect(() => {
+    let cancelled = false;
 
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        // Checked Part Types take over as the active category filter;
-        // with none checked, the route's :categoryId (if any) applies.
-        const effectiveCategories =
-          selectedPartTypeIds.length > 0 ? selectedPartTypeIds.join(",") : categoryId;
-
         const [categoryRes, productsRes] = await Promise.all([
           categoryId ? getCategory(categoryId) : Promise.resolve(null),
           getProducts({
-            page: effectivePage,
+            page: filters.page,
             limit: PAGE_SIZE,
-            categories: effectiveCategories,
-            search: searchTerm || undefined,
-            price_min: debouncedPriceMin ? Number(debouncedPriceMin) : undefined,
-            price_max: debouncedPriceMax ? Number(debouncedPriceMax) : undefined,
-            sort: mapSortToApiParam(sort),
+            categories: filters.categoryIds.length ? filters.categoryIds.join(",") : undefined,
+            search: filters.search || undefined,
+            price_min: filters.priceMin ? Number(filters.priceMin) : undefined,
+            price_max: filters.priceMax ? Number(filters.priceMax) : undefined,
+            sort: mapSortToApiParam(filters.sort),
+            stock: filters.stock ?? undefined,
             make: vehicle?.make || undefined,
             model: vehicle?.model || undefined,
             model_code: vehicle?.model_code || undefined,
@@ -148,7 +120,6 @@ export function ProductsListing() {
 
         if (cancelled) return;
         setCategory(categoryRes?.data ?? null);
-        setRawProducts(productsRes.data.items);
         setCategoryProducts(productsRes.data.items.map(mapApiProductToProduct));
         setTotal(productsRes.data.total);
         setTotalPages(Math.max(1, productsRes.data.totalPages));
@@ -164,34 +135,38 @@ export function ProductsListing() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterKey, page]);
-
-  // Part Type checkbox counts are derived from the current server response
-  // (already scoped to this category/search/vehicle/price query).
-  const partTypeFacets = useMemo(() => buildCategoryFacets(rawProducts), [rawProducts]);
-
-  function togglePartType(id: string) {
-    setSelectedPartTypeIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
-  }
+  }, [
+    categoryId,
+    filters.categoryIds.join(","),
+    filters.search,
+    filters.priceMin,
+    filters.priceMax,
+    filters.sort,
+    filters.stock,
+    filters.page,
+    vehicle?.make,
+    vehicle?.model,
+    vehicle?.model_code,
+    vehicle?.year_from,
+  ]);
 
   function clearAll() {
-    setSelectedPartTypeIds([]);
-    setPriceMin("");
-    setPriceMax("");
+    setPriceMinInput("");
+    setPriceMaxInput("");
+    filters.clearAll();
   }
 
-  const title = searchTerm
-    ? `Search results for "${searchTerm}"`
+  const title = filters.search
+    ? `Search results for "${filters.search}"`
     : category?.name ?? "All Parts";
-  const description = searchTerm
-    ? `Showing parts matching "${searchTerm}"${category ? ` in ${category.name}` : ""}.`
+  const description = filters.search
+    ? `Showing parts matching "${filters.search}"${category ? ` in ${category.name}` : ""}.`
     : category
     ? `Browse our full range of ${category.name.toLowerCase()} parts for your vehicle.`
     : "Browse our full range of performance parts for your vehicle.";
   const breadcrumbItems = category
     ? [{ label: "Home", href: "/" }, { label: "Categories", href: "/categories" }, { label: category.name }]
-    : [{ label: "Home", href: "/" }, { label: searchTerm ? "Search Results" : "All Parts" }];
+    : [{ label: "Home", href: "/" }, { label: filters.search ? "Search Results" : "All Parts" }];
 
   const vehicleLabel = vehicle?.make
     ? [vehicle.make, vehicle.model, vehicle.model_code].filter(Boolean).join(" ")
@@ -211,19 +186,21 @@ export function ProductsListing() {
 
       <div className="flex flex-col gap-8 lg:flex-row">
         <FilterSidebar
-          partTypes={partTypeFacets}
-          selectedPartTypeIds={selectedPartTypeIds}
-          onTogglePartType={togglePartType}
-          priceMin={priceMin}
-          priceMax={priceMax}
-          onPriceMinChange={setPriceMin}
-          onPriceMaxChange={setPriceMax}
+          partTypes={partTypes}
+          selectedPartTypeIds={filters.categoryIds}
+          onTogglePartType={filters.toggleCategory}
+          priceMin={priceMinInput}
+          priceMax={priceMaxInput}
+          onPriceMinChange={setPriceMinInput}
+          onPriceMaxChange={setPriceMaxInput}
+          stock={filters.stock}
+          onStockChange={filters.setStock}
           onClearAll={clearAll}
           vehicleFitmentLabel={vehicleLabel}
         />
 
         <div className="min-w-0 flex-1">
-          <ResultsHeader count={total} sort={sort} onSortChange={setSort} />
+          <ResultsHeader count={total} sort={filters.sort} onSortChange={filters.setSort} />
 
           {loading ? (
             <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
@@ -245,7 +222,7 @@ export function ProductsListing() {
             </div>
           )}
 
-          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} className="mt-10" />
+          <Pagination page={filters.page} totalPages={totalPages} onPageChange={filters.setPage} className="mt-10" />
         </div>
       </div>
     </main>

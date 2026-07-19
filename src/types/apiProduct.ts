@@ -42,4 +42,7 @@ export interface ApiProduct {
   categories: ApiCategoryRef[];
   tags: string[];
   created_at?: string;
+  stock_control: boolean;
+  stock_count: number | null;
+  stock_status: "in_stock" | "low_stock" | "out_of_stock";
 }
