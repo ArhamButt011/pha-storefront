@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Truck, Wrench, Loader2, AlertTriangle, XCircle } from "lucide-react";
-import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
+// import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import { OrderConfirmedHero } from "@/components/checkout/confirmation/OrderConfirmedHero";
 import { WhatsNextCard } from "@/components/checkout/confirmation/WhatsNextCard";
 import { LoyaltyProgramBanner } from "@/components/checkout/confirmation/LoyaltyProgramBanner";
@@ -110,7 +110,7 @@ export function OrderConfirmation() {
   if (phase === "loading" || phase === "polling") {
     return (
       <div className="min-h-screen bg-bg">
-        <CheckoutHeader showReturnToCart={false} />
+        {/* <CheckoutHeader showReturnToCart={false} /> */}
         <main className="mx-auto flex max-w-xl flex-col items-center gap-3 px-4 py-24 text-center sm:px-6">
           <Loader2 className="h-8 w-8 animate-spin text-accent" />
           <h1 className="text-lg font-bold text-fg">Confirming your payment…</h1>
@@ -125,7 +125,7 @@ export function OrderConfirmation() {
   if (phase === "timeout") {
     return (
       <div className="min-h-screen bg-bg">
-        <CheckoutHeader showReturnToCart={false} />
+        {/* <CheckoutHeader showReturnToCart={false} /> */}
         <main className="mx-auto flex max-w-xl flex-col items-center gap-3 px-4 py-24 text-center sm:px-6">
           <AlertTriangle className="h-8 w-8 text-accent" />
           <h1 className="text-lg font-bold text-fg">Still confirming your payment</h1>
@@ -145,7 +145,7 @@ export function OrderConfirmation() {
   if (phase === "cancelled") {
     return (
       <div className="min-h-screen bg-bg">
-        <CheckoutHeader showReturnToCart={false} />
+        {/* <CheckoutHeader showReturnToCart={false} /> */}
         <main className="mx-auto flex max-w-xl flex-col items-center gap-3 px-4 py-24 text-center sm:px-6">
           <XCircle className="h-8 w-8 text-danger" />
           <h1 className="text-lg font-bold text-fg">This order was cancelled</h1>
@@ -166,7 +166,7 @@ export function OrderConfirmation() {
   if (phase === "error") {
     return (
       <div className="min-h-screen bg-bg">
-        <CheckoutHeader showReturnToCart={false} />
+        {/* <CheckoutHeader showReturnToCart={false} /> */}
         <main className="mx-auto flex max-w-xl flex-col items-center gap-3 px-4 py-24 text-center sm:px-6">
           <AlertTriangle className="h-8 w-8 text-danger" />
           <h1 className="text-lg font-bold text-fg">Couldn't load your order</h1>
@@ -185,7 +185,7 @@ export function OrderConfirmation() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <CheckoutHeader showReturnToCart={false} />
+      {/* <CheckoutHeader showReturnToCart={false} /> */}
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1fr_340px]">

@@ -3,7 +3,7 @@ import { CHECKOUT_STEPS } from "@/constants/checkout";
 
 export function CheckoutStepper({ currentStep }: { currentStep: number }) {
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center mt-10">
       {CHECKOUT_STEPS.map((step, i) => {
         const num = i + 1;
         const isActive = num === currentStep;

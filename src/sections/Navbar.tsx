@@ -49,7 +49,7 @@ export function Navbar({ onInquiry }: Props) {
             : "bg-transparent"
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid h-16 max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex shrink-0 items-center gap-0 group">
             <img
               src="/branding/logo.svg"
@@ -61,7 +61,7 @@ export function Navbar({ onInquiry }: Props) {
             </span>
           </Link>
 
-          <div className="hidden items-center gap-6 lg:flex">
+          <div className="hidden items-center justify-center gap-6 lg:flex">
             {NAV_LINKS.map((l) => (
               <NavLinkItem
                 key={l.href}
@@ -73,7 +73,7 @@ export function Navbar({ onInquiry }: Props) {
             ))}
           </div>
 
-          <div className="ml-auto hidden items-center gap-1 lg:flex">
+          <div className="hidden items-center gap-1 justify-self-end lg:flex">
             <button
               type="button"
               onClick={openFilters}
@@ -103,7 +103,7 @@ export function Navbar({ onInquiry }: Props) {
           </div>
 
           <button
-            className="ml-auto p-2 text-fg lg:hidden"
+            className="justify-self-end p-2 text-fg lg:hidden"
             onClick={() => setMenuOpen(true)}
           >
             <Menu className="h-6 w-6" />

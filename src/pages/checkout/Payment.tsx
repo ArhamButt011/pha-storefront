@@ -9,7 +9,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import type { StripeElementsOptions } from "@stripe/stripe-js";
-import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
+// import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { Button } from "@/components/ui/button";
 import { createPaymentIntent } from "@/lib/api/payments";
@@ -158,7 +158,7 @@ export function CheckoutPayment() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <CheckoutHeader />
+      {/* <CheckoutHeader /> */}
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <CheckoutStepper currentStep={2} />

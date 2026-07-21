@@ -25,11 +25,12 @@ export default function App() {
             <Route path="/product/:slug" element={<ProductDetails />} />
             <Route path="/bundles" element={<BundlesListing />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<CheckoutShipping />} />
+            <Route path="/checkout/payment" element={<CheckoutPayment />} />
+            <Route path="/checkout/confirmation" element={<OrderConfirmation />} />
+            <Route path="/checkout/invoice" element={<Invoice />} />
           </Route>
-          <Route path="/checkout" element={<CheckoutShipping />} />
-          <Route path="/checkout/payment" element={<CheckoutPayment />} />
-          <Route path="/checkout/confirmation" element={<OrderConfirmation />} />
-          <Route path="/checkout/invoice" element={<Invoice />} />
+         
         </Routes>
       </BrowserRouter>
     </VehicleProvider>

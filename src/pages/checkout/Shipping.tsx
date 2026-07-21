@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
+// import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { FitmentGuaranteeBanner } from "@/components/checkout/FitmentGuaranteeBanner";
 import { ShippingForm, type ShippingDetails } from "@/components/checkout/ShippingForm";
@@ -100,7 +100,7 @@ const vehicleLabel = vehicle?.make
 
   return (
     <div className="min-h-screen bg-bg">
-      <CheckoutHeader />
+      {/* <CheckoutHeader /> */}
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <CheckoutStepper currentStep={1} />
