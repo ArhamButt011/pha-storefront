@@ -1,6 +1,25 @@
+import type { DeliveryMethod } from "@/types/checkout";
+
 export const CHECKOUT_STEPS = ["Shipping", "Payment", "Review"] as const;
 
 export const AU_STATES = ["VIC", "NSW", "QLD", "WA", "SA", "TAS", "ACT", "NT"];
+
+export interface DeliveryMethodOption {
+  value: DeliveryMethod;
+  label: string;
+  description: string;
+}
+
+export const DELIVERY_METHOD_OPTIONS: DeliveryMethodOption[] = [
+  { value: "delivery", label: "Delivery", description: "Ship to your address" },
+  { value: "pickup", label: "Pick Up", description: "Collect in-store" },
+];
+
+export const PICKUP_LOCATION = {
+  name: "Parts Hub Australia — Melbourne Warehouse",
+  address: "123 Performance Way, Melbourne VIC 3000",
+  note: "We'll email you once your order is ready for collection — usually within 1 business day.",
+};
 
 export interface TrustBadge {
   title: string;

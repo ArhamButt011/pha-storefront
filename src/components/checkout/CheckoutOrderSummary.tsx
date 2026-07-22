@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { TRUST_BADGES } from "@/constants/checkout";
 import { formatCurrency } from "@/utils/currency";
 import type { CartItem } from "@/store/cartSlice";
+import type { DeliveryMethod } from "@/types/checkout";
 
 const BADGE_ICONS = [ShieldCheck, BadgeCheck, Headphones];
 
@@ -10,6 +11,7 @@ interface CheckoutOrderSummaryProps {
   items: CartItem[];
   subtotal: number;
   vehicleMake?: string;
+  deliveryMethod?: DeliveryMethod;
   onContinue?: () => void;
   submitting?: boolean;
   disabled?: boolean;
@@ -19,13 +21,15 @@ export function CheckoutOrderSummary({
   items,
   subtotal,
   vehicleMake,
+  deliveryMethod = "delivery",
   onContinue,
   submitting = false,
   disabled = false,
 }: CheckoutOrderSummaryProps) {
+  const isPickup = deliveryMethod === "pickup";
   // Real per-item shipping cost from the backend, multiplied by quantity and
-  // summed across lines, same as the cart page.
-  const shipping = items.reduce((sum, item) => sum + (item.shippingCost ?? 0) * item.quantity, 0);
+  // summed across lines, same as the cart page — waived entirely for pickup.
+  const shipping = isPickup ? 0 : items.reduce((sum, item) => sum + (item.shippingCost ?? 0) * item.quantity, 0);
   const total = subtotal + shipping;
 
   return (
@@ -54,9 +58,9 @@ export function CheckoutOrderSummary({
           <span className="font-semibold text-fg">{formatCurrency(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-fg-muted">Shipping (Express)</span>
+          <span className="text-fg-muted">{isPickup ? "Pickup" : "Shipping (Express)"}</span>
           <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
-            {shipping > 0 ? formatCurrency(shipping) : "Free"}
+            {isPickup ? "Free" : shipping > 0 ? formatCurrency(shipping) : "Free"}
           </span>
         </div>
       </div>

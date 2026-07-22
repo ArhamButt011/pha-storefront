@@ -1,15 +1,23 @@
 import { CreditCard } from "lucide-react";
 import { INVOICE_NOTE } from "@/constants/checkout";
 import { formatCurrency } from "@/utils/currency";
+import type { DeliveryMethod } from "@/types/checkout";
 
 interface InvoicePaymentAndTotalsProps {
   paymentMethod: { brand: string; last4: string };
   subtotal: number;
   shipping: number;
   total: number;
+  deliveryMethod?: DeliveryMethod;
 }
 
-export function InvoicePaymentAndTotals({ paymentMethod, subtotal, shipping, total }: InvoicePaymentAndTotalsProps) {
+export function InvoicePaymentAndTotals({
+  paymentMethod,
+  subtotal,
+  shipping,
+  total,
+  deliveryMethod = "delivery",
+}: InvoicePaymentAndTotalsProps) {
   return (
     <div className="grid gap-6 sm:grid-cols-2">
       <div className="rounded-2xl border border-border bg-bg-2 p-5">
@@ -31,7 +39,7 @@ export function InvoicePaymentAndTotals({ paymentMethod, subtotal, shipping, tot
             <span className="font-semibold text-fg">{formatCurrency(subtotal)}</span>
           </div>
           <div className="flex items-center justify-between border-b border-border pb-2.5">
-            <span className="text-fg-muted">Shipping (Express Premium)</span>
+            <span className="text-fg-muted">{deliveryMethod === "pickup" ? "Pickup" : "Shipping (Express Premium)"}</span>
             <span className="font-semibold text-fg">{formatCurrency(shipping)}</span>
           </div>
         </div>

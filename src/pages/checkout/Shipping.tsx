@@ -4,27 +4,36 @@ import { useDispatch } from "react-redux";
 // import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { FitmentGuaranteeBanner } from "@/components/checkout/FitmentGuaranteeBanner";
-import { ShippingForm, type ShippingDetails } from "@/components/checkout/ShippingForm";
+import { ShippingForm } from "@/components/checkout/ShippingForm";
 import { CheckoutOrderSummary } from "@/components/checkout/CheckoutOrderSummary";
 import { useCart } from "@/hooks/useCart";
 import { useVehicle } from "@/context/VehicleContext";
 import { createOrder } from "@/lib/api/orders";
 import { setOrder } from "@/store/checkoutSlice";
 import type { AppDispatch } from "@/store/store";
+import type { AddressFields, ShippingDetails } from "@/types/checkout";
+
+const EMPTY_ADDRESS: AddressFields = { address: "", suburb: "", state: "VIC", postcode: "" };
 
 const INITIAL_SHIPPING: ShippingDetails = {
   fullName: "",
   email: "",
   phone: "",
-  address: "",
-  suburb: "",
-  state: "VIC",
-  postcode: "",
+  deliveryMethod: "delivery",
+  shippingAddress: { ...EMPTY_ADDRESS },
   billingSameAsShipping: true,
+  billingAddress: { ...EMPTY_ADDRESS },
 };
 
+function isAddressComplete(a: AddressFields) {
+  return Boolean(a.address.trim() && a.suburb.trim() && a.postcode.trim());
+}
+
 function isShippingComplete(s: ShippingDetails) {
-  return Boolean(s.fullName.trim() && s.email.trim() && s.phone.trim() && s.address.trim() && s.suburb.trim() && s.postcode.trim());
+  if (!(s.fullName.trim() && s.email.trim() && s.phone.trim())) return false;
+  if (s.deliveryMethod === "pickup") return true;
+  if (!isAddressComplete(s.shippingAddress)) return false;
+  return s.billingSameAsShipping || isAddressComplete(s.billingAddress);
 }
 
 export function CheckoutShipping() {
@@ -59,6 +68,8 @@ const vehicleLabel = vehicle?.make
     setSubmitting(true);
     setError(null);
 
+    const isPickup = shipping.deliveryMethod === "pickup";
+
     try {
       // Prices/stock are re-derived server-side from product/variant ids —
       // only ids and quantities are sent, never the cart's own line prices.
@@ -69,16 +80,15 @@ const vehicleLabel = vehicle?.make
           email: shipping.email,
           phone: shipping.phone,
         },
-        shipping_address: {
-          address: shipping.address,
-          suburb: shipping.suburb,
-          state: shipping.state,
-          postcode: shipping.postcode,
-        },
-        // The form only collects a single address today (no separate billing
-        // address fields exist yet even when "same as shipping" is unchecked)
-        // — always send null (same-as-shipping) until that UI is built.
-        billing_address: null,
+        delivery_method: shipping.deliveryMethod,
+        // Backend rejects these fields outright for pickup — omit rather
+        // than send null/empty.
+        ...(isPickup
+          ? {}
+          : {
+              shipping_address: shipping.shippingAddress,
+              billing_address: shipping.billingSameAsShipping ? null : shipping.billingAddress,
+            }),
       });
 
       const order = res.data;
@@ -125,6 +135,7 @@ const vehicleLabel = vehicle?.make
               items={items}
               subtotal={totalPrice}
               vehicleMake={vehicle?.make}
+              deliveryMethod={shipping.deliveryMethod}
               onContinue={handleContinue}
               submitting={submitting}
             />

@@ -1,5 +1,6 @@
 import { apiClient } from "./client";
 import type { BeResponse } from "./base";
+import type { DeliveryMethod } from "@/types/checkout";
 
 export interface OrderItemPayload {
   product: string;
@@ -23,7 +24,10 @@ export interface OrderAddressPayload {
 export interface CreateOrderPayload {
   items: OrderItemPayload[];
   customer: OrderCustomerPayload;
-  shipping_address: OrderAddressPayload;
+  delivery_method: DeliveryMethod;
+  // Omit entirely for pickup — the backend rejects these fields being sent
+  // (rather than ignored) when delivery_method is "pickup".
+  shipping_address?: OrderAddressPayload;
   billing_address?: OrderAddressPayload | null;
 }
 
@@ -61,7 +65,9 @@ export interface ApiOrder {
   order_number: string;
   items: ApiOrderItem[];
   customer: OrderCustomerPayload;
-  shipping_address: OrderAddressPayload;
+  delivery_method: DeliveryMethod;
+  // null when delivery_method is "pickup" — there's nowhere to ship.
+  shipping_address: OrderAddressPayload | null;
   billing_address: OrderAddressPayload | null;
   subtotal: number; // cents, GST-inclusive
   shipping_cost: number; // cents
