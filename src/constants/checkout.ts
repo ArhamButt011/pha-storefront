@@ -16,8 +16,8 @@ export const DELIVERY_METHOD_OPTIONS: DeliveryMethodOption[] = [
 ];
 
 export const PICKUP_LOCATION = {
-  name: "Parts Hub Australia — Melbourne Warehouse",
-  address: "123 Performance Way, Melbourne VIC 3000",
+  name: "Parts Hub Australia",
+  address: "34 Killara Road, Campbellfield VIC 3061, Australia",
   note: "We'll email you once your order is ready for collection — usually within 1 business day.",
 };
 
@@ -61,6 +61,7 @@ export const LOYALTY_PROGRAM = {
 export const COMPANY_INFO = {
   name: "Parts Hub Australia",
   abn: "45 678 910 112",
+  email: "support@partshub.com.au",
 };
 
 export const INVOICE_NOTE = "Please ensure installation is performed by a certified technician to maintain fitment guarantee.";
