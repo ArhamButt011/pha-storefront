@@ -25,7 +25,7 @@ export function InvoiceItemsTable({ items }: { items: InvoiceItem[] }) {
             <tr key={item.sku ?? i} className="border-b border-border last:border-0">
               <td className="px-5 py-4 font-semibold text-accent">{item.sku ?? "—"}</td>
               <td className="px-5 py-4">
-                <p className="font-semibold text-fg">{item.name}</p>
+                <p className="max-w-[280px] break-words font-semibold text-fg">{item.name}</p>
               </td>
               <td className="px-5 py-4 text-right text-fg-muted">{item.quantity}</td>
               <td className="px-5 py-4 text-right text-fg-muted">{formatCurrency(item.unitPrice)}</td>
