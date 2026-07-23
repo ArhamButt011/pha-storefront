@@ -1,10 +1,8 @@
-import { CarFront, Pencil, X } from "lucide-react";
+import { CarFront, X } from "lucide-react";
 import { useVehicle, type SelectedVehicle } from "@/context/VehicleContext";
-import { useSearchModal } from "@/context/SearchModalContext";
 
 export function VehicleChip({ vehicle }: { vehicle: SelectedVehicle }) {
   const { setVehicle } = useVehicle();
-  const { openModal } = useSearchModal();
   const label = [vehicle.make, vehicle.model, vehicle.model_code].filter(Boolean).join(" ");
 
   return (
@@ -14,14 +12,9 @@ export function VehicleChip({ vehicle }: { vehicle: SelectedVehicle }) {
         <div className="text-[10px] font-semibold uppercase tracking-wider text-fg-muted">Your Vehicle</div>
         <div className="text-sm font-bold text-fg">{label}</div>
       </div>
-      <button
-        type="button"
-        onClick={openModal}
-        className="flex h-7 w-7 items-center justify-center rounded-full text-fg-muted transition-colors hover:bg-bg-3 hover:text-accent"
-        aria-label="Change vehicle"
-      >
-        <Pencil className="h-3.5 w-3.5" />
-      </button>
+      {/* "Change vehicle" (pencil) opened SearchFiltersModal, which is
+          disabled for now — see Layout.tsx — so this is disabled too rather
+          than leaving a dead click. */}
       <button
         type="button"
         onClick={() => setVehicle(null)}

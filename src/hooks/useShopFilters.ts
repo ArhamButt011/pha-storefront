@@ -17,9 +17,10 @@ export interface ShopFiltersState {
   page: number;
   stock: StockFilterValue | null;
   search: string;
-  // Set via the header/hero SearchFiltersModal rather than the sidebar —
-  // read-only pass-through here, same as `search`, but still applied to the
-  // API call and cleared by "Clear All".
+  // Normally set via SearchFiltersModal rather than the sidebar (that modal
+  // is temporarily disabled, see Layout.tsx) — read-only pass-through here,
+  // same as `search`, but still applied to the API call and cleared by
+  // "Clear All".
   condition: ConditionFilterValue | null;
   authenticity: AuthenticityFilterValue | null;
   mpn: string;

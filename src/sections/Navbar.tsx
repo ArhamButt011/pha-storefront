@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ShoppingCart, User, Search as SearchIcon } from "lucide-react";
+import { Menu, X, ShoppingCart, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLinkItem } from "@/components/layout/NavLinkItem";
+import { HeaderSearchBar } from "@/components/search/HeaderSearchBar";
 import { useCart } from "@/hooks/useCart";
 import { useVehicle } from "@/context/VehicleContext";
-import { useSearchModal } from "@/context/SearchModalContext";
 
 interface Props {
   onInquiry: () => void;
@@ -23,18 +23,12 @@ export function Navbar({ onInquiry }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { totalItems: cartCount } = useCart();
   const { setVehicle } = useVehicle();
-  const { openModal } = useSearchModal();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  function openFilters() {
-    setMenuOpen(false);
-    openModal();
-  }
 
   function handleNavClick(href: string) {
     if (href === "/shop") setVehicle(null);
@@ -43,7 +37,7 @@ export function Navbar({ onInquiry }: Props) {
   return (
     <>
       <nav
-        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        className={`fixed top-0 z-50 w-full pt-3 transition-all duration-300 ${
           scrolled
             ? "bg-bg/95 shadow-lg backdrop-blur-md border-b border-border"
             : "bg-transparent"
@@ -61,7 +55,11 @@ export function Navbar({ onInquiry }: Props) {
             </span>
           </Link>
 
-          <div className="hidden items-center justify-center gap-6 lg:flex">
+          <div className="hidden justify-center lg:flex">
+            <HeaderSearchBar className="w-full max-w-md xl:max-w-lg" />
+          </div>
+
+          <div className="hidden items-center gap-6 justify-self-end lg:flex">
             {NAV_LINKS.map((l) => (
               <NavLinkItem
                 key={l.href}
@@ -71,35 +69,26 @@ export function Navbar({ onInquiry }: Props) {
                 className="nav-link whitespace-nowrap text-sm font-medium text-fg-muted transition-colors hover:text-fg"
               />
             ))}
-          </div>
-
-          <div className="hidden items-center gap-1 justify-self-end lg:flex">
-            <button
-              type="button"
-              onClick={openFilters}
-              className="p-2 text-fg-muted transition-colors hover:text-fg"
-              aria-label="Search"
-            >
-              <SearchIcon className="h-5 w-5" />
-            </button>
-            {/* <button className="p-2 text-fg-muted transition-colors hover:text-fg" aria-label="Wishlist">
-              <Heart className="h-5 w-5" />
-            </button> */}
-            <Link to="/cart" className="relative p-2 text-fg-muted transition-colors hover:text-fg" aria-label="Cart">
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-fg">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-            <button
-              className="p-2 text-fg-muted transition-colors hover:text-fg cursor-pointer"
-              aria-label="Account"
-              onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}
-            >
-              <User className="h-5 w-5" />
-            </button>
+            <div className="flex items-center gap-1">
+              {/* <button className="p-2 text-fg-muted transition-colors hover:text-fg" aria-label="Wishlist">
+                <Heart className="h-5 w-5" />
+              </button> */}
+              <Link to="/cart" className="relative p-2 text-fg-muted transition-colors hover:text-fg" aria-label="Cart">
+                <ShoppingCart className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-fg">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+              <button
+                className="p-2 text-fg-muted transition-colors hover:text-fg cursor-pointer"
+                aria-label="Account"
+                onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}
+              >
+                <User className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           <button
@@ -137,14 +126,7 @@ export function Navbar({ onInquiry }: Props) {
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={openFilters}
-          aria-label="Search"
-          className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-bg-3 text-fg-muted transition-colors hover:text-fg"
-        >
-          <SearchIcon className="h-5 w-5" />
-        </button>
+        <HeaderSearchBar className="mb-6 w-full" onNavigate={() => setMenuOpen(false)} />
 
         <nav className="flex flex-col gap-1">
           {NAV_LINKS.map((l) => (

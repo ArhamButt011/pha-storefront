@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Hero } from "@/sections/Hero";
-import { HeroSearchBar } from "@/sections/HeroSearchBar";
+import { VehicleSelector } from "@/sections/VehicleSelector";
 import { Categories } from "@/sections/Categories";
 import { Brands } from "@/sections/Brands";
 import { Products } from "@/sections/Products";
@@ -20,7 +20,7 @@ export function Home() {
   return (
     <main>
       <Hero />
-      <HeroSearchBar />
+      <VehicleSelector />
       <Categories />
       <Brands />
       <Products />

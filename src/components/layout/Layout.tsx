@@ -3,18 +3,21 @@ import { Outlet } from "react-router-dom";
 import { Navbar } from "@/sections/Navbar";
 import { Footer } from "@/sections/Footer";
 import { InquiryModal } from "@/components/InquiryModal";
-import { SearchFiltersModal } from "@/components/search/SearchFiltersModal";
-import { SearchModalProvider, useSearchModal } from "@/context/SearchModalContext";
+// Commented out for now — the header search bar (Navbar) handles live search
+// directly, so the old advanced-filter modal is disabled rather than deleted
+// in case it's needed again.
+// import { SearchFiltersModal } from "@/components/search/SearchFiltersModal";
+import { SearchModalProvider } from "@/context/SearchModalContext";
 
 function LayoutInner({ onInquiry }: { onInquiry: () => void }) {
-  const { open, setOpen } = useSearchModal();
+  // const { open, setOpen } = useSearchModal();
 
   return (
     <>
       <Navbar onInquiry={onInquiry} />
       <Outlet />
       <Footer />
-      <SearchFiltersModal open={open} onOpenChange={setOpen} />
+      {/* <SearchFiltersModal open={open} onOpenChange={setOpen} /> */}
     </>
   );
 }

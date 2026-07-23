@@ -75,26 +75,13 @@ export function ProductsListing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [priceMinInput, priceMaxInput]);
 
-  // Real, catalog-wide "Part Type" facet counts — fetched once on mount from
-  // the categories API, independent of whatever other filters are active.
-  useEffect(() => {
-    let cancelled = false;
-    getCategories({ limit: 100 })
-      .then((res) => {
-        if (cancelled) return;
-        setPartTypes(
-          res.data.items.map((c) => ({ id: c._id, name: c.name, count: c.product_count ?? 0 })),
-        );
-      })
-      .catch(console.error);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // Fetches the category (title/breadcrumb) + products whenever any filter
-  // (categories, search, price range, sort, stock, page) or the applied
-  // vehicle fitment changes — everything is a real GET /product query param.
+  // Fetches the category (title/breadcrumb) + products + "Part Type" facet
+  // counts whenever any filter (categories, search, price range, sort, stock,
+  // page) or the applied vehicle fitment changes — everything is a real GET
+  // query param. Counts deliberately omit `categories` (the part-type
+  // selection itself) so every checkbox keeps showing "how many results
+  // toggling it would return" against the other active filters, matching the
+  // backend's own facet-exclusion in category.service.js.
   useEffect(() => {
     let cancelled = false;
 
@@ -102,26 +89,31 @@ export function ProductsListing() {
       setLoading(true);
       setError(null);
       try {
-        const [categoryRes, productsRes] = await Promise.all([
+        const sharedFilterParams = {
+          search: filters.search || undefined,
+          price_min: filters.priceMin ? Number(filters.priceMin) : undefined,
+          price_max: filters.priceMax ? Number(filters.priceMax) : undefined,
+          condition: filters.condition ?? undefined,
+          authenticity: filters.authenticity ?? undefined,
+          mpn: filters.mpn || undefined,
+          sku: filters.sku || undefined,
+          make: vehicle?.make || undefined,
+          model: vehicle?.model || undefined,
+          model_code: vehicle?.model_code || undefined,
+          year: vehicle?.year_from || undefined,
+        };
+
+        const [categoryRes, productsRes, categoriesRes] = await Promise.all([
           categoryId ? getCategory(categoryId) : Promise.resolve(null),
           getProducts({
+            ...sharedFilterParams,
             page: filters.page,
             limit: PAGE_SIZE,
             categories: filters.categoryIds.length ? filters.categoryIds.join(",") : undefined,
-            search: filters.search || undefined,
-            price_min: filters.priceMin ? Number(filters.priceMin) : undefined,
-            price_max: filters.priceMax ? Number(filters.priceMax) : undefined,
             sort: mapSortToApiParam(filters.sort),
             stock: filters.stock ?? undefined,
-            condition: filters.condition ?? undefined,
-            authenticity: filters.authenticity ?? undefined,
-            mpn: filters.mpn || undefined,
-            sku: filters.sku || undefined,
-            make: vehicle?.make || undefined,
-            model: vehicle?.model || undefined,
-            model_code: vehicle?.model_code || undefined,
-            year: vehicle?.year_from || undefined,
           }),
+          getCategories({ ...sharedFilterParams, limit: 100 }),
         ]);
 
         if (cancelled) return;
@@ -129,6 +121,9 @@ export function ProductsListing() {
         setCategoryProducts(productsRes.data.items.map(mapApiProductToProduct));
         setTotal(productsRes.data.total);
         setTotalPages(Math.max(1, productsRes.data.totalPages));
+        setPartTypes(
+          categoriesRes.data.items.map((c) => ({ id: c._id, name: c.name, count: c.product_count ?? 0 })),
+        );
       } catch (err) {
         if (!cancelled) setError("Failed to load products. Please try again.");
         console.error(err);

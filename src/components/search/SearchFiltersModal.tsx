@@ -7,6 +7,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getCategories } from "@/lib/api/categories";
+import { LiveSearchResults } from "./LiveSearchResults";
 import {
   getVehicleMakes,
   getVehicleModels,
@@ -23,6 +24,7 @@ import {
 import { VEHICLE_PARAM_KEYS } from "@/context/VehicleContext";
 import { useShopFilters } from "@/hooks/useShopFilters";
 import type { ApiCategory } from "@/types/category";
+import type { Product } from "@/data/products";
 
 // Static option lists live at module scope (not re-created per render/keystroke).
 // No "" entry — an empty value falls through to the native placeholder (muted
@@ -239,6 +241,14 @@ export function SearchFiltersModal({ open, onOpenChange }: SearchFiltersModalPro
     [handleSubmit],
   );
 
+  const handleSelectProduct = useCallback(
+    (product: Product) => {
+      onOpenChange(false);
+      navigate(`/product/${product.slug}`);
+    },
+    [onOpenChange, navigate],
+  );
+
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent className="max-w-2xl">
@@ -259,6 +269,7 @@ export function SearchFiltersModal({ open, onOpenChange }: SearchFiltersModalPro
               onKeyDown={handleSearchKeyDown}
               placeholder="Part number, title, brand…"
             />
+            <LiveSearchResults query={search} onSelectProduct={handleSelectProduct} onViewAll={handleSubmit} />
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
