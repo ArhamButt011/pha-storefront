@@ -8,16 +8,16 @@ export function ImageGallery({ images, alt }: { images: string[]; alt: string })
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   return (
-    <div className="flex gap-4">
+    <div className="flex h-[26rem] gap-4 sm:h-[30rem] lg:h-[34rem]">
       {images.length > 1 && (
-        <div className="flex min-h-0 w-20 shrink-0 flex-col gap-3 overflow-y-auto">
+        <div className="flex h-full w-20 shrink-0 flex-col gap-3 overflow-y-auto pr-1">
           {images.map((img, i) => (
             <button
               key={img}
               type="button"
               onClick={() => setActive(i)}
               className={cn(
-                "aspect-square overflow-hidden rounded-xl border-2 bg-bg-2 transition-colors",
+                "aspect-square shrink-0 overflow-hidden rounded-xl border-2 bg-bg-2 transition-colors",
                 i === active ? "border-accent" : "border-transparent hover:border-border",
               )}
             >
@@ -27,7 +27,7 @@ export function ImageGallery({ images, alt }: { images: string[]; alt: string })
         </div>
       )}
 
-      <div className="relative flex-1 aspect-square overflow-hidden rounded-2xl bg-bg-2">
+      <div className="relative h-full flex-1 overflow-hidden rounded-2xl bg-bg-2">
         <img src={images[active]} alt={alt} className="h-full w-full object-contain" />
         <button
           type="button"

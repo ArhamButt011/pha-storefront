@@ -51,6 +51,7 @@ export function mapApiProductToProduct(item: ApiProduct): Product {
   return {
     id: item._id,
     categorySlug: primaryCategory?.slug ?? "",
+    categoryId: primaryCategory?._id,
 
     slug: item.slug,
     categoryName: primaryCategory?.name,

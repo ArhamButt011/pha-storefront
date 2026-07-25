@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Truck, PackageCheck, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ImageGallery } from "@/components/product/ImageGallery";
 import { ProductDetailSkeleton } from "@/components/product/ProductDetailSkeleton";
 import { FitmentBadge } from "@/components/product/FitmentBadge";
 import { ProductTabs } from "@/components/product/ProductTabs";
-import { QuantityStepper } from "@/components/ui/quantity-stepper";
+import { ProductConditionQuantityRow } from "@/components/product/ProductConditionQuantityRow";
+import { ShippingReturnsPayments } from "@/components/product/ShippingReturnsPayments";
+import { SimilarItems } from "@/components/product/SimilarItems";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/data/products";
 import { getCategoryBySlug } from "@/data/categories";
@@ -187,22 +189,21 @@ export function ProductDetails() {
             )}
           </div>
 
-          <div className="mt-5 space-y-2 text-sm text-fg-muted">
-            <div className="flex items-center gap-2">
-              <Truck className="h-4 w-4 shrink-0 text-accent" />
-              Fast Dispatch from Melbourne HQ —{" "}
-              {product.shippingCost ? formatCurrency(product.shippingCost) : "Free Shipping"}
-            </div>
-            <div className="flex items-center gap-2">
-              <PackageCheck className="h-4 w-4 shrink-0 text-accent" />{" "}
-              {product.stock.label}
-            </div>
-          </div>
+          <ProductConditionQuantityRow
+            condition={product.condition}
+            qty={qty}
+            onQtyChange={setQty}
+            stockCount={product.stockCount}
+            stockStatus={product.stock.status}
+          />
 
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <QuantityStepper value={qty} onChange={setQty} max={product.stockCount ?? undefined} />
+          {product.stock.status === "out-of-stock" && (
+            <p className="mt-5 text-sm font-semibold text-danger">{product.stock.label}</p>
+          )}
+
+          <div className="mt-5 flex flex-col gap-3">
             <Button
-              className="mt-2 w-full gap-2"
+              className="w-full gap-2"
               onClick={handleAddToCart}
               size="lg"
               disabled={product.stock.status === "out-of-stock"}
@@ -213,21 +214,19 @@ export function ProductDetails() {
                 ? "Added to Cart"
                 : "Add to Cart"}
             </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full gap-2"
+              onClick={handleBuyNow}
+              disabled={product.stock.status === "out-of-stock"}
+            >
+              <Zap className="h-4 w-4" />
+              Buy Now
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="lg"
-            className="mt-3 w-full gap-2"
-            onClick={handleBuyNow}
-            disabled={product.stock.status === "out-of-stock"}
-          >
-            <Zap className="h-4 w-4" />
-            Buy Now
-          </Button>
-          {/* <Button variant="outline" size="lg" className="mt-3 w-full gap-2">
-            <Send className="h-4 w-4" />
-            Buy with Afterpay
-          </Button> */}
+
+          <ShippingReturnsPayments shippingCost={product.shippingCost} />
 
           {infoRows.length > 0 && (
             <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-6 text-sm">
@@ -248,6 +247,13 @@ export function ProductDetails() {
       <div className="mt-16">
         <ProductTabs product={product} />
       </div>
+
+      <SimilarItems
+        categoryId={product.categoryId}
+        categorySlug={product.categorySlug}
+        categoryTitle={category?.title}
+        excludeProductId={product.id}
+      />
     </main>
   );
 }

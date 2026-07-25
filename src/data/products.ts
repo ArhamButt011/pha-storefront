@@ -32,6 +32,7 @@ export interface Product {
   id: string;
   slug: string;
   categorySlug: string;
+  categoryId?: string;
   categoryName?: string;
   brand: string;
   partType: string;

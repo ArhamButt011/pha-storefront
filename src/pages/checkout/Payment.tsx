@@ -11,8 +11,10 @@ import {
 import type { StripeElementsOptions } from "@stripe/stripe-js";
 // import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
+import { PaymentOrderHeader } from "@/components/checkout/payment/PaymentOrderHeader";
 import { Button } from "@/components/ui/button";
 import { createPaymentIntent } from "@/lib/api/payments";
+import { getOrder, type ApiOrder } from "@/lib/api/orders";
 import { stripePromise } from "@/lib/stripe";
 import { setOrder } from "@/store/checkoutSlice";
 import type { AppDispatch, RootState } from "@/store/store";
@@ -113,6 +115,27 @@ export function CheckoutPayment() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [order, setOrderDetails] = useState<ApiOrder | null>(null);
+
+  // Fetched purely for the header (customer name / order # / collection
+  // info) — separate from the payment-intent flow below so a hiccup here
+  // (e.g. a slow response) never blocks the customer from actually paying.
+  // This is what lets someone open an admin-generated link cold, with no
+  // prior session/Redux state, and still see whose order this is.
+  useEffect(() => {
+    if (!orderId || !guestToken) return;
+    let cancelled = false;
+    getOrder(orderId, guestToken)
+      .then((res) => {
+        if (!cancelled) setOrderDetails(res.data);
+      })
+      .catch(() => {
+        /* non-fatal — the payment form still works without the header */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orderId, guestToken]);
 
   useEffect(() => {
     // Neither the slice nor the URL carries an order reference — genuinely
@@ -164,6 +187,15 @@ export function CheckoutPayment() {
         <CheckoutStepper currentStep={2} />
 
         <div className="mx-auto mt-8 max-w-xl">
+          {order && (
+            <PaymentOrderHeader
+              customerName={order.customer.name}
+              orderNumber={order.order_number}
+              deliveryMethod={order.delivery_method}
+              shippingAddress={order.shipping_address}
+            />
+          )}
+
           {loading && (
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-bg-2 p-10 text-center">
               <Loader2 className="h-6 w-6 animate-spin text-accent" />
