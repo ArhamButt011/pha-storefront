@@ -35,13 +35,12 @@ export function SimilarItems({ categoryId, categorySlug, categoryTitle, excludeP
       return;
     }
 
-    getProducts({ categories: categoryId, limit: SIMILAR_ITEMS_LIMIT + 1 })
+    getProducts({ categories: categoryId, limit: SIMILAR_ITEMS_LIMIT })
       .then((res) => {
         if (cancelled) return;
         const mapped = res.data.items
           .map(mapApiProductToProduct)
-          .filter((p) => p.id !== excludeProductId)
-          .slice(0, SIMILAR_ITEMS_LIMIT);
+          .filter((p) => p.id !== excludeProductId);
         setProducts(mapped);
       })
       .catch((err) => {

@@ -128,6 +128,13 @@
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 
+/* Scrollbar stays invisible until the container is hovered. */
+.scrollbar-on-hover { scrollbar-color: transparent transparent; }
+.scrollbar-on-hover::-webkit-scrollbar-thumb { background: transparent; }
+.scrollbar-on-hover:hover { scrollbar-color: hsl(var(--accent)) hsl(var(--bg-2)); }
+.scrollbar-on-hover:hover::-webkit-scrollbar-thumb { background: hsl(var(--accent)); }
+.scrollbar-on-hover:hover::-webkit-scrollbar-thumb:hover { background: hsl(var(--accent)/0.8); }
+
 .glow-orange {
   text-shadow:
     0 0 20px hsl(var(--accent)/0.18),

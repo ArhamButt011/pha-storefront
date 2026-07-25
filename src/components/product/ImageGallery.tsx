@@ -10,7 +10,7 @@ export function ImageGallery({ images, alt }: { images: string[]; alt: string })
   return (
     <div className="flex h-[26rem] gap-4 sm:h-[30rem] lg:h-[34rem]">
       {images.length > 1 && (
-        <div className="flex h-full w-20 shrink-0 flex-col gap-3 overflow-y-auto pr-1">
+        <div className="scrollbar-on-hover flex h-full w-20 shrink-0 flex-col gap-3 overflow-y-auto pr-1">
           {images.map((img, i) => (
             <button
               key={img}
