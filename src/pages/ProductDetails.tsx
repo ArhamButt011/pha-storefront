@@ -250,7 +250,6 @@ export function ProductDetails() {
 
       <SimilarItems
         categoryId={product.categoryId}
-        categorySlug={product.categorySlug}
         categoryTitle={category?.title}
         excludeProductId={product.id}
       />

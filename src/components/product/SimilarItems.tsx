@@ -10,7 +10,6 @@ const SIMILAR_ITEMS_LIMIT = 4;
 
 export interface SimilarItemsProps {
   categoryId?: string;
-  categorySlug: string;
   categoryTitle?: string;
   excludeProductId: string;
 }
@@ -22,8 +21,10 @@ export interface SimilarItemsProps {
 // The `categories` filter on the product list API only matches Mongo
 // ObjectIds (see server/src/utils/productFilter.js) — a slug is silently
 // ignored, which would fall back to an unfiltered "most recent products"
-// list. So this must be filtered by categoryId, not categorySlug.
-export function SimilarItems({ categoryId, categorySlug, categoryTitle, excludeProductId }: SimilarItemsProps) {
+// list. So this must be filtered by categoryId, not categorySlug. The
+// "See All" link below reuses categoryId for the same reason, since
+// /shop/:categoryId feeds straight into that same filter.
+export function SimilarItems({ categoryId, categoryTitle, excludeProductId }: SimilarItemsProps) {
   const [products, setProducts] = useState<Product[] | null>(null);
 
   useEffect(() => {
@@ -59,9 +60,9 @@ export function SimilarItems({ categoryId, categorySlug, categoryTitle, excludeP
     <div className="mt-16 border-t border-border pt-10">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-2">
         <h2 className="font-display text-xl font-black text-fg sm:text-2xl">Similar Items</h2>
-        {categorySlug && (
+        {categoryId && (
           <Link
-            to={`/shop/${categorySlug}`}
+            to={`/shop/${categoryId}`}
             className="text-sm font-semibold text-accent hover:underline"
           >
             See all{categoryTitle ? ` in ${categoryTitle}` : ""}
