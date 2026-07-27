@@ -6,6 +6,7 @@ import type { DeliveryMethod } from "@/types/checkout";
 interface InvoicePaymentAndTotalsProps {
   paymentMethod: { brand: string; last4: string };
   subtotal: number;
+  taxAmount: number;
   shipping: number;
   total: number;
   deliveryMethod?: DeliveryMethod;
@@ -14,6 +15,7 @@ interface InvoicePaymentAndTotalsProps {
 export function InvoicePaymentAndTotals({
   paymentMethod,
   subtotal,
+  taxAmount,
   shipping,
   total,
   deliveryMethod = "delivery",
@@ -37,6 +39,10 @@ export function InvoicePaymentAndTotals({
           <div className="flex items-center justify-between">
             <span className="text-fg-muted">Subtotal</span>
             <span className="font-semibold text-fg">{formatCurrency(subtotal)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-fg-muted">GST Included</span>
+            <span className="font-semibold text-fg">{formatCurrency(taxAmount)}</span>
           </div>
           <div className="flex items-center justify-between border-b border-border pb-2.5">
             <span className="text-fg-muted">{deliveryMethod === "pickup" ? "Pickup" : "Shipping (Express Premium)"}</span>

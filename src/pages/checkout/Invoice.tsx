@@ -135,6 +135,7 @@ export function Invoice() {
         <InvoicePaymentAndTotals
           paymentMethod={paymentMethod}
           subtotal={order.subtotal / 100}
+          taxAmount={order.tax_amount / 100}
           shipping={order.shipping_cost / 100}
           total={order.total / 100}
           deliveryMethod={order.delivery_method}
