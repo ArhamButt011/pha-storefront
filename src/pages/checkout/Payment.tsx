@@ -15,7 +15,7 @@ import { PaymentOrderHeader } from "@/components/checkout/payment/PaymentOrderHe
 import { Button } from "@/components/ui/button";
 import { createPaymentIntent } from "@/lib/api/payments";
 import { getOrder, type ApiOrder } from "@/lib/api/orders";
-import { stripePromise } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { setOrder } from "@/store/checkoutSlice";
 import type { AppDispatch, RootState } from "@/store/store";
 
@@ -113,6 +113,7 @@ export function CheckoutPayment() {
   const guestToken = sliceGuestToken ?? paramGuestToken;
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [publishableKey, setPublishableKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [order, setOrderDetails] = useState<ApiOrder | null>(null);
@@ -157,7 +158,10 @@ export function CheckoutPayment() {
 
     createPaymentIntent({ order_id: orderId, token: guestToken })
       .then((res) => {
-        if (!cancelled) setClientSecret(res.data.client_secret);
+        if (!cancelled) {
+          setClientSecret(res.data.client_secret);
+          setPublishableKey(res.data.stripe_publishable_key);
+        }
       })
       .catch((err) => {
         if (!cancelled) {
@@ -215,8 +219,8 @@ export function CheckoutPayment() {
             </div>
           )}
 
-          {!loading && !error && clientSecret && (
-            <Elements stripe={stripePromise} options={options}>
+          {!loading && !error && clientSecret && publishableKey && (
+            <Elements stripe={getStripe(publishableKey)} options={options}>
               <PaymentForm orderId={orderId} guestToken={guestToken} orderNumber={orderNumber} />
             </Elements>
           )}

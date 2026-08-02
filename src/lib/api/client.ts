@@ -6,6 +6,15 @@ export const apiClient = axios.create({
   timeout: 15_000,
 });
 
+// The backend is multi-tenant — every request needs to say which tenant's
+// store this is. This storefront is a single-tenant deployment (one store
+// per deployment), so its own slug is fixed and known at build time.
+apiClient.interceptors.request.use((config) => {
+  const tenantSlug = import.meta.env.VITE_TENANT_SLUG;
+  if (tenantSlug) config.headers["X-Tenant-Slug"] = tenantSlug;
+  return config;
+});
+
 export class ApiError extends Error {
   status?: number;
 
