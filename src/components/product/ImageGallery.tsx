@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ZoomIn } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { HoverZoomImage } from "./HoverZoomImage";
 import { ImageLightbox } from "./ImageLightbox";
 
 export function ImageGallery({ images, alt }: { images: string[]; alt: string }) {
@@ -28,7 +29,7 @@ export function ImageGallery({ images, alt }: { images: string[]; alt: string })
       )}
 
       <div className="relative h-full flex-1 overflow-hidden rounded-2xl bg-bg-2">
-        <img src={images[active]} alt={alt} className="h-full w-full object-contain" />
+        <HoverZoomImage src={images[active]} alt={alt} />
         <button
           type="button"
           onClick={() => setLightboxOpen(true)}
