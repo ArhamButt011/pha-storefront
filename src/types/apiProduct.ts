@@ -88,3 +88,16 @@ export interface ApiProduct {
   listings?: ApiMarketplaceListing[];
   display?: ApiProductDisplay;
 }
+
+// Lightweight shape returned by GET /product/search/suggest — only the
+// fields the autocomplete dropdown renders (see product.service.js's
+// getProductSuggestions), not a full ApiProduct.
+export interface ApiProductSuggestion {
+  _id: string;
+  title: string;
+  slug: string;
+  sku: string | null;
+  mpn: string | null;
+  price: number;
+  attachments: ApiAttachment[];
+}

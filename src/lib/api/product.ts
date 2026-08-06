@@ -1,6 +1,6 @@
 import { apiClient } from "./client";
 import type { BeResponse } from "./base";
-import type { ApiProduct } from "@/types/apiProduct";
+import type { ApiProduct, ApiProductSuggestion } from "@/types/apiProduct";
 import type {
   AuthenticityFilterValue,
   ConditionFilterValue,
@@ -46,6 +46,22 @@ export const getProducts = async (params: ProductListParams = {}) => {
 export const getProductBySlug = async (slug: string) => {
   const { data } = await apiClient.get<BeResponse<ApiProduct>>(
     `/product/${slug}`,
+  );
+  return data;
+};
+
+export interface SuggestProductsData {
+  items: ApiProductSuggestion[];
+  total: number;
+}
+
+// Typesense-backed autocomplete (fuzzy/prefix match, ranked SKU/MPN/title
+// first) — used by the header search bar's live dropdown instead of a full
+// `getProducts({search, limit})` call. See product.controller.js#suggestProducts.
+export const getSearchSuggestions = async (q: string, limit = 6) => {
+  const { data } = await apiClient.get<BeResponse<SuggestProductsData>>(
+    "/product/search/suggest",
+    { params: { q, limit } },
   );
   return data;
 };

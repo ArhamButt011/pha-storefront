@@ -2,10 +2,9 @@ import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { LiveSearchResults } from "./LiveSearchResults";
+import { LiveSearchResults, type ProductSuggestion } from "./LiveSearchResults";
 import { SHOP_FILTER_PARAMS } from "@/constants/shopFilters";
 import { cn } from "@/utils/cn";
-import type { Product } from "@/data/products";
 
 export interface HeaderSearchBarProps {
   className?: string;
@@ -42,7 +41,7 @@ export function HeaderSearchBar({ className, onNavigate }: HeaderSearchBarProps)
   }, []);
 
   const handleSelectProduct = useCallback(
-    (product: Product) => {
+    (product: ProductSuggestion) => {
       closeNow();
       setQuery("");
       onNavigate?.();

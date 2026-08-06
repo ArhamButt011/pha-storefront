@@ -2,7 +2,7 @@ import type { ApiProduct, ApiVehicle } from "@/types/apiProduct";
 import type { Product, VehicleFitmentRow } from "@/data/products";
 import { mapApiStockStatus, stockLabel } from "@/constants/stock";
 
-const PLACEHOLDER_IMG =
+export const PLACEHOLDER_IMG =
   "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?w=500&h=500&fit=crop";
 
 function formatYearRange(yearFrom: number | null, yearTo: number | null): string {

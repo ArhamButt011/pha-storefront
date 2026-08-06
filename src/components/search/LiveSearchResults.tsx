@@ -1,27 +1,52 @@
 import { useEffect, useState } from "react";
 import { Loader2, PackageSearch } from "lucide-react";
-import { getProducts } from "@/lib/api/product";
+import { getSearchSuggestions } from "@/lib/api/product";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { mapApiProductToProduct } from "@/utils/mapApiProduct";
+import { PLACEHOLDER_IMG } from "@/utils/mapApiProduct";
 import { formatCurrency } from "@/utils/currency";
-import type { Product } from "@/data/products";
+import type { ApiProductSuggestion } from "@/types/apiProduct";
 
 const MIN_QUERY_LENGTH = 1;
 const SEARCH_DEBOUNCE_MS = 300;
 const MAX_RESULTS = 6;
 
+// Just the fields a suggestion row renders/navigates with — deliberately
+// smaller than the full `Product` type used by the /shop listing, since
+// these come from the lightweight suggest endpoint, not a full product fetch.
+export interface ProductSuggestion {
+  id: string;
+  slug: string;
+  title: string;
+  img: string;
+  sku: string | null;
+  mpn: string | null;
+  price: number;
+}
+
+function toSuggestion(item: ApiProductSuggestion): ProductSuggestion {
+  return {
+    id: item._id,
+    slug: item.slug,
+    title: item.title,
+    img: item.attachments?.[0]?.url ?? PLACEHOLDER_IMG,
+    sku: item.sku,
+    mpn: item.mpn,
+    price: item.price,
+  };
+}
+
 export interface LiveSearchResultsProps {
   query: string;
-  onSelectProduct: (product: Product) => void;
+  onSelectProduct: (product: ProductSuggestion) => void;
   onViewAll: () => void;
 }
 
-// Google-style live results: matches against part number/title/SKU/keywords
-// (tags)/description server-side (see product.controller.js's `search`
-// filter), debounced so every keystroke doesn't fire a request.
+// Google-style live results: fuzzy/typo-tolerant, ranked SKU/MPN/title-first
+// matches via Typesense (see product.controller.js#suggestProducts),
+// debounced so every keystroke doesn't fire a request.
 export function LiveSearchResults({ query, onSelectProduct, onViewAll }: LiveSearchResultsProps) {
   const debouncedQuery = useDebouncedValue(query.trim(), SEARCH_DEBOUNCE_MS);
-  const [results, setResults] = useState<Product[]>([]);
+  const [results, setResults] = useState<ProductSuggestion[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -34,10 +59,10 @@ export function LiveSearchResults({ query, onSelectProduct, onViewAll }: LiveSea
     }
     let cancelled = false;
     setLoading(true);
-    getProducts({ search: debouncedQuery, limit: MAX_RESULTS })
+    getSearchSuggestions(debouncedQuery, MAX_RESULTS)
       .then((res) => {
         if (cancelled) return;
-        setResults(res.data.items.map(mapApiProductToProduct));
+        setResults(res.data.items.map(toSuggestion));
         setTotal(res.data.total);
       })
       .catch(() => {
