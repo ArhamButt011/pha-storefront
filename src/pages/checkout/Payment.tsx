@@ -8,12 +8,12 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
-import type { StripeElementsOptions } from "@stripe/stripe-js";
+import type { Stripe, StripeElementsOptions } from "@stripe/stripe-js";
 import { CheckoutHeader } from "@/components/checkout/CheckoutHeader";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { Button } from "@/components/ui/button";
 import { createPaymentIntent } from "@/lib/api/payments";
-import { stripePromise } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { setOrder } from "@/store/checkoutSlice";
 import type { AppDispatch, RootState } from "@/store/store";
 
@@ -113,6 +113,14 @@ export function CheckoutPayment() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Only ever set client-side (see lib/stripe.ts) — Elements accepts a null
+  // `stripe` prop while this is pending, which is the officially supported
+  // way to defer initialization.
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
+
+  useEffect(() => {
+    setStripePromise(getStripe());
+  }, []);
 
   useEffect(() => {
     // Neither the slice nor the URL carries an order reference — genuinely
@@ -193,3 +201,5 @@ export function CheckoutPayment() {
     </div>
   );
 }
+
+export default CheckoutPayment;

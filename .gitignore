@@ -4,6 +4,10 @@ node_modules/
 # Build output
 dist/
 dist-ssr/
+build/
+
+# react-router typegen output
+.react-router/
 
 # Environment variables
 .env

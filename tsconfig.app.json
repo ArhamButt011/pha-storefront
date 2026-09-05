@@ -17,9 +17,14 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    // Lets a route file's `import type { Route } from "./+types/X"` resolve
+    // to the file react-router-typegen generates under .react-router/types
+    // (mirroring src/'s layout, since react-router.config.ts sets
+    // appDirectory: "src") — run `react-router typegen` before `tsc -b`.
+    "rootDirs": [".", "./.react-router/types"],
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", ".react-router/types/**/*"]
 }

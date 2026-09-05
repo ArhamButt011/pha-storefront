@@ -232,3 +232,5 @@ export function OrderConfirmation() {
     </div>
   );
 }
+
+export default OrderConfirmation;

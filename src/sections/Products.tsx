@@ -1,15 +1,10 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, ArrowRight } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
-import { getProducts } from "@/lib/api/product";
-import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import type { Product } from "@/data/products";
 import { useVehicle } from "@/context/VehicleContext";
-
-const FEATURED_COUNT = 5;
 
 function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
@@ -61,50 +56,13 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-function ProductCardSkeleton() {
-  return (
-    <div className="flex flex-col overflow-hidden rounded-2xl bg-bg-2">
-      <div className="h-44 animate-pulse bg-bg-3" />
-      <div className="flex flex-col gap-2 p-4">
-        <div className="h-3 w-1/2 animate-pulse rounded bg-bg-3" />
-        <div className="h-4 w-3/4 animate-pulse rounded bg-bg-3" />
-        <div className="mt-2 h-4 w-1/3 animate-pulse rounded bg-bg-3" />
-      </div>
-    </div>
-  );
-}
-
-export function Products() {
+// NOTE: fetching moved to Home's route loader (SSR) — this section is only
+// ever rendered from Home, and has no interactivity that would need its own
+// re-fetch, so it just renders what it's given.
+export function Products({ products }: { products: Product[] }) {
   const headRef = useScrollReveal<HTMLDivElement>(0.2);
   const gridRef = useScrollReveal<HTMLDivElement>(0.1);
- const { setVehicle } = useVehicle();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await getProducts({ page: 1, limit: FEATURED_COUNT });
-        if (cancelled) return;
-        setProducts(res.data.items.map(mapApiProductToProduct));
-      } catch (err) {
-        if (!cancelled) setError("Failed to load featured parts.");
-        console.error(err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { setVehicle } = useVehicle();
 
   return (
     <section id="products" className="bg-bg-2/40 py-20">
@@ -121,20 +79,14 @@ export function Products() {
           </Link>
         </div>
 
-        {error ? (
-          <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
-            {error}
-          </div>
-        ) : (
-          <div
-            ref={gridRef}
-            className="stagger grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5"
-          >
-            {loading
-              ? Array.from({ length: FEATURED_COUNT }).map((_, i) => <ProductCardSkeleton key={i} />)
-              : products.map((p) => <ProductCard key={p.id} product={p} />)}
-          </div>
-        )}
+        <div
+          ref={gridRef}
+          className="stagger grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5"
+        >
+          {products.map((p) => (
+            <ProductCard key={p.id} product={p} />
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -5,7 +5,7 @@ import { OrderSummary } from "@/components/cart/OrderSummary";
 import { EmptyCart } from "@/components/cart/EmptyCart";
 import { useCart } from "@/hooks/useCart";
 
-export function Cart() {
+function Cart() {
   const { items, totalItems, totalPrice } = useCart();
   const navigate = useNavigate();
 
@@ -43,3 +43,5 @@ export function Cart() {
     </main>
   );
 }
+
+export default Cart;

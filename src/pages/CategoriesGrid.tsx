@@ -1,23 +1,56 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
+import type { Route } from "./+types/CategoriesGrid";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { CategoryCard } from "@/components/categories/CategoryCard";
 import { Input } from "@/components/ui/input";
 import { getCategories } from "@/lib/api/categories";
 import { getCategoryImage } from "@/lib/categoryImages";
+import { getOrigin } from "@/lib/seo";
 import type { CategoryWithImage } from "@/types/category";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
-export function CategoriesGrid() {
+export async function loader({ request }: Route.LoaderArgs) {
+  const res = await getCategories({ limit: 100, page: 1 });
+  const categories: CategoryWithImage[] = res.data.items.map((cat, index) => ({
+    ...cat,
+    img: getCategoryImage(cat.slug, index),
+  }));
+  return { categories, origin: getOrigin(request) };
+}
+
+export function meta({ data }: Route.MetaArgs) {
+  const canonicalUrl = data ? `${data.origin}/categories` : undefined;
+  return [
+    { title: "Shop by Category | Parts Hub Australia" },
+    {
+      name: "description",
+      content:
+        "Browse automotive parts by category — engine, suspension, brakes, exhaust and more, all fitted to your vehicle.",
+    },
+    ...(canonicalUrl
+      ? [
+          { property: "og:title", content: "Shop by Category | Parts Hub Australia" },
+          { property: "og:url", content: canonicalUrl },
+        ]
+      : []),
+  ];
+}
+
+export default function CategoriesGrid({ loaderData }: Route.ComponentProps) {
   const [query, setQuery] = useState("");
   // Mirrors the query box's raw text into a debounced value below, so the
   // API is only called once the person pauses typing rather than on every
   // keystroke.
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const [categories, setCategories] = useState<CategoryWithImage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<CategoryWithImage[]>(loaderData.categories);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The loader already fetched the unfiltered (debouncedQuery === "") list
+  // server-side — skip the redundant duplicate fetch that would otherwise
+  // fire on mount for that same, already-satisfied query.
+  const skipNextFetch = useRef(true);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query.trim()), SEARCH_DEBOUNCE_MS);
@@ -25,6 +58,11 @@ export function CategoriesGrid() {
   }, [query]);
 
   useEffect(() => {
+    if (skipNextFetch.current) {
+      skipNextFetch.current = false;
+      return;
+    }
+
     let cancelled = false;
 
     async function load() {
