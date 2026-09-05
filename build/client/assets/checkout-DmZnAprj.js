@@ -1,0 +1,6 @@
+import{c as e}from"./cn-DaoVIXo8.js";/**
+ * @license lucide-react v1.41.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const t=[["path",{d:"M21 12a9 9 0 1 1-6.219-8.56",key:"13zald"}]],a=e("loader-circle",t),s=["Shipping","Payment","Review"],o=["VIC","NSW","QLD","WA","SA","TAS","ACT","NT"],n=[{title:"Secure SSL Encryption",description:"Your data is protected and encrypted"},{title:"24-Month Parts Warranty",description:"Genuine quality guarantee"},{title:"Specialist Support",description:"Expert help for your {make} project"}],r=[{title:"Real-time Tracking",description:"Receive SMS & email updates as your parts move through our logistics network. Delivery ETA: 2-3 business days.",actionLabel:"Track Shipment"},{title:"Technical Support",description:"Access installation guides, fitment FAQs, or chat with our specialist mechanics for part-specific advice.",actionLabel:"Get Assistance"}],c={title:"PH Loyalty Program",description:"Join 50k+ enthusiasts. Earn {points} points from this order. Unlock exclusive early access to performance drops.",actionLabel:"Join Now"},p={name:"Parts Hub Australia",abn:"45 678 910 112"},l="Please ensure installation is performed by a certified technician to maintain fitment guarantee.";export{o as A,p as C,l as I,c as L,n as T,r as W,a,s as b};
