@@ -14,6 +14,7 @@ export default [
     route("product/:slug", "pages/ProductDetails.tsx"),
     route("bundles", "pages/BundlesListing.tsx"),
     route("cart", "pages/Cart.tsx"),
+    route("returns-policy", "pages/ReturnsPolicy.tsx"),
   ]),
 
   // Session/Stripe routes — never crawled. No loaders; all data fetching
