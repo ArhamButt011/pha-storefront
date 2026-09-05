@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import type { Route } from "./+types/CategoriesGrid";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { CategoryCard } from "@/components/categories/CategoryCard";
+import { CategoryCardSkeleton } from "@/components/categories/CategoryCardSkeleton";
 import { Input } from "@/components/ui/input";
 import { getCategories } from "@/lib/api/categories";
 import { getCategoryImage } from "@/lib/categoryImages";
@@ -126,8 +127,10 @@ export default function CategoriesGrid({ loaderData }: Route.ComponentProps) {
 
       <div className="mt-10">
         {loading ? (
-          <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
-            Loading categories…
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <CategoryCardSkeleton key={i} />
+            ))}
           </div>
         ) : error ? (
           <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">

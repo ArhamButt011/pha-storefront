@@ -6,7 +6,10 @@ import type { CategoryWithImage } from "@/types/category";
 
 // NOTE: fetching moved to Home's route loader (SSR) — this section is only
 // ever rendered from Home, and has no interactivity that would need its own
-// re-fetch, so it just renders what it's given.
+// re-fetch (so dev's CategoryCardSkeleton loading state doesn't apply here
+// any more either — SSR'd data is already present before first paint, so
+// there's nothing for a skeleton to cover; it's still used wherever a
+// client-side fetch remains, e.g. CategoriesGrid's own search-driven refetch).
 export function Categories({ categories }: { categories: CategoryWithImage[] }) {
   const headRef = useScrollReveal<HTMLDivElement>(0.2);
   const gridRef = useScrollReveal<HTMLDivElement>(0.1);

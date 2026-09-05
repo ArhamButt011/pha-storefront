@@ -32,6 +32,7 @@ export interface Product {
   id: string;
   slug: string;
   categorySlug: string;
+  categoryId?: string;
   categoryName?: string;
   brand: string;
   partType: string;
@@ -52,6 +53,11 @@ make?: string | null;
   grade?: string;
   gallery?: string[];
   sku?: string;
+  mpn?: string;
+  supersededPartNumbers?: string[];
+  shippingCost?: number | null;
+  /** Raw available units from the backend; null = untracked/unlimited. */
+  stockCount?: number | null;
   brandFull?: string;
   warranty?: string;
   material?: string;

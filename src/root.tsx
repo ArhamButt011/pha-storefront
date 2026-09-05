@@ -15,6 +15,7 @@ import "./index.css";
 import { VehicleProvider } from "@/context/VehicleContext";
 import { createServerStore } from "@/store/store";
 import { getBrowserStore, startPersisting } from "@/store/browserStore";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 // Runs before hydration (inline, in <head>) so a light-mode visitor never
 // sees a flash of the default dark theme. Dark is still the default: the
@@ -96,7 +97,9 @@ export default function App() {
         theme="dark"
       />
       <VehicleProvider>
-        <Outlet />
+        <TooltipProvider delayDuration={200}>
+          <Outlet />
+        </TooltipProvider>
       </VehicleProvider>
     </Provider>
   );

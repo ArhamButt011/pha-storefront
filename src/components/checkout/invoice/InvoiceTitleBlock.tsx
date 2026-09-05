@@ -12,11 +12,14 @@ export function InvoiceTitleBlock({ invoiceNumber, orderReference, date, isPaid 
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-6 rounded-2xl border border-border bg-bg-2 p-6">
-      <div>
-        <h1 className="font-display text-2xl font-black tracking-wide text-fg sm:text-3xl">Tax Invoice</h1>
-        <p className="mt-1 text-sm text-fg-muted">
-          {COMPANY_INFO.name} | ABN {COMPANY_INFO.abn}
-        </p>
+      <div className="flex items-start gap-4">
+        <img src="/branding/logo.png" alt={COMPANY_INFO.name} className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+        <div>
+          <h1 className="font-display text-2xl font-black tracking-wide text-fg sm:text-3xl">Tax Invoice</h1>
+          <p className="mt-1 text-sm text-fg-muted">
+            {COMPANY_INFO.name} | ABN {COMPANY_INFO.abn}
+          </p>
+        </div>
       </div>
 
       <div className="text-right">

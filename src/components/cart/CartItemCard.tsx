@@ -1,11 +1,8 @@
 import { Trash2 } from "lucide-react";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { useCart } from "@/hooks/useCart";
+import { formatCurrency } from "@/utils/currency";
 import type { CartItem } from "@/store/cartSlice";
-
-function formatCurrency(value: number) {
-  return `A$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export function CartItemCard({ item }: { item: CartItem }) {
   const { setQuantity, removeFromCart } = useCart();
@@ -36,7 +33,11 @@ export function CartItemCard({ item }: { item: CartItem }) {
         </div>
 
         <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-3">
-          <QuantityStepper value={item.quantity} onChange={(q) => setQuantity(item.id, q)} />
+          <QuantityStepper
+            value={item.quantity}
+            onChange={(q) => setQuantity(item.id, q)}
+            max={item.maxQuantity ?? undefined}
+          />
           <div className="text-right">
             <div className="text-lg font-black text-fg">{formatCurrency(lineTotal)}</div>
             {item.shippingNote && <div className="text-xs text-fg-muted">{item.shippingNote}</div>}

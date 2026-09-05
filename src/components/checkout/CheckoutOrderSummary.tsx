@@ -1,19 +1,17 @@
 import { ArrowRight, ShieldCheck, BadgeCheck, Headphones, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { GST_DIVISOR } from "@/constants/cart";
 import { TRUST_BADGES } from "@/constants/checkout";
+import { formatCurrency } from "@/utils/currency";
 import type { CartItem } from "@/store/cartSlice";
+import type { DeliveryMethod } from "@/types/checkout";
 
 const BADGE_ICONS = [ShieldCheck, BadgeCheck, Headphones];
-
-function formatCurrency(value: number) {
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 interface CheckoutOrderSummaryProps {
   items: CartItem[];
   subtotal: number;
   vehicleMake?: string;
+  deliveryMethod?: DeliveryMethod;
   onContinue?: () => void;
   submitting?: boolean;
   disabled?: boolean;
@@ -23,14 +21,16 @@ export function CheckoutOrderSummary({
   items,
   subtotal,
   vehicleMake,
+  deliveryMethod = "delivery",
   onContinue,
   submitting = false,
   disabled = false,
 }: CheckoutOrderSummaryProps) {
-  // Product prices are GST-inclusive (AU retail) — GST is extracted for
-  // display, never added on top of the subtotal.
-  const gst = subtotal / GST_DIVISOR;
-  const total = subtotal;
+  const isPickup = deliveryMethod === "pickup";
+  // Real per-item shipping cost from the backend, multiplied by quantity and
+  // summed across lines, same as the cart page — waived entirely for pickup.
+  const shipping = isPickup ? 0 : items.reduce((sum, item) => sum + (item.shippingCost ?? 0) * item.quantity, 0);
+  const total = subtotal + shipping;
 
   return (
     <div className="rounded-2xl border border-border bg-bg-2 p-6">
@@ -58,12 +58,10 @@ export function CheckoutOrderSummary({
           <span className="font-semibold text-fg">{formatCurrency(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-fg-muted">Shipping (Express)</span>
-          <span className="font-semibold text-ok">FREE</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-fg-muted">Includes GST</span>
-          <span className="font-semibold text-fg">{formatCurrency(gst)}</span>
+          <span className="text-fg-muted">{isPickup ? "Pickup" : "Shipping (Express)"}</span>
+          <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
+            {isPickup ? "Free" : shipping > 0 ? formatCurrency(shipping) : "Free"}
+          </span>
         </div>
       </div>
 

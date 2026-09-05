@@ -1,9 +1,12 @@
 import { type RouteConfig, route, index, layout } from "@react-router/dev/routes";
 
 export default [
-  // SSR'd — crawled surface (Home, Categories, Shop, Product, Bundles) plus
-  // /cart, which shares the same Navbar/Footer chrome. See MIGRATION.md for
-  // why /cart still renders correctly with no server data dependency.
+  // Everything shares the same Navbar/Footer chrome now (dev's "Work on
+  // displaying the same nav bar across the whole app" — checkout used to be
+  // top-level, outside Layout, before that). SSR'd: Home, Categories, Shop,
+  // Product, Bundles. Client-driven, no loaders (see MIGRATION.md): /cart
+  // and /checkout/* — still fine under the same layout(), since none of
+  // them depend on server-fetched data to render their shell.
   layout("components/layout/Layout.tsx", [
     index("pages/Home.tsx"),
     route("categories", "pages/CategoriesGrid.tsx"),
@@ -15,12 +18,9 @@ export default [
     route("bundles", "pages/BundlesListing.tsx"),
     route("cart", "pages/Cart.tsx"),
     route("returns-policy", "pages/ReturnsPolicy.tsx"),
+    route("checkout", "pages/checkout/Shipping.tsx"),
+    route("checkout/payment", "pages/checkout/Payment.tsx"),
+    route("checkout/confirmation", "pages/checkout/Confirmation.tsx"),
+    route("checkout/invoice", "pages/checkout/Invoice.tsx"),
   ]),
-
-  // Session/Stripe routes — never crawled. No loaders; all data fetching
-  // stays in useEffect exactly as before (see MIGRATION.md).
-  route("checkout", "pages/checkout/Shipping.tsx"),
-  route("checkout/payment", "pages/checkout/Payment.tsx"),
-  route("checkout/confirmation", "pages/checkout/Confirmation.tsx"),
-  route("checkout/invoice", "pages/checkout/Invoice.tsx"),
 ] satisfies RouteConfig;

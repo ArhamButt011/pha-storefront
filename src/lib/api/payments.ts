@@ -9,6 +9,8 @@ export interface CreateIntentPayload {
 export interface CreateIntentData {
   payment_id: string;
   client_secret: string;
+  // This store's own Stripe publishable key (BYOK) — see lib/stripe.ts#getStripe.
+  stripe_publishable_key: string;
 }
 
 export const createPaymentIntent = async (payload: CreateIntentPayload) => {

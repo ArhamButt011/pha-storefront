@@ -1,19 +1,25 @@
 import { CreditCard } from "lucide-react";
 import { INVOICE_NOTE } from "@/constants/checkout";
-
-function formatCurrency(value: number) {
-  return `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+import { formatCurrency } from "@/utils/currency";
+import type { DeliveryMethod } from "@/types/checkout";
 
 interface InvoicePaymentAndTotalsProps {
   paymentMethod: { brand: string; last4: string };
   subtotal: number;
+  taxAmount: number;
   shipping: number;
-  gst: number;
   total: number;
+  deliveryMethod?: DeliveryMethod;
 }
 
-export function InvoicePaymentAndTotals({ paymentMethod, subtotal, shipping, gst, total }: InvoicePaymentAndTotalsProps) {
+export function InvoicePaymentAndTotals({
+  paymentMethod,
+  subtotal,
+  taxAmount,
+  shipping,
+  total,
+  deliveryMethod = "delivery",
+}: InvoicePaymentAndTotalsProps) {
   return (
     <div className="grid gap-6 sm:grid-cols-2">
       <div className="rounded-2xl border border-border bg-bg-2 p-5">
@@ -35,12 +41,12 @@ export function InvoicePaymentAndTotals({ paymentMethod, subtotal, shipping, gst
             <span className="font-semibold text-fg">{formatCurrency(subtotal)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-fg-muted">Shipping (Express Premium)</span>
-            <span className="font-semibold text-fg">{formatCurrency(shipping)}</span>
+            <span className="text-fg-muted">GST Included</span>
+            <span className="font-semibold text-fg">{formatCurrency(taxAmount)}</span>
           </div>
           <div className="flex items-center justify-between border-b border-border pb-2.5">
-            <span className="text-fg-muted">Includes GST</span>
-            <span className="font-semibold text-fg">{formatCurrency(gst)}</span>
+            <span className="text-fg-muted">{deliveryMethod === "pickup" ? "Pickup" : "Shipping (Express Premium)"}</span>
+            <span className="font-semibold text-fg">{formatCurrency(shipping)}</span>
           </div>
         </div>
         <div className="mt-3 flex items-baseline justify-between">

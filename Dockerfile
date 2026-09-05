@@ -17,7 +17,7 @@ COPY . .
 # statically inlines import.meta.env.VITE_* exactly like the client bundle
 # does, so the server (running inside this same built image) reads back the
 # same value the client was built with — no runtime env plumbing needed.
-ARG VITE_API_URL=https://admin.partshubaustralia.com.au/api/v1
+ARG VITE_API_URL=https://app.autopartspro.au/api/v1
 ENV VITE_API_URL=$VITE_API_URL
 # REQUIRED, not optional — see src/lib/api/client.ts and MIGRATION.md. No
 # default here on purpose: every guest backend request needs this tenant's

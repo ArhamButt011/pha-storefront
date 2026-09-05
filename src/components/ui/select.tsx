@@ -1,6 +1,7 @@
 import * as React from "react";
 import ReactSelect from "react-select";
 import { cn } from "@/utils/cn";
+import { SELECT_MENU_PORTAL_PROPS } from "@/components/ui/select-shared";
 
 export interface SelectOption {
   value: string;
@@ -18,6 +19,8 @@ export interface SelectProps {
   maxMenuHeight?: number;
   /** Whether typing filters the options. Defaults to true; set false for short, fixed lists like sort order. */
   isSearchable?: boolean;
+  /** Shows a per-field "x" to reset back to no selection. Off by default (e.g. a sort-order field should never be empty). */
+  isClearable?: boolean;
 }
 
 // react-select ships unstyled-friendly `classNames` (v5.7+) so we can theme
@@ -32,6 +35,7 @@ export const Select = React.memo(function Select({
   className,
   maxMenuHeight = 240, // ~15rem, matches previous dropdown cap
   isSearchable = true,
+  isClearable = false,
 }: SelectProps) {
   const selected = React.useMemo(
     () => options.find((o) => o.value === value) ?? null,
@@ -46,8 +50,10 @@ export const Select = React.memo(function Select({
       placeholder={placeholder}
       isDisabled={disabled}
       isSearchable={isSearchable}
+      isClearable={isClearable}
       unstyled
       menuPlacement="auto" // handles the flip-up/flip-down correctly
+      {...SELECT_MENU_PORTAL_PROPS}
       maxMenuHeight={maxMenuHeight} // built-in scroll, no custom scroll logic needed
       classNamePrefix="rs"
       className={className}
@@ -63,8 +69,9 @@ export const Select = React.memo(function Select({
         input: () => "text-fg",
         indicatorSeparator: () => "hidden",
         dropdownIndicator: () => "text-fg-muted",
+        clearIndicator: () => "text-fg-muted transition-colors hover:text-danger cursor-pointer",
         menu: () =>
-          "z-50 mt-1 overflow-hidden rounded-lg border border-border bg-bg-2 shadow-lg",
+          "overflow-hidden rounded-lg border border-border bg-bg-2 shadow-lg",
         menuList: () => "p-1",
         option: (state) =>
           cn(

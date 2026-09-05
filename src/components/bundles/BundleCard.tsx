@@ -1,9 +1,6 @@
 import { Check, ShoppingCart } from "lucide-react";
+import { formatCurrency as formatPrice } from "@/utils/currency";
 import type { Bundle } from "@/data/bundles";
-
-function formatPrice(value: number) {
-  return `A$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export function BundleCard({ bundle }: { bundle: Bundle }) {
   const saveAmount = bundle.oldPrice - bundle.price;

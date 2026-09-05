@@ -41,6 +41,7 @@ export interface ApiMarketplaceListing {
   condition: string | null;
   condition_notes: string | null;
   warranty: string | null;
+  mpn: string | null;
   superseded_part_number: string[];
   authenticity: string | null;
   aspects: Record<string, string>;
@@ -80,6 +81,7 @@ export interface ApiProduct {
   // Google Merchant adapter, which reads this same field (see
   // listing.resolver.js#resolveIdentifiers).
   mpn: string | null;
+  shipping_cost: number | null;
   brand: string | null;
   condition: string;
   authenticity: string | null;
@@ -93,4 +95,17 @@ export interface ApiProduct {
   stock_status: "in_stock" | "low_stock" | "out_of_stock";
   listings?: ApiMarketplaceListing[];
   display?: ApiProductDisplay;
+}
+
+// Lightweight shape returned by GET /product/search/suggest — only the
+// fields the autocomplete dropdown renders (see product.service.js's
+// getProductSuggestions), not a full ApiProduct.
+export interface ApiProductSuggestion {
+  _id: string;
+  title: string;
+  slug: string;
+  sku: string | null;
+  mpn: string | null;
+  price: number;
+  attachments: ApiAttachment[];
 }

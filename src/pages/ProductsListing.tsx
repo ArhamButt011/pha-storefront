@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigation } from "react-router-dom";
 import type { Route } from "./+types/ProductsListing";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
-import { VehicleChip } from "@/components/products/VehicleChip";
+import { ActiveFilters } from "@/components/products/ActiveFilters";
 import { FilterSidebar, type FacetOption } from "@/components/products/FilterSidebar";
 import { ResultsHeader } from "@/components/products/ResultsHeader";
 import { ProductCard } from "@/components/products/ProductCard";
+import { ProductGridSkeleton } from "@/components/products/ProductGridSkeleton";
 import { Pagination } from "@/components/ui/pagination";
 import { useVehicle } from "@/context/VehicleContext";
 import { useShopFilters } from "@/hooks/useShopFilters";
@@ -13,7 +14,13 @@ import { getCategory, getCategories } from "@/lib/api/categories";
 import { getProducts } from "@/lib/api/product";
 import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { getOrigin } from "@/lib/seo";
-import { SHOP_FILTER_PARAMS, DEFAULT_SORT, type StockFilterValue } from "@/constants/shopFilters";
+import {
+  SHOP_FILTER_PARAMS,
+  DEFAULT_SORT,
+  type StockFilterValue,
+  type ConditionFilterValue,
+  type AuthenticityFilterValue,
+} from "@/constants/shopFilters";
 
 const PAGE_SIZE = 9;
 
@@ -50,6 +57,10 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   const page = Math.max(1, Number(sp.get(P.page) ?? "1") || 1);
   const stock = (sp.get(P.stock) as StockFilterValue | null) ?? undefined;
   const search = sp.get(P.search)?.trim() || undefined;
+  const condition = (sp.get(P.condition) as ConditionFilterValue | null) ?? undefined;
+  const authenticity = (sp.get(P.authenticity) as AuthenticityFilterValue | null) ?? undefined;
+  const mpn = sp.get(P.mpn)?.trim() || undefined;
+  const sku = sp.get(P.sku)?.trim() || undefined;
 
   const make = sp.get("make") || undefined;
   const model = sp.get("model") || undefined;
@@ -58,24 +69,38 @@ export async function loader({ request, params }: Route.LoaderArgs) {
 
   const origin = getOrigin(request);
 
+  // Shared with the "Part Type" facet-count query below — a category's
+  // product_count should reflect the current search/vehicle/price/
+  // condition selection, not a static catalog-wide total (matches the
+  // backend's own facet-exclusion in category.service.js). Deliberately
+  // omits `categories` itself so every checkbox keeps showing "how many
+  // results toggling it would return" against the other active filters.
+  const sharedFilterParams = {
+    search,
+    price_min: priceMin ? Number(priceMin) : undefined,
+    price_max: priceMax ? Number(priceMax) : undefined,
+    condition,
+    authenticity,
+    mpn,
+    sku,
+    make,
+    model,
+    model_code,
+    year: year_from,
+  };
+
   try {
     const [categoryRes, productsRes, partTypesRes] = await Promise.all([
       params.categoryId ? getCategory(params.categoryId) : Promise.resolve(null),
       getProducts({
+        ...sharedFilterParams,
         page,
         limit: PAGE_SIZE,
         categories: categoryIds.length ? categoryIds.join(",") : undefined,
-        search,
-        price_min: priceMin ? Number(priceMin) : undefined,
-        price_max: priceMax ? Number(priceMax) : undefined,
         sort: mapSortToApiParam(sort),
         stock,
-        make,
-        model,
-        model_code,
-        year: year_from,
       }),
-      getCategories({ limit: 100 }),
+      getCategories({ ...sharedFilterParams, limit: 100 }),
     ]);
 
     return {
@@ -145,27 +170,45 @@ export default function ProductsListing({ loaderData }: Route.ComponentProps) {
 
   const PRICE_DEBOUNCE_MS = 400;
 
+  // One combined debounce for both bounds (rather than a separate effect per
+  // input) so a change to both min and max always lands in a single
+  // setPriceRange call — two independent setPriceMin/setPriceMax calls can
+  // race, since React Router's setSearchParams builds its next value from
+  // the current render's searchParams closure rather than a live ref, so the
+  // second call's navigate() can silently overwrite the first (see
+  // setPriceRange's comment in useShopFilters for the full explanation).
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (priceMinInput !== filters.priceMin) filters.setPriceMin(priceMinInput);
+      // Skip no-op writes (e.g. on mount, before the user has typed anything) —
+      // every filter setter also resets `page`, so writing back an unchanged
+      // value would wipe out a page number restored from the URL on load.
+      if (priceMinInput !== filters.priceMin || priceMaxInput !== filters.priceMax) {
+        filters.setPriceRange(priceMinInput, priceMaxInput);
+      }
     }, PRICE_DEBOUNCE_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [priceMinInput]);
+  }, [priceMinInput, priceMaxInput]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (priceMaxInput !== filters.priceMax) filters.setPriceMax(priceMaxInput);
-    }, PRICE_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [priceMaxInput]);
-
-  function clearAll() {
+  // useCallback so this stays referentially stable across renders — passed
+  // to the memoized FilterSidebar as onClearAll, where a fresh function
+  // reference every render would defeat the memoization.
+  const clearAll = useCallback(() => {
     setPriceMinInput("");
     setPriceMaxInput("");
     filters.clearAll();
-  }
+  }, [filters.clearAll]);
+
+  // Removing the price pill needs to reset the sidebar's own local (debounced)
+  // input state too, not just the URL — otherwise the inputs keep showing the
+  // old typed value even though the price_min/price_max params are gone.
+  // Both bounds must clear via one setPriceRange call, not two separate
+  // setPriceMin/setPriceMax calls — see setPriceRange's comment for why.
+  const clearPrice = useCallback(() => {
+    setPriceMinInput("");
+    setPriceMaxInput("");
+    filters.setPriceRange("", "");
+  }, [filters.setPriceRange]);
 
   const title = filters.search
     ? `Search results for "${filters.search}"`
@@ -187,7 +230,7 @@ export default function ProductsListing({ loaderData }: Route.ComponentProps) {
     <main className="mx-auto max-w-7xl px-4 pb-8 lg:pt-28 pt-20 sm:px-6 lg:px-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <Breadcrumb items={breadcrumbItems} />
-        {vehicle?.make && <VehicleChip vehicle={vehicle} />}
+        <ActiveFilters filters={filters} categories={partTypes} vehicle={vehicle} onClearPrice={clearPrice} />
       </div>
 
       <div className="mb-8">
@@ -214,9 +257,7 @@ export default function ProductsListing({ loaderData }: Route.ComponentProps) {
           <ResultsHeader count={total} sort={filters.sort} onSortChange={filters.setSort} />
 
           {loading ? (
-            <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
-              Loading parts…
-            </div>
+            <ProductGridSkeleton count={PAGE_SIZE} />
           ) : loaderData.error ? (
             <div className="rounded-2xl border border-border bg-bg-2 px-6 py-16 text-center text-fg-muted">
               {loaderData.error}

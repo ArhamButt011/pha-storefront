@@ -4,6 +4,7 @@ import { cn } from "@/utils/cn";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
 import { STOCK_DOT } from "@/constants/stock";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { Product } from "@/data/products";
 
 const BADGE_LABEL: Record<NonNullable<Product["badge"]>, string> = {
@@ -56,7 +57,12 @@ export function ProductCard({ product }: { product: Product }) {
           </span> */}
         </div>
 
-        <h3 className="mb-4 font-bold text-fg">{product.title}</h3>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <h3 className="mb-4 line-clamp-3 font-bold text-fg">{product.title}</h3>
+          </TooltipTrigger>
+          <TooltipContent side="top">{product.title}</TooltipContent>
+        </Tooltip>
 
         <div className="mt-auto flex items-center justify-between gap-2">
           <div className="flex items-baseline gap-2">

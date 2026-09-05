@@ -1,6 +1,5 @@
-import { MapPin, PackageSearch } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import { Button } from "@/components/ui/button";
 
 const STATS = [
   { value: "98%", label: "On-Time Delivery" },
@@ -35,11 +34,6 @@ export function LogisticsStats() {
                 </div>
               ))}
             </div>
-
-            <Button size="lg" className="mt-8 gap-2">
-              <PackageSearch className="h-5 w-5" />
-              Track Your Order
-            </Button>
           </div>
 
           {/* Map graphic */}

@@ -11,6 +11,8 @@ export function useImageZoom(scale = 2.5) {
 
   const toggle = useCallback(() => setIsZoomed((z) => !z), []);
   const reset = useCallback(() => setIsZoomed(false), []);
+  const enter = useCallback(() => setIsZoomed(true), []);
+  const leave = useCallback(() => setIsZoomed(false), []);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent<HTMLElement>) => {
@@ -28,5 +30,5 @@ export function useImageZoom(scale = 2.5) {
     ? { transform: `scale(${scale})`, transformOrigin: `${origin.x}% ${origin.y}%` }
     : undefined;
 
-  return { isZoomed, toggle, reset, handleMouseMove, style };
+  return { isZoomed, toggle, reset, enter, leave, handleMouseMove, style };
 }

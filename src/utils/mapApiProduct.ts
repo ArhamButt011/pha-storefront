@@ -2,7 +2,7 @@ import type { ApiProduct, ApiVehicle } from "@/types/apiProduct";
 import type { Product, VehicleFitmentRow } from "@/data/products";
 import { mapApiStockStatus, stockLabel } from "@/constants/stock";
 
-const PLACEHOLDER_IMG =
+export const PLACEHOLDER_IMG =
   "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?w=500&h=500&fit=crop";
 
 function formatYearRange(yearFrom: number | null, yearTo: number | null): string {
@@ -23,18 +23,17 @@ function fitmentToRow(f: ApiVehicle): VehicleFitmentRow {
   };
 }
 
-// Additional spec rows sourced from the listing: superseded/cross-reference
-// part numbers and any free-form item specifics (e.g. "Color: Black").
-function buildListingSpecs(item: ApiProduct) {
-  const listing = item.listings?.[0];
-  if (!listing) return [];
-
+// Generic spec rows sourced from the listing's free-form item specifics
+// (e.g. "Color: Black") — MPN and superseded part numbers get their own
+// dedicated fields/section instead (see PartIdentifiers), since they're part
+// identifiers a buyer searches by, not general specifications.
+function buildSpecs(item: ApiProduct) {
   const specs: { label: string; value: string }[] = [];
-  if (listing.superseded_part_number.length > 0) {
-    specs.push({ label: "Superseded Part Number(s)", value: listing.superseded_part_number.join(", ") });
-  }
-  for (const [label, value] of Object.entries(listing.aspects)) {
-    if (value) specs.push({ label, value });
+  const aspects = item.listings?.[0]?.aspects;
+  if (aspects) {
+    for (const [label, value] of Object.entries(aspects)) {
+      if (value) specs.push({ label, value });
+    }
   }
   return specs;
 }
@@ -52,6 +51,7 @@ export function mapApiProductToProduct(item: ApiProduct): Product {
   return {
     id: item._id,
     categorySlug: primaryCategory?.slug ?? "",
+    categoryId: primaryCategory?._id,
 
     slug: item.slug,
     categoryName: primaryCategory?.name,
@@ -76,6 +76,10 @@ export function mapApiProductToProduct(item: ApiProduct): Product {
    year_to: item.vehicle?.year_to ?? null,
 vehicleFit: item.vehicle ?? null,
     sku: item.sku ?? undefined,
+    mpn: display?.mpn ?? item.mpn ?? undefined,
+    supersededPartNumbers: item.listings?.[0]?.superseded_part_number ?? [],
+    shippingCost: item.shipping_cost ?? null,
+    stockCount: item.stock_count ?? null,
     // `display` is the backend's already-resolved precedence (listing
     // override wins, else the product's own value) — rendered as-is rather
     // than re-derived here. Title/description/price/photo overrides are
@@ -89,6 +93,6 @@ vehicleFit: item.vehicle ?? null,
     warranty: display?.warranty ?? undefined,
     productNote: item.description || undefined,
     vehicleFitments: (display?.vehicle_fitments ?? []).map(fitmentToRow),
-    specs: buildListingSpecs(item),
+    specs: buildSpecs(item),
   };
 }

@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import type { Product } from "@/data/products";
 import { TechnicalSpecifications } from "@/components/product/TechnicalSpecifications";
+import { PartIdentifiers } from "@/components/product/PartIdentifiers";
 import { VehicleFitmentTable } from "@/components/product/VehicleFitmentTable";
 
 export function ProductTabs({ product }: { product: Product }) {
@@ -10,6 +11,7 @@ export function ProductTabs({ product }: { product: Product }) {
   return (
     <div>
       <TechnicalSpecifications product={product} />
+      <PartIdentifiers product={product} />
 
       {(note || (features && features.length > 0)) && (
         <div className="mt-12">

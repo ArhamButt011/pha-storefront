@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Truck, PackageCheck, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import type { Route } from "./+types/ProductDetails";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ImageGallery } from "@/components/product/ImageGallery";
 import { FitmentBadge } from "@/components/product/FitmentBadge";
 import { ProductTabs } from "@/components/product/ProductTabs";
-import { QuantityStepper } from "@/components/ui/quantity-stepper";
+import { ProductConditionQuantityRow } from "@/components/product/ProductConditionQuantityRow";
+import { ShippingReturnsPayments } from "@/components/product/ShippingReturnsPayments";
+import { SimilarItems } from "@/components/product/SimilarItems";
 import { Button } from "@/components/ui/button";
 import { getCategoryBySlug } from "@/data/categories";
 import { getProductBySlug } from "@/lib/api/product";
@@ -14,6 +16,7 @@ import { ApiError } from "@/lib/api/client";
 import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
+import { formatCurrency } from "@/utils/currency";
 import { getOrigin, safeJsonLd, stripHtml, mapAvailability, mapItemCondition } from "@/lib/seo";
 import type { ApiProduct } from "@/types/apiProduct";
 
@@ -105,7 +108,9 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
   const gallery = product.gallery ?? [product.img];
 
   const infoRows = [
-    product.sku ? { label: "SKU #", value: product.sku } : null,
+    // SKU and Warranty are shown further down (Part Identifiers / Technical
+    // Specifications) instead — showing them here too would repeat the same
+    // fact twice on the page.
     product.material ? { label: "Material", value: product.material } : null,
   ].filter((row): row is { label: string; value: string } => row !== null);
 
@@ -180,36 +185,34 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
           )}
 
           <div className="mt-6 flex flex-wrap items-baseline gap-3">
-            <span className="text-3xl font-black text-accent">
-              A${product.price.toLocaleString()}.00
-            </span>
+            <span className="text-3xl font-black text-accent">{formatCurrency(product.price)}</span>
             {product.oldPrice && (
               <>
                 <span className="text-base text-fg-muted/60 line-through">
-                  A${product.oldPrice.toLocaleString()}.00
+                  {formatCurrency(product.oldPrice)}
                 </span>
                 <span className="rounded-full bg-ok/15 px-2.5 py-1 text-xs font-bold text-ok">
-                  Save ${(product.oldPrice - product.price).toLocaleString()}.00
+                  Save {formatCurrency(product.oldPrice - product.price)}
                 </span>
               </>
             )}
           </div>
 
-          <div className="mt-5 space-y-2 text-sm text-fg-muted">
-            <div className="flex items-center gap-2">
-              <Truck className="h-4 w-4 shrink-0 text-accent" /> Fast Dispatch
-              from Melbourne HQ
-            </div>
-            <div className="flex items-center gap-2">
-              <PackageCheck className="h-4 w-4 shrink-0 text-accent" />{" "}
-              {product.stock.label}
-            </div>
-          </div>
+          <ProductConditionQuantityRow
+            condition={product.condition}
+            qty={qty}
+            onQtyChange={setQty}
+            stockCount={product.stockCount}
+            stockStatus={product.stock.status}
+          />
 
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <QuantityStepper value={qty} onChange={setQty} />
+          {product.stock.status === "out-of-stock" && (
+            <p className="mt-5 text-sm font-semibold text-danger">{product.stock.label}</p>
+          )}
+
+          <div className="mt-5 flex flex-col gap-3">
             <Button
-              className="mt-2 w-full gap-2"
+              className="w-full gap-2"
               onClick={handleAddToCart}
               size="lg"
               disabled={product.stock.status === "out-of-stock"}
@@ -220,17 +223,19 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
                 ? "Added to Cart"
                 : "Add to Cart"}
             </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full gap-2"
+              onClick={handleBuyNow}
+              disabled={product.stock.status === "out-of-stock"}
+            >
+              <Zap className="h-4 w-4" />
+              Buy Now
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="lg"
-            className="mt-3 w-full gap-2"
-            onClick={handleBuyNow}
-            disabled={product.stock.status === "out-of-stock"}
-          >
-            <Zap className="h-4 w-4" />
-            Buy Now
-          </Button>
+
+          <ShippingReturnsPayments shippingCost={product.shippingCost} />
 
           {infoRows.length > 0 && (
             <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-6 text-sm">
@@ -251,6 +256,12 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
       <div className="mt-16">
         <ProductTabs product={product} />
       </div>
+
+      <SimilarItems
+        categoryId={product.categoryId}
+        categoryTitle={category?.title}
+        excludeProductId={product.id}
+      />
     </main>
   );
 }

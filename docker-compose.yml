@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
       target: server
       args:
-        VITE_API_URL: https://admin.partshubaustralia.com.au/api/v1
+        VITE_API_URL: https://app.autopartspro.au/api/v1
         # REQUIRED (see Dockerfile / src/lib/api/client.ts / MIGRATION.md) —
         # this tenant's own slug, never copy-pasted from another tenant's
         # compose file: a wrong-but-present value here silently serves that
@@ -29,7 +29,7 @@ services:
       dockerfile: Dockerfile
       target: nginx
       args:
-        VITE_API_URL: https://admin.partshubaustralia.com.au/api/v1
+        VITE_API_URL: https://app.autopartspro.au/api/v1
         # REQUIRED (see Dockerfile / src/lib/api/client.ts / MIGRATION.md) —
         # this tenant's own slug, never copy-pasted from another tenant's
         # compose file: a wrong-but-present value here silently serves that

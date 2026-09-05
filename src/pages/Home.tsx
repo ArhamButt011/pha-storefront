@@ -4,7 +4,7 @@ import type { Route } from "./+types/Home";
 import { Hero } from "@/sections/Hero";
 import { VehicleSelector } from "@/sections/VehicleSelector";
 import { Categories } from "@/sections/Categories";
-// import { Brands } from "@/sections/Brands";
+import { Brands } from "@/sections/Brands";
 import { Products } from "@/sections/Products";
 import { WhyChooseUs } from "@/sections/WhyChooseUs";
 import { LogisticsStats } from "@/sections/LogisticsStats";
@@ -15,12 +15,15 @@ import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { getOrigin } from "@/lib/seo";
 import type { CategoryWithImage } from "@/types/category";
 
-const FEATURED_COUNT = 5;
+// Matches each section's own grid layout: Categories is a single
+// lg:grid-cols-5 row, Products is two full lg:grid-cols-4 rows.
+const FEATURED_CATEGORIES_COUNT = 5;
+const FEATURED_PRODUCTS_COUNT = 8;
 
 export async function loader({ request }: Route.LoaderArgs) {
   const [categoriesRes, productsRes] = await Promise.all([
-    getCategories({ limit: FEATURED_COUNT, page: 1 }),
-    getProducts({ page: 1, limit: FEATURED_COUNT }),
+    getCategories({ limit: FEATURED_CATEGORIES_COUNT, page: 1 }),
+    getProducts({ page: 1, limit: FEATURED_PRODUCTS_COUNT }),
   ]);
 
   const featuredCategories: CategoryWithImage[] = categoriesRes.data.items.map((cat, index) => ({
@@ -62,7 +65,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       <Hero />
       <VehicleSelector />
       <Categories categories={loaderData.featuredCategories} />
-      {/* <Brands /> */}
+      <Brands />
       <Products products={loaderData.featuredProducts} />
       <WhyChooseUs />
       <LogisticsStats />
