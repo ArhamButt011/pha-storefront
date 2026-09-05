@@ -56,6 +56,10 @@ export interface ApiProductDisplay {
   authenticity: string | null;
   warranty: string | null;
   condition_notes: string | null;
+  // Backend-resolved listing-override-wins-else-product's-own-value — same
+  // precedence as condition/authenticity/warranty above (see
+  // listing.resolver.js#resolveIdentifiers in pha-dashboard, the same
+  // precedence the Google Merchant feed itself uses for this field).
   mpn: string | null;
   vehicle_fitments: ApiVehicle[];
 }
@@ -72,6 +76,10 @@ export interface ApiProduct {
   compare_price: number | null;
   cost_price: number | null;
   sku: string | null;
+  // Manufacturer Part Number — distinct from `sku` (an internal stock
+  // code). Confirmed against pha-dashboard's real API response and its
+  // Google Merchant adapter, which reads this same field (see
+  // listing.resolver.js#resolveIdentifiers).
   mpn: string | null;
   shipping_cost: number | null;
   brand: string | null;

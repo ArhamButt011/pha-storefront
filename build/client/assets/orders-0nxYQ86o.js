@@ -1,1 +1,0 @@
-import{a as t}from"./client-Fr3cYQ_G.js";const o=async a=>{const{data:r}=await t.post("/order",a);return r},n=async(a,r)=>{const{data:e}=await t.get(`/order/${a}`,{params:{token:r}});return e};export{o as c,n as g};

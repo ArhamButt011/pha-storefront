@@ -1,100 +1,113 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Zap } from "lucide-react";
+import type { Route } from "./+types/ProductDetails";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { ImageGallery } from "@/components/product/ImageGallery";
-import { ProductDetailSkeleton } from "@/components/product/ProductDetailSkeleton";
 import { FitmentBadge } from "@/components/product/FitmentBadge";
 import { ProductTabs } from "@/components/product/ProductTabs";
 import { ProductConditionQuantityRow } from "@/components/product/ProductConditionQuantityRow";
 import { ShippingReturnsPayments } from "@/components/product/ShippingReturnsPayments";
 import { SimilarItems } from "@/components/product/SimilarItems";
 import { Button } from "@/components/ui/button";
-import type { Product } from "@/data/products";
 import { getCategoryBySlug } from "@/data/categories";
 import { getProductBySlug } from "@/lib/api/product";
+import { ApiError } from "@/lib/api/client";
 import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
 import { formatCurrency } from "@/utils/currency";
+import { getOrigin, safeJsonLd, stripHtml, mapAvailability, mapItemCondition } from "@/lib/seo";
+import type { ApiProduct } from "@/types/apiProduct";
 
-export function ProductDetails() {
-  const { slug } = useParams();
+function buildProductJsonLd(product: ApiProduct, origin: string) {
+  const canonicalUrl = `${origin}/product/${product.slug}`;
+  // Same precedence pha-dashboard's own Google Merchant adapter resolves
+  // (listing override wins, else the product's own value) — see
+  // listing.resolver.js#resolveIdentifiers. NOT the same thing as `sku`
+  // (an internal stock code) — conflating the two would itself be a
+  // feed/page mismatch, since the real feed sends this value, not the SKU.
+  const mpn = product.display?.mpn ?? product.mpn ?? null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    description: stripHtml(product.description) || product.title,
+    ...(product.attachments?.length ? { image: product.attachments.map((a) => a.url) } : {}),
+    ...(product.sku ? { sku: product.sku } : {}),
+    // Omitted entirely when the backend has no brand for this product —
+    // the feed never fabricates one either (resolveIdentifiers only sends
+    // brand alongside a present mpn; a fabricated "Generic" here would
+    // itself be a page/feed mismatch of the kind this migration needs to
+    // avoid, even though the on-page *display* still shows "Generic" via
+    // mapApiProductToProduct's own, pre-existing fallback).
+    ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
+    offers: {
+      "@type": "Offer",
+      // Straight from the backend response — never rounded/reformatted, so
+      // this can never drift from the Merchant Center feed for the same SKU.
+      price: String(product.price),
+      priceCurrency: "AUD",
+      availability: `https://schema.org/${mapAvailability(product.stock_status)}`,
+      itemCondition: `https://schema.org/${mapItemCondition(product.display?.condition ?? product.condition)}`,
+      url: canonicalUrl,
+      ...(mpn ? { mpn } : {}),
+    },
+  };
+}
+
+export async function loader({ params, request }: Route.LoaderArgs) {
+  const { slug } = params;
+
+  try {
+    const res = await getProductBySlug(slug!);
+    return { product: res.data, origin: getOrigin(request) };
+  } catch (err) {
+    // Only an affirmative "doesn't exist" becomes a 404 — Merchant Center
+    // and Google both treat 404 as "permanently gone" and will drop the
+    // page from the index, which is the wrong outcome for a transient
+    // backend/network error. Anything else propagates and renders the
+    // root ErrorBoundary as a 500 instead.
+    if (err instanceof ApiError && err.status === 404) {
+      throw new Response("Not Found", { status: 404 });
+    }
+    throw err;
+  }
+}
+
+export function meta({ data }: Route.MetaArgs) {
+  if (!data) return [];
+  const { product, origin } = data;
+  const canonicalUrl = `${origin}/product/${product.slug}`;
+  const title = `${product.title} | Parts Hub Australia`;
+  const description = stripHtml(product.description).slice(0, 300) || product.title;
+  const image = product.attachments?.[0]?.url;
+
+  return [
+    { title },
+    { name: "description", content: description },
+    { property: "og:type", content: "product" },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+    { property: "og:url", content: canonicalUrl },
+    ...(image ? [{ property: "og:image", content: image }] : []),
+  ];
+}
+
+export default function ProductDetails({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    // Resets the picker back to 1 on every navigation between products —
-    // otherwise a quantity chosen on a high-stock product could visually
-    // exceed the next product's (lower) stock cap for a moment.
-    setQty(1);
-
-    async function load() {
-      if (!slug) {
-        setError("Product not found.");
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await getProductBySlug(slug);
-        if (cancelled) return;
-        setProduct(mapApiProductToProduct(res.data));
-      } catch (err) {
-        if (!cancelled) {
-          setError("This part may have been removed or the link is incorrect.");
-          toast.error("Couldn't load this product. Please try again.");
-        }
-        console.error(err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
-
-  if (loading) {
-    return <ProductDetailSkeleton />;
-  }
-
-  if (error || !product) {
-    return (
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-32 text-center sm:px-6 lg:px-8">
-        <h1 className="font-display text-2xl font-black text-fg">
-          Product not found
-        </h1>
-        <p className="mt-3 text-fg-muted">
-          {error ?? "This part may have been removed or the link is incorrect."}
-        </p>
-        <Link
-          to="/shop"
-          className="mt-6 inline-block text-accent hover:underline"
-        >
-          Back to all parts
-        </Link>
-      </main>
-    );
-  }
+  const product = mapApiProductToProduct(loaderData.product);
+  const jsonLd = buildProductJsonLd(loaderData.product, loaderData.origin);
 
   const category = getCategoryBySlug(product.categorySlug);
   const gallery = product.gallery ?? [product.img];
 
   const infoRows = [
-    // { label: "Brand", value: product.brandFull ?? product.brand },
     // SKU and Warranty are shown further down (Part Identifiers / Technical
     // Specifications) instead — showing them here too would repeat the same
     // fact twice on the page.
@@ -102,12 +115,7 @@ export function ProductDetails() {
   ].filter((row): row is { label: string; value: string } => row !== null);
 
   function handleAddToCart() {
-    if (!product) return;
-
-    if (product.stock.status === "out-of-stock") {
-      return;
-    }
-
+    if (product.stock.status === "out-of-stock") return;
     try {
       addToCart(productToCartItem(product, qty));
       setAdded(true);
@@ -118,9 +126,7 @@ export function ProductDetails() {
   }
 
   function handleBuyNow() {
-    if (!product) return;
     if (product.stock.status === "out-of-stock") return;
-
     try {
       addToCart(productToCartItem(product, qty));
       navigate("/checkout");
@@ -131,6 +137,16 @@ export function ProductDetails() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-20 lg:pt-28 sm:px-6 lg:px-8">
+      {/* React 19 hoists <link>/<title>/<meta> rendered anywhere in the tree
+          into <head> — the route module's `links` export can't do this
+          since it has no access to loader data (needed for the slug). */}
+      <link rel="canonical" href={`${loaderData.origin}/product/${loaderData.product.slug}`} />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
+      />
+
       <div className="mb-6">
         <Breadcrumb
           items={[
@@ -153,11 +169,6 @@ export function ProductDetails() {
                 {product.grade}
               </span>
             )}
-            {/* <div className="ml-auto flex items-center gap-2 text-sm">
-              <StarRating rating={product.rating} />
-              <span className="font-semibold text-fg">{product.rating.toFixed(1)}</span>
-              {product.reviewCount && <span className="text-fg-muted">({product.reviewCount} Reviews)</span>}
-            </div> */}
           </div>
 
           <h1 className="mt-3 font-display text-2xl font-black leading-tight text-fg sm:text-3xl">
@@ -174,9 +185,7 @@ export function ProductDetails() {
           )}
 
           <div className="mt-6 flex flex-wrap items-baseline gap-3">
-            <span className="text-3xl font-black text-accent">
-              {formatCurrency(product.price)}
-            </span>
+            <span className="text-3xl font-black text-accent">{formatCurrency(product.price)}</span>
             {product.oldPrice && (
               <>
                 <span className="text-base text-fg-muted/60 line-through">

@@ -1,12 +1,44 @@
 services:
-  storefront:
+  # Renders pages — loaders, meta, JSON-LD. Not directly reachable from
+  # pha-net; only nginx talks to it (see nginx/nginx.conf's upstream).
+  app:
+    image: pha-storefront-app:${STOREFRONT_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
+      target: server
       args:
         VITE_API_URL: https://app.autopartspro.au/api/v1
+        # REQUIRED (see Dockerfile / src/lib/api/client.ts / MIGRATION.md) —
+        # this tenant's own slug, never copy-pasted from another tenant's
+        # compose file: a wrong-but-present value here silently serves that
+        # other tenant's data, not an error.
+        VITE_TENANT_SLUG: parts-hub-australia
+    restart: unless-stopped
+    networks:
+      - pha-net
+
+  # Keeps the container name/hostname the rest of pha-net already expects
+  # (TLS termination + reverse proxy happens upstream of this compose file);
+  # serves fingerprinted client assets directly, proxies everything else to
+  # `app`.
+  storefront:
+    image: pha-storefront-nginx:${STOREFRONT_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: nginx
+      args:
+        VITE_API_URL: https://app.autopartspro.au/api/v1
+        # REQUIRED (see Dockerfile / src/lib/api/client.ts / MIGRATION.md) —
+        # this tenant's own slug, never copy-pasted from another tenant's
+        # compose file: a wrong-but-present value here silently serves that
+        # other tenant's data, not an error.
+        VITE_TENANT_SLUG: parts-hub-australia
     hostname: pha-storefront
     restart: unless-stopped
+    depends_on:
+      - app
     networks:
       - pha-net
 

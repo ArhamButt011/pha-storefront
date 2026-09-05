@@ -144,3 +144,5 @@ export function Invoice() {
     </div>
   );
 }
+
+export default Invoice;

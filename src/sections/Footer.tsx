@@ -1,11 +1,18 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Phone, Mail, MapPin, ArrowRight } from "lucide-react";
 import { toast } from "react-toastify";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { subscribeNewsletter } from "@/lib/api/newsletter";
+import { SUPPORT_EMAIL } from "@/constants/contact";
 
-const CUSTOMER_SERVICE_LINKS = ["Returns Policy", "Shipping Info"];
+// `to: null` means the page doesn't exist yet — renders as a plain,
+// non-navigating placeholder until it does.
+const CUSTOMER_SERVICE_LINKS: { label: string; to: string | null }[] = [
+  { label: "Returns Policy", to: "/returns-policy" },
+  { label: "Shipping Info", to: null },
+];
 
 export function Footer() {
   const [email, setEmail] = useState("");
@@ -49,7 +56,7 @@ export function Footer() {
               <a href="tel:0393575313" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-fg-muted transition-all hover:border-accent/50 hover:bg-accent/10 hover:text-accent">
                 <Phone className="h-4 w-4" />
               </a>
-              <a href="mailto:sales@partshubaustralia.com.au" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-fg-muted transition-all hover:border-accent/50 hover:bg-accent/10 hover:text-accent">
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-fg-muted transition-all hover:border-accent/50 hover:bg-accent/10 hover:text-accent">
                 <Mail className="h-4 w-4" />
               </a>
               <a
@@ -66,11 +73,21 @@ export function Footer() {
           <div>
             <h4 className="mb-5 font-display text-xs font-bold uppercase tracking-wider text-fg">Customer Service</h4>
             <ul className="space-y-3">
-              {CUSTOMER_SERVICE_LINKS.map((l) => (
-                <li key={l}>
-                  <a href="#" className="text-sm text-fg-muted transition-colors hover:text-accent">{l}</a>
-                </li>
-              ))}
+              {CUSTOMER_SERVICE_LINKS.map((l) =>
+                l.to ? (
+                  <li key={l.label}>
+                    <Link to={l.to} className="text-sm text-fg-muted transition-colors hover:text-accent">
+                      {l.label}
+                    </Link>
+                  </li>
+                ) : (
+                  <li key={l.label}>
+                    <a href="#" className="text-sm text-fg-muted transition-colors hover:text-accent">
+                      {l.label}
+                    </a>
+                  </li>
+                ),
+              )}
             </ul>
           </div>
 

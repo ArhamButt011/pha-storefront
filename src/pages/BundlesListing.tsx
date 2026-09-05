@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { Route } from "./+types/BundlesListing";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { BundlesHero } from "@/components/bundles/BundlesHero";
 import { BundleCard } from "@/components/bundles/BundleCard";
@@ -6,7 +7,21 @@ import { WhyChooseBundles } from "@/components/bundles/WhyChooseBundles";
 import { BUNDLES } from "@/data/bundles";
 import { MAKES } from "@/data/vehicles";
 
-export function BundlesListing() {
+// NOTE: no loader — this page's data (BUNDLES/MAKES) is static, local
+// module data with no backend fetch to move server-side; it already
+// server-renders fully as soon as the route is SSR'd.
+export function meta({}: Route.MetaArgs) {
+  const title = "Popular Bundles | Parts Hub Australia";
+  const description = "Curated performance part bundles for popular makes — built to fit together, priced to bundle.";
+  return [
+    { title },
+    { name: "description", content: description },
+    { property: "og:title", content: title },
+    { property: "og:description", content: description },
+  ];
+}
+
+export default function BundlesListing() {
   const [vehicleValue, setVehicleValue] = useState("");
   const [appliedMake, setAppliedMake] = useState<string | null>(null);
 

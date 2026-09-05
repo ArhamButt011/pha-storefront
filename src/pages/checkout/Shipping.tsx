@@ -7,6 +7,7 @@ import { FitmentGuaranteeBanner } from "@/components/checkout/FitmentGuaranteeBa
 import { ShippingForm } from "@/components/checkout/ShippingForm";
 import { CheckoutOrderSummary } from "@/components/checkout/CheckoutOrderSummary";
 import { useCart } from "@/hooks/useCart";
+import { useHasRehydrated } from "@/hooks/useHasRehydrated";
 import { useVehicle } from "@/context/VehicleContext";
 import { createOrder } from "@/lib/api/orders";
 import { setOrder } from "@/store/checkoutSlice";
@@ -44,12 +45,19 @@ export function CheckoutShipping() {
   const [shipping, setShipping] = useState<ShippingDetails>(INITIAL_SHIPPING);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The cart is only readable from localStorage, client-side, after
+  // redux-persist rehydrates (see useHasRehydrated's own comment on the
+  // real bug this fixes) — until then, `items` is indistinguishable from
+  // "genuinely empty", so neither the redirect nor the render below can
+  // trust it yet.
+  const hasRehydrated = useHasRehydrated();
 
   useEffect(() => {
+    if (!hasRehydrated) return;
     if (items.length === 0) navigate("/cart", { replace: true });
-  }, [items.length, navigate]);
+  }, [hasRehydrated, items.length, navigate]);
 
-  if (items.length === 0) return null;
+  if (!hasRehydrated || items.length === 0) return null;
 
 const vehicleLabel = vehicle?.make
   ? [vehicle.make, vehicle.model, vehicle.model_code].filter(Boolean).join(" ")
@@ -145,3 +153,5 @@ const vehicleLabel = vehicle?.make
     </div>
   );
 }
+
+export default CheckoutShipping;

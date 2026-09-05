@@ -32,3 +32,7 @@ export function Layout() {
     </SearchModalProvider>
   );
 }
+
+// routes.ts's layout() references this file directly — a route module's
+// component must be its `default` export.
+export default Layout;
