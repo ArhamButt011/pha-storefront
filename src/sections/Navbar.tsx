@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ShoppingCart, User } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLinkItem } from "@/components/layout/NavLinkItem";
 import { HeaderSearchBar } from "@/components/search/HeaderSearchBar";
@@ -81,13 +81,6 @@ export function Navbar({ onInquiry }: Props) {
                   </span>
                 )}
               </Link>
-              <button
-                className="p-2 text-fg-muted transition-colors hover:text-fg cursor-pointer"
-                aria-label="Account"
-                onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}
-              >
-                <User className="h-5 w-5" />
-              </button>
             </div>
           </div>
 
@@ -147,9 +140,6 @@ export function Navbar({ onInquiry }: Props) {
         <div className="mt-auto flex flex-col gap-3">
           <Button variant="outline" className="w-full" onClick={() => { setMenuOpen(false); onInquiry(); }}>
             Enquire
-          </Button>
-          <Button className="w-full" onClick={() => window.open("https://admin.partshubaustralia.com.au/login", "_blank")}>
-            Sign In
           </Button>
         </div>
       </div>

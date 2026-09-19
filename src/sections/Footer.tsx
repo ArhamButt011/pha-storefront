@@ -125,6 +125,17 @@ export function Footer() {
           <p className="text-xs text-fg-muted">
             © {new Date().getFullYear()} Parts Hub Australia. All rights reserved. Precision Engineered.
           </p>
+          <p className="text-xs text-fg-muted">
+            Powered by{" "}
+            <a
+              href="https://autopartspro.au/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-fg transition-colors hover:text-accent"
+            >
+              AutoPartsPro
+            </a>
+          </p>
         </div>
       </div>
     </footer>
