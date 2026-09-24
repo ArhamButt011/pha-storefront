@@ -14,6 +14,8 @@ services:
         # compose file: a wrong-but-present value here silently serves that
         # other tenant's data, not an error.
         VITE_TENANT_SLUG: parts-hub-australia
+        # Optional, per-tenant — this tenant's own GTM container (see .env.example).
+        VITE_GTM_ID: GTM-MG58PQFN
     restart: unless-stopped
     networks:
       - pha-net
@@ -35,6 +37,8 @@ services:
         # compose file: a wrong-but-present value here silently serves that
         # other tenant's data, not an error.
         VITE_TENANT_SLUG: parts-hub-australia
+        # Optional, per-tenant — this tenant's own GTM container (see .env.example).
+        VITE_GTM_ID: GTM-MG58PQFN
     hostname: pha-storefront
     restart: unless-stopped
     depends_on:

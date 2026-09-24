@@ -26,6 +26,18 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 // this necessarily duplicates since it must run outside the React bundle.
 const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("pha-theme");var d=s==="light"?false:s==="dark"?true:window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
 
+// Google Tag Manager — snippet as supplied by the SEO team, verbatim apart
+// from the container ID being interpolated. Goes as high in <head> as
+// possible; the <noscript> iframe fallback sits right after <body> opens.
+// Per-tenant (like VITE_TENANT_SLUG) and optional: unset => no GTM at all,
+// so local dev and tenants without a container don't send any tracking.
+const GTM_ID = import.meta.env.VITE_GTM_ID;
+const GTM_SCRIPT = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`;
+
 export function Layout({ children }: { children: ReactNode }) {
   return (
     // suppressHydrationWarning: the inline theme script above may mutate
@@ -36,6 +48,9 @@ export function Layout({ children }: { children: ReactNode }) {
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
+        {/* Google Tag Manager */}
+        {GTM_ID && <script dangerouslySetInnerHTML={{ __html: GTM_SCRIPT }} />}
+        {/* End Google Tag Manager */}
         <link rel="icon" type="image/svg+xml" href="/branding/logo.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {/* Site-wide fallback — SSR routes override via their own `meta` export,
@@ -58,6 +73,18 @@ export function Layout({ children }: { children: ReactNode }) {
         <Links />
       </head>
       <body>
+        {/* Google Tag Manager (noscript) */}
+        {GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
+        {/* End Google Tag Manager (noscript) */}
         {children}
         <ScrollRestoration />
         <Scripts />

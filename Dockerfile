@@ -28,6 +28,9 @@ ENV VITE_API_URL=$VITE_API_URL
 # broken (or, with the wrong-but-present value, WRONG TENANT'S) data.
 ARG VITE_TENANT_SLUG
 ENV VITE_TENANT_SLUG=$VITE_TENANT_SLUG
+# Optional, per-tenant — see .env.example. Empty => no GTM rendered.
+ARG VITE_GTM_ID
+ENV VITE_GTM_ID=$VITE_GTM_ID
 RUN npm run build
 
 FROM node:20-alpine AS server
