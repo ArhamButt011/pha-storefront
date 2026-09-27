@@ -18,6 +18,7 @@ export function productToCartItem(product: Product, quantity?: number) {
     meta,
     shippingNote: product.stock.label,
     shippingCost: product.shippingCost ?? null,
+    shippingMethod: product.shippingMethod,
     maxQuantity: product.stockCount ?? null,
   };
 }

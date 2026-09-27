@@ -1,23 +1,27 @@
 import { Truck, RotateCcw, CreditCard } from "lucide-react";
 import { formatCurrency } from "@/utils/currency";
+import { CALCULATED_SHIPPING_LABEL, SHIPPING_METHOD } from "@/constants/shipping";
+import type { ShippingMethod } from "@/types/apiProduct";
 
 export interface ShippingReturnsPaymentsProps {
   shippingCost?: number | null;
+  shippingMethod?: ShippingMethod;
 }
 
 const RETURNS_TEXT = "30-day returns accepted on unused parts in original packaging.";
 const PAYMENTS_TEXT = "Secure checkout via Stripe — all major credit and debit cards accepted.";
 
-// Adapted from a marketplace listing's "Postage, returns and payments" block
-// — kept to the facts this storefront actually has (no buyer-pays-return-postage
-// fine print or card-brand logos we can't source/verify).
-export function ShippingReturnsPayments({ shippingCost }: ShippingReturnsPaymentsProps) {
+// Marketplace-style postage block, limited to facts this store can verify.
+export function ShippingReturnsPayments({ shippingCost, shippingMethod }: ShippingReturnsPaymentsProps) {
+  const calculated = shippingMethod === SHIPPING_METHOD.CALCULATED;
   const rows = [
     {
       icon: Truck,
       label: "Postage",
-      value: shippingCost ? formatCurrency(shippingCost) : "Free Shipping",
-      detail: "Fast dispatch from our Melbourne HQ",
+      value: calculated ? CALCULATED_SHIPPING_LABEL : shippingCost ? formatCurrency(shippingCost) : "Free Shipping",
+      detail: calculated
+        ? "Courier rate for your postcode, shown before you pay."
+        : "Fast dispatch from our Melbourne HQ",
     },
     {
       icon: RotateCcw,

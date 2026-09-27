@@ -19,6 +19,8 @@ export function ShippingForm({ values, onChange }: ShippingFormProps) {
         deliveryMethod={values.deliveryMethod}
         shippingAddress={values.shippingAddress}
         onShippingChange={(patch) => onChange({ shippingAddress: { ...values.shippingAddress, ...patch } })}
+        addressType={values.addressType}
+        onAddressTypeChange={(addressType) => onChange({ addressType })}
         billingSameAsShipping={values.billingSameAsShipping}
         onBillingSameChange={(billingSameAsShipping) => onChange({ billingSameAsShipping })}
         billingAddress={values.billingAddress}

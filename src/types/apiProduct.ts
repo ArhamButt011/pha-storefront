@@ -30,8 +30,7 @@ export interface ApiListingFitment {
   year_to: number | null;
 }
 
-// Curated, public-safe subset of a MarketplaceListing (currently eBay only) —
-// only present on the product detail response, not the list.
+// Public-safe subset of an eBay listing; only on the detail response.
 export interface ApiMarketplaceListing {
   platform: string;
   title_override: string | null;
@@ -48,21 +47,19 @@ export interface ApiMarketplaceListing {
   fitment: ApiListingFitment[];
 }
 
-// Backend-resolved "which value wins" precedence (listing override vs. the
-// product's own value) plus deduped vehicle fitment — render this as-is
-// rather than re-deriving it on the client. Only on the detail response.
+// Server-resolved values (override, else product); render as-is. Detail only.
 export interface ApiProductDisplay {
   condition: string | null;
   authenticity: string | null;
   warranty: string | null;
   condition_notes: string | null;
-  // Backend-resolved listing-override-wins-else-product's-own-value — same
-  // precedence as condition/authenticity/warranty above (see
-  // listing.resolver.js#resolveIdentifiers in pha-dashboard, the same
-  // precedence the Google Merchant feed itself uses for this field).
+  // Same precedence as above and as the Google Merchant feed.
   mpn: string | null;
   vehicle_fitments: ApiVehicle[];
 }
+
+// standard: flat shipping_cost per unit; calculated: courier quote at checkout.
+export type ShippingMethod = "standard" | "calculated";
 
 export interface ApiProduct {
   _id: string;
@@ -76,12 +73,10 @@ export interface ApiProduct {
   compare_price: number | null;
   cost_price: number | null;
   sku: string | null;
-  // Manufacturer Part Number — distinct from `sku` (an internal stock
-  // code). Confirmed against pha-dashboard's real API response and its
-  // Google Merchant adapter, which reads this same field (see
-  // listing.resolver.js#resolveIdentifiers).
+  // Manufacturer part number; `sku` is the internal stock code.
   mpn: string | null;
   shipping_cost: number | null;
+  shipping_method?: ShippingMethod;
   brand: string | null;
   condition: string;
   authenticity: string | null;
@@ -97,9 +92,7 @@ export interface ApiProduct {
   display?: ApiProductDisplay;
 }
 
-// Lightweight shape returned by GET /product/search/suggest — only the
-// fields the autocomplete dropdown renders (see product.service.js's
-// getProductSuggestions), not a full ApiProduct.
+// GET /product/search/suggest: just what the autocomplete renders.
 export interface ApiProductSuggestion {
   _id: string;
   title: string;

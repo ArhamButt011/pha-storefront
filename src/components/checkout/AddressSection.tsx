@@ -3,8 +3,8 @@ import { IconInput } from "@/components/ui/icon-input";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AU_STATES, PICKUP_LOCATION } from "@/constants/checkout";
-import type { AddressFields, DeliveryMethod } from "@/types/checkout";
+import { ADDRESS_TYPE_OPTIONS, AU_STATES, PICKUP_LOCATION } from "@/constants/checkout";
+import type { AddressFields, AddressType, DeliveryMethod } from "@/types/checkout";
 
 function AddressFieldGroup({
   values,
@@ -56,6 +56,8 @@ interface AddressSectionProps {
   deliveryMethod: DeliveryMethod;
   shippingAddress: AddressFields;
   onShippingChange: (patch: Partial<AddressFields>) => void;
+  addressType: AddressType;
+  onAddressTypeChange: (type: AddressType) => void;
   billingSameAsShipping: boolean;
   onBillingSameChange: (checked: boolean) => void;
   billingAddress: AddressFields;
@@ -66,6 +68,8 @@ export function AddressSection({
   deliveryMethod,
   shippingAddress,
   onShippingChange,
+  addressType,
+  onAddressTypeChange,
   billingSameAsShipping,
   onBillingSameChange,
   billingAddress,
@@ -95,6 +99,15 @@ export function AddressSection({
           <h2 className="text-lg font-bold text-fg">Shipping Address</h2>
         </div>
         <AddressFieldGroup values={shippingAddress} onChange={onShippingChange} />
+        <div className="mt-4 space-y-1.5 sm:w-60">
+          <label className="text-xs font-semibold uppercase tracking-wider text-fg-muted">Address Type</label>
+          <Select
+            value={addressType}
+            onValueChange={(v) => onAddressTypeChange(v as AddressType)}
+            options={ADDRESS_TYPE_OPTIONS}
+            isSearchable={false}
+          />
+        </div>
       </div>
 
       <div className="rounded-2xl border border-border bg-bg-2 p-6">

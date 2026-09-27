@@ -22,11 +22,7 @@ import type { ApiProduct } from "@/types/apiProduct";
 
 function buildProductJsonLd(product: ApiProduct, origin: string) {
   const canonicalUrl = `${origin}/product/${product.slug}`;
-  // Same precedence pha-dashboard's own Google Merchant adapter resolves
-  // (listing override wins, else the product's own value) — see
-  // listing.resolver.js#resolveIdentifiers. NOT the same thing as `sku`
-  // (an internal stock code) — conflating the two would itself be a
-  // feed/page mismatch, since the real feed sends this value, not the SKU.
+  // Same MPN the Merchant feed sends (override, else product); not the SKU.
   const mpn = product.display?.mpn ?? product.mpn ?? null;
 
   return {
@@ -36,17 +32,11 @@ function buildProductJsonLd(product: ApiProduct, origin: string) {
     description: stripHtml(product.description) || product.title,
     ...(product.attachments?.length ? { image: product.attachments.map((a) => a.url) } : {}),
     ...(product.sku ? { sku: product.sku } : {}),
-    // Omitted entirely when the backend has no brand for this product —
-    // the feed never fabricates one either (resolveIdentifiers only sends
-    // brand alongside a present mpn; a fabricated "Generic" here would
-    // itself be a page/feed mismatch of the kind this migration needs to
-    // avoid, even though the on-page *display* still shows "Generic" via
-    // mapApiProductToProduct's own, pre-existing fallback).
+    // No brand, no field: the feed never invents one, so neither does this.
     ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
     offers: {
       "@type": "Offer",
-      // Straight from the backend response — never rounded/reformatted, so
-      // this can never drift from the Merchant Center feed for the same SKU.
+      // Unformatted backend value, so it can't drift from the Merchant feed.
       price: String(product.price),
       priceCurrency: "AUD",
       availability: `https://schema.org/${mapAvailability(product.stock_status)}`,
@@ -64,11 +54,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     const res = await getProductBySlug(slug!);
     return { product: res.data, origin: getOrigin(request) };
   } catch (err) {
-    // Only an affirmative "doesn't exist" becomes a 404 — Merchant Center
-    // and Google both treat 404 as "permanently gone" and will drop the
-    // page from the index, which is the wrong outcome for a transient
-    // backend/network error. Anything else propagates and renders the
-    // root ErrorBoundary as a 500 instead.
+    // Only a real 404 is a 404; Google de-indexes it, so outages must 500.
     if (err instanceof ApiError && err.status === 404) {
       throw new Response("Not Found", { status: 404 });
     }
@@ -108,9 +94,7 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
   const gallery = product.gallery ?? [product.img];
 
   const infoRows = [
-    // SKU and Warranty are shown further down (Part Identifiers / Technical
-    // Specifications) instead — showing them here too would repeat the same
-    // fact twice on the page.
+    // SKU and Warranty appear further down, so they're not repeated here.
     product.material ? { label: "Material", value: product.material } : null,
   ].filter((row): row is { label: string; value: string } => row !== null);
 
@@ -235,7 +219,7 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
             </Button>
           </div>
 
-          <ShippingReturnsPayments shippingCost={product.shippingCost} />
+          <ShippingReturnsPayments shippingCost={product.shippingCost} shippingMethod={product.shippingMethod} />
 
           {infoRows.length > 0 && (
             <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border pt-6 text-sm">

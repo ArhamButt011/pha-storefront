@@ -12,8 +12,7 @@ function formatYearRange(yearFrom: number | null, yearTo: number | null): string
   return "—";
 }
 
-// Formatting only — which fitments to show and de-duplication already
-// happened server-side (item.display.vehicle_fitments).
+// Formatting only; the server already picked and deduped the fitments.
 function fitmentToRow(f: ApiVehicle): VehicleFitmentRow {
   return {
     make: f.make || "—",
@@ -23,10 +22,7 @@ function fitmentToRow(f: ApiVehicle): VehicleFitmentRow {
   };
 }
 
-// Generic spec rows sourced from the listing's free-form item specifics
-// (e.g. "Color: Black") — MPN and superseded part numbers get their own
-// dedicated fields/section instead (see PartIdentifiers), since they're part
-// identifiers a buyer searches by, not general specifications.
+// Item-specific rows; part numbers get their own PartIdentifiers section.
 function buildSpecs(item: ApiProduct) {
   const specs: { label: string; value: string }[] = [];
   const aspects = item.listings?.[0]?.aspects;
@@ -79,14 +75,9 @@ vehicleFit: item.vehicle ?? null,
     mpn: display?.mpn ?? item.mpn ?? undefined,
     supersededPartNumbers: item.listings?.[0]?.superseded_part_number ?? [],
     shippingCost: item.shipping_cost ?? null,
+    shippingMethod: item.shipping_method,
     stockCount: item.stock_count ?? null,
-    // `display` is the backend's already-resolved precedence (listing
-    // override wins, else the product's own value) — rendered as-is rather
-    // than re-derived here. Title/description/price/photo overrides are
-    // deliberately excluded from `display` server-side: those are meant for
-    // that specific marketplace's listing page, not the storefront (the
-    // description override in particular is a full HTML page template, not
-    // plain text fit for this display).
+    // Server-resolved; marketplace-only overrides are excluded from display.
     condition: display?.condition ?? item.condition ?? undefined,
     conditionNotes: display?.condition_notes ?? undefined,
     authenticity: display?.authenticity ?? item.authenticity ?? undefined,

@@ -1,15 +1,18 @@
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/currency";
+import { CALCULATED_SHIPPING_LABEL } from "@/constants/shipping";
 
 interface OrderSummaryProps {
   subtotal: number;
-  /** Real per-item shipping cost total from the backend, 0 = free */
+  /** Flat-rate shipping total from the backend, 0 = free */
   shipping: number;
+  /** Some lines are priced by courier quote, known only at checkout */
+  hasCalculatedShipping?: boolean;
   onCheckout?: () => void;
 }
 
-export function OrderSummary({ subtotal, shipping, onCheckout }: OrderSummaryProps) {
+export function OrderSummary({ subtotal, shipping, hasCalculatedShipping = false, onCheckout }: OrderSummaryProps) {
   const total = subtotal + shipping;
 
   return (
@@ -23,15 +26,19 @@ export function OrderSummary({ subtotal, shipping, onCheckout }: OrderSummaryPro
         </div>
         <div className="flex items-center justify-between border-b border-border pb-3">
           <span className="text-fg-muted">Express Shipping</span>
-          <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
-            {shipping > 0 ? formatCurrency(shipping) : "Free"}
-          </span>
+          {hasCalculatedShipping ? (
+            <span className="font-semibold text-fg-muted">{CALCULATED_SHIPPING_LABEL}</span>
+          ) : (
+            <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
+              {shipping > 0 ? formatCurrency(shipping) : "Free"}
+            </span>
+          )}
         </div>
       </div>
 
       <div className="mt-4">
         <div className="flex items-baseline justify-between">
-          <span className="font-bold text-fg">Total</span>
+          <span className="font-bold text-fg">{hasCalculatedShipping ? "Total (excl. shipping)" : "Total"}</span>
           <span className="font-display text-2xl font-black text-accent">{formatCurrency(total)}</span>
         </div>
         <p className="text-right text-xs text-fg-muted">AUD Dollars</p>

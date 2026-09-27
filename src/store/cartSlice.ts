@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { ShippingMethod } from "@/types/apiProduct";
 
 export interface CartItem {
   id: string;
@@ -15,7 +16,9 @@ export interface CartItem {
   shippingNote?: string;
   /** Per-item shipping surcharge from the backend, null/0 = free */
   shippingCost?: number | null;
-  /** Available stock from the backend at add-to-cart time; null = untracked/unlimited */
+  /** "calculated" is priced by courier quote at checkout, not shippingCost */
+  shippingMethod?: ShippingMethod;
+  /** Stock when added to the cart; null = untracked/unlimited */
   maxQuantity?: number | null;
 }
 
@@ -29,11 +32,7 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // The cart's quantity cap is enforced here, not just in the UI (stepper
-    // max, disabled buttons) — this is the single source of truth so the
-    // stored quantity can never exceed available stock regardless of which
-    // call site dispatched the change. `maxQuantity` null/undefined means
-    // untracked/unlimited stock, so no cap applies.
+    // The one place the stock cap is enforced; null maxQuantity = no cap.
     addItem(state, action: PayloadAction<Omit<CartItem, "quantity"> & { quantity?: number }>) {
       const requested = action.payload.quantity ?? 1;
       const max = action.payload.maxQuantity;

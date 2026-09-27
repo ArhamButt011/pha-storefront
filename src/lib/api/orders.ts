@@ -1,6 +1,6 @@
 import { apiClient } from "./client";
 import type { BeResponse } from "./base";
-import type { DeliveryMethod } from "@/types/checkout";
+import type { AddressType, DeliveryMethod } from "@/types/checkout";
 
 export interface OrderItemPayload {
   product: string;
@@ -19,14 +19,14 @@ export interface OrderAddressPayload {
   suburb: string;
   state: string;
   postcode: string;
+  address_type?: AddressType | null;
 }
 
 export interface CreateOrderPayload {
   items: OrderItemPayload[];
   customer: OrderCustomerPayload;
   delivery_method: DeliveryMethod;
-  // Omit entirely for pickup — the backend rejects these fields being sent
-  // (rather than ignored) when delivery_method is "pickup".
+  // Omit for pickup; the backend rejects these fields rather than ignoring them.
   shipping_address?: OrderAddressPayload;
   billing_address?: OrderAddressPayload | null;
 }
@@ -48,8 +48,7 @@ export interface ApiOrderItem {
   quantity: number;
 }
 
-// Populated by the backend from the linked Payment doc — card_brand/last4
-// are only set once the payment has actually succeeded.
+// From the linked Payment; card_brand/last4 only once payment succeeded.
 export interface ApiOrderPayment {
   _id: string;
   status: string;
@@ -80,8 +79,7 @@ export interface ApiOrder {
   payment: ApiOrderPayment | null;
 }
 
-// Only present in the create-order response — never returned again by
-// GET /order/:id, which strips it server-side.
+// Only in the create-order response; GET /order/:id strips it.
 export interface ApiOrderCreated extends ApiOrder {
   guest_access_token: string;
 }

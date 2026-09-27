@@ -8,6 +8,7 @@ import { ShippingForm } from "@/components/checkout/ShippingForm";
 import { CheckoutOrderSummary } from "@/components/checkout/CheckoutOrderSummary";
 import { useCart } from "@/hooks/useCart";
 import { useHasRehydrated } from "@/hooks/useHasRehydrated";
+import { useShippingQuote } from "@/hooks/useShippingQuote";
 import { useVehicle } from "@/context/VehicleContext";
 import { createOrder } from "@/lib/api/orders";
 import { setOrder } from "@/store/checkoutSlice";
@@ -22,6 +23,7 @@ const INITIAL_SHIPPING: ShippingDetails = {
   phone: "",
   deliveryMethod: "delivery",
   shippingAddress: { ...EMPTY_ADDRESS },
+  addressType: "residential",
   billingSameAsShipping: true,
   billingAddress: { ...EMPTY_ADDRESS },
 };
@@ -45,12 +47,9 @@ export function CheckoutShipping() {
   const [shipping, setShipping] = useState<ShippingDetails>(INITIAL_SHIPPING);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // The cart is only readable from localStorage, client-side, after
-  // redux-persist rehydrates (see useHasRehydrated's own comment on the
-  // real bug this fixes) — until then, `items` is indistinguishable from
-  // "genuinely empty", so neither the redirect nor the render below can
-  // trust it yet.
+  // Before redux-persist rehydrates, an empty cart may not really be empty.
   const hasRehydrated = useHasRehydrated();
+  const shippingQuote = useShippingQuote(items, shipping.shippingAddress, shipping.addressType, shipping.deliveryMethod);
 
   useEffect(() => {
     if (!hasRehydrated) return;
@@ -79,8 +78,7 @@ const vehicleLabel = vehicle?.make
     const isPickup = shipping.deliveryMethod === "pickup";
 
     try {
-      // Prices/stock are re-derived server-side from product/variant ids —
-      // only ids and quantities are sent, never the cart's own line prices.
+      // Only ids and quantities; the server re-derives every price.
       const res = await createOrder({
         items: items.map((item) => ({ product: item.id, quantity: item.quantity })),
         customer: {
@@ -89,12 +87,11 @@ const vehicleLabel = vehicle?.make
           phone: shipping.phone,
         },
         delivery_method: shipping.deliveryMethod,
-        // Backend rejects these fields outright for pickup — omit rather
-        // than send null/empty.
+        // The backend rejects address fields on pickup, even as null.
         ...(isPickup
           ? {}
           : {
-              shipping_address: shipping.shippingAddress,
+              shipping_address: { ...shipping.shippingAddress, address_type: shipping.addressType },
               billing_address: shipping.billingSameAsShipping ? null : shipping.billingAddress,
             }),
       });
@@ -144,6 +141,7 @@ const vehicleLabel = vehicle?.make
               subtotal={totalPrice}
               vehicleMake={vehicle?.make}
               deliveryMethod={shipping.deliveryMethod}
+              shippingQuote={shippingQuote}
               onContinue={handleContinue}
               submitting={submitting}
             />

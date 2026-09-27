@@ -1,3 +1,4 @@
+import type { ShippingMethod } from "@/types/apiProduct";
 export type StockStatus = "in-stock" | "limited" | "out-of-stock";
 export type Badge = "top-rated" | "sale";
 
@@ -56,6 +57,7 @@ make?: string | null;
   mpn?: string;
   supersededPartNumbers?: string[];
   shippingCost?: number | null;
+  shippingMethod?: ShippingMethod;
   /** Raw available units from the backend; null = untracked/unlimited. */
   stockCount?: number | null;
   brandFull?: string;

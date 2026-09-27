@@ -2,8 +2,9 @@ import { ArrowRight, ShieldCheck, BadgeCheck, Headphones, Loader2 } from "lucide
 import { Button } from "@/components/ui/button";
 import { TRUST_BADGES } from "@/constants/checkout";
 import { formatCurrency } from "@/utils/currency";
+import { flatShippingTotal, hasCalculatedShipping } from "@/utils/shipping";
 import type { CartItem } from "@/store/cartSlice";
-import type { DeliveryMethod } from "@/types/checkout";
+import type { DeliveryMethod, ShippingQuoteState } from "@/types/checkout";
 
 const BADGE_ICONS = [ShieldCheck, BadgeCheck, Headphones];
 
@@ -12,6 +13,8 @@ interface CheckoutOrderSummaryProps {
   subtotal: number;
   vehicleMake?: string;
   deliveryMethod?: DeliveryMethod;
+  /** Live quote for the entered address; wins over the cart's flat rates */
+  shippingQuote?: ShippingQuoteState;
   onContinue?: () => void;
   submitting?: boolean;
   disabled?: boolean;
@@ -22,15 +25,20 @@ export function CheckoutOrderSummary({
   subtotal,
   vehicleMake,
   deliveryMethod = "delivery",
+  shippingQuote = { status: "idle" },
   onContinue,
   submitting = false,
   disabled = false,
 }: CheckoutOrderSummaryProps) {
   const isPickup = deliveryMethod === "pickup";
-  // Real per-item shipping cost from the backend, multiplied by quantity and
-  // summed across lines, same as the cart page — waived entirely for pickup.
-  const shipping = isPickup ? 0 : items.reduce((sum, item) => sum + (item.shippingCost ?? 0) * item.quantity, 0);
+  const quoted = shippingQuote.status === "ready" ? shippingQuote : null;
+  const shipping = isPickup ? 0 : (quoted?.amount ?? flatShippingTotal(items));
+  // No price yet for courier-rated lines, so the order can't be placed.
+  const awaitingQuote = !isPickup && !quoted && hasCalculatedShipping(items);
   const total = subtotal + shipping;
+  const shippingLabel = isPickup ? "Pickup" : quoted?.courier ? `Shipping (${quoted.courier})` : "Shipping (Express)";
+  const pendingText =
+    shippingQuote.status === "loading" ? "Calculating…" : shippingQuote.status === "error" ? "Unavailable" : "Enter postcode";
 
   return (
     <div className="rounded-2xl border border-border bg-bg-2 p-6">
@@ -58,19 +66,31 @@ export function CheckoutOrderSummary({
           <span className="font-semibold text-fg">{formatCurrency(subtotal)}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-fg-muted">{isPickup ? "Pickup" : "Shipping (Express)"}</span>
-          <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
-            {isPickup ? "Free" : shipping > 0 ? formatCurrency(shipping) : "Free"}
-          </span>
+          <span className="text-fg-muted">{shippingLabel}</span>
+          {awaitingQuote ? (
+            <span className="font-semibold text-fg-muted">{pendingText}</span>
+          ) : (
+            <span className={shipping > 0 ? "font-semibold text-fg" : "font-semibold text-ok"}>
+              {shipping > 0 ? formatCurrency(shipping) : "Free"}
+            </span>
+          )}
         </div>
+        {awaitingQuote && shippingQuote.status === "needs_address" && (
+          <p className="text-xs text-fg-muted">Enter your postcode and suburb to see the courier price.</p>
+        )}
+        {!isPickup && shippingQuote.status === "error" && (
+          <p role="alert" className="text-xs text-danger">
+            {shippingQuote.message}
+          </p>
+        )}
       </div>
 
       <div className="mt-4 flex items-baseline justify-between border-t border-border pt-4">
-        <span className="font-bold text-fg">Total</span>
+        <span className="font-bold text-fg">{awaitingQuote ? "Total (excl. shipping)" : "Total"}</span>
         <span className="font-display text-2xl font-black text-accent">{formatCurrency(total)}</span>
       </div>
 
-      <Button size="lg" className="mt-6 w-full gap-2" onClick={onContinue} disabled={disabled || submitting}>
+      <Button size="lg" className="mt-6 w-full gap-2" onClick={onContinue} disabled={disabled || submitting || awaitingQuote}>
         {submitting ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />

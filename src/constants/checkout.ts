@@ -1,4 +1,4 @@
-import type { DeliveryMethod } from "@/types/checkout";
+import type { AddressType, DeliveryMethod } from "@/types/checkout";
 
 export const CHECKOUT_STEPS = ["Shipping", "Payment", "Review"] as const;
 
@@ -15,6 +15,11 @@ export const DELIVERY_METHOD_OPTIONS: DeliveryMethodOption[] = [
   { value: "pickup", label: "Pick Up", description: "Collect in-store" },
 ];
 
+export const ADDRESS_TYPE_OPTIONS: { value: AddressType; label: string }[] = [
+  { value: "residential", label: "Residential" },
+  { value: "business", label: "Business" },
+];
+
 export const PICKUP_LOCATION = {
   name: "Parts Hub Australia",
   address: "34 Killara Road, Campbellfield VIC 3061, Australia",
@@ -26,7 +31,7 @@ export interface TrustBadge {
   description: string;
 }
 
-/** "{make}" is replaced with the customer's selected vehicle make at render time. */
+/** "{make}" becomes the customer's selected vehicle make. */
 export const TRUST_BADGES: TrustBadge[] = [
   { title: "Secure SSL Encryption", description: "Your data is protected and encrypted" },
   { title: "24-Month Parts Warranty", description: "Genuine quality guarantee" },
