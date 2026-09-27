@@ -25,6 +25,8 @@ export interface ProductListParams {
   authenticity?: AuthenticityFilterValue;
   mpn?: string;
   sku?: string;
+  /** Comma-separated product ids. */
+  ids?: string;
 }
 
 export interface ProductListData {
@@ -43,6 +45,10 @@ export const getProducts = async (params: ProductListParams = {}) => {
   return data;
 };
 
+// Current data for these products; unpublished or deleted ones are absent.
+export const getProductsByIds = (ids: string[]) =>
+  getProducts({ ids: ids.join(","), limit: Math.min(Math.max(ids.length, 1), 100) });
+
 export const getProductBySlug = async (slug: string) => {
   const { data } = await apiClient.get<BeResponse<ApiProduct>>(
     `/product/${slug}`,
@@ -55,9 +61,7 @@ export interface SuggestProductsData {
   total: number;
 }
 
-// Typesense-backed autocomplete (fuzzy/prefix match, ranked SKU/MPN/title
-// first) — used by the header search bar's live dropdown instead of a full
-// `getProducts({search, limit})` call. See product.controller.js#suggestProducts.
+// Typesense autocomplete for the header search's live dropdown.
 export const getSearchSuggestions = async (q: string, limit = 6) => {
   const { data } = await apiClient.get<BeResponse<SuggestProductsData>>(
     "/product/search/suggest",

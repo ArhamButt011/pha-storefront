@@ -22,6 +22,12 @@ export interface CartItem {
   maxQuantity?: number | null;
 }
 
+/** Product fields refreshed from the server; quantity and fitment stay. */
+export type CartItemUpdate = Pick<
+  CartItem,
+  "id" | "title" | "brand" | "img" | "price" | "shippingNote" | "shippingCost" | "shippingMethod" | "maxQuantity"
+>;
+
 interface CartState {
   items: CartItem[];
 }
@@ -60,11 +66,22 @@ const cartSlice = createSlice({
           : action.payload.quantity;
       }
     },
+    // Drops lines no longer for sale or out of stock; re-caps the rest.
+    syncItems(state, action: PayloadAction<CartItemUpdate[]>) {
+      const latest = new Map(action.payload.map((u) => [u.id, u]));
+      state.items = state.items.flatMap((item) => {
+        const update = latest.get(item.id);
+        if (!update || update.maxQuantity === 0) return [];
+        const max = update.maxQuantity;
+        const quantity = max != null ? Math.min(item.quantity, max) : item.quantity;
+        return [{ ...item, ...update, quantity }];
+      });
+    },
     clearCart(state) {
       state.items = [];
     },
   },
 });
 
-export const { addItem, removeItem, updateQuantity, clearCart } = cartSlice.actions;
+export const { addItem, removeItem, updateQuantity, syncItems, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
