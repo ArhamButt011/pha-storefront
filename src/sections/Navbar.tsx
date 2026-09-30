@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ShoppingCart } from "lucide-react";
+import { CartLink } from "@/components/layout/CartLink";
 import { Button } from "@/components/ui/button";
 import { NavLinkItem } from "@/components/layout/NavLinkItem";
 import { HeaderSearchBar } from "@/components/search/HeaderSearchBar";
@@ -73,23 +74,20 @@ export function Navbar({ onInquiry }: Props) {
               {/* <button className="p-2 text-fg-muted transition-colors hover:text-fg" aria-label="Wishlist">
                 <Heart className="h-5 w-5" />
               </button> */}
-              <Link to="/cart" className="relative p-2 text-fg-muted transition-colors hover:text-fg" aria-label="Cart">
-                <ShoppingCart className="h-5 w-5" />
-                {cartCount > 0 && (
-                  <span className="absolute right-0 top-0 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-accent-fg">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
+              <CartLink />
             </div>
           </div>
 
-          <button
-            className="justify-self-end p-2 text-fg lg:hidden"
-            onClick={() => setMenuOpen(true)}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
+          <div className="flex items-center gap-1 justify-self-end lg:hidden">
+            <CartLink className="text-fg" />
+            <button
+              className="p-2 text-fg"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -114,6 +112,7 @@ export function Navbar({ onInquiry }: Props) {
           <button
             onClick={() => setMenuOpen(false)}
             className="rounded-lg p-1.5 text-fg-muted hover:bg-bg-3 hover:text-fg"
+            aria-label="Close menu"
           >
             <X className="h-5 w-5" />
           </button>
@@ -135,6 +134,21 @@ export function Navbar({ onInquiry }: Props) {
               activeClassName="bg-bg-3 text-accent"
             />
           ))}
+          <Link
+            to="/cart"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-fg-muted transition-colors hover:bg-bg-3 hover:text-accent"
+          >
+            <span className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Cart
+            </span>
+            {cartCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold text-accent-fg">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </nav>
 
         <div className="mt-auto flex flex-col gap-3">
