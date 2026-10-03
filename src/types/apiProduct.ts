@@ -58,8 +58,8 @@ export interface ApiProductDisplay {
   vehicle_fitments: ApiVehicle[];
 }
 
-// standard: flat shipping_cost per unit; calculated: courier quote at checkout.
-export type ShippingMethod = "standard" | "calculated";
+// standard: flat rate; calculated: courier quote; pickup: in store only.
+export type ShippingMethod = "standard" | "calculated" | "pickup";
 
 export interface ApiProduct {
   _id: string;

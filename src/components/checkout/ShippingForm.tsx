@@ -6,14 +6,19 @@ import type { ShippingDetails } from "@/types/checkout";
 interface ShippingFormProps {
   values: ShippingDetails;
   onChange: (patch: Partial<ShippingDetails>) => void;
+  pickupOnly?: boolean;
 }
 
-export function ShippingForm({ values, onChange }: ShippingFormProps) {
+export function ShippingForm({ values, onChange, pickupOnly }: ShippingFormProps) {
   return (
     <div className="space-y-6">
       <ContactSection fullName={values.fullName} email={values.email} phone={values.phone} onChange={onChange} />
 
-      <DeliveryMethodSection value={values.deliveryMethod} onChange={(deliveryMethod) => onChange({ deliveryMethod })} />
+      <DeliveryMethodSection
+        value={values.deliveryMethod}
+        onChange={(deliveryMethod) => onChange({ deliveryMethod })}
+        pickupOnly={pickupOnly}
+      />
 
       <AddressSection
         deliveryMethod={values.deliveryMethod}

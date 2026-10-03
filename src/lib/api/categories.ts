@@ -6,13 +6,12 @@ import type {
   ConditionFilterValue,
 } from "@/constants/shopFilters";
 
-// Filter fields mirror ProductListParams (lib/api/product.ts) — passing the
-// same active shop filters here makes each category's product_count reflect
-// the current search/vehicle/price/condition selection instead of a static
-// catalog-wide total.
+// Same filters as ProductListParams, so product_count follows the shop filters.
 export interface CategoryListParams {
   limit?: number;
   page?: number;
+  // Comma-separated slugs; narrows which categories are listed.
+  slugs?: string;
   search?: string;
   price_min?: number;
   price_max?: number;

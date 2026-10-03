@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/utils/cn";
 
 interface Props {
   href: string;
-  label: string;
+  label: ReactNode;
   onClick?: () => void;
   className?: string;
   activeClassName?: string;

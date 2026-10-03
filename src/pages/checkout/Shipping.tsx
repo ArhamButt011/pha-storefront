@@ -12,6 +12,7 @@ import { useShippingQuote } from "@/hooks/useShippingQuote";
 import { useVehicle } from "@/context/VehicleContext";
 import { createOrder } from "@/lib/api/orders";
 import { setOrder } from "@/store/checkoutSlice";
+import { hasPickupOnly } from "@/utils/shipping";
 import type { AppDispatch } from "@/store/store";
 import type { AddressFields, ShippingDetails } from "@/types/checkout";
 
@@ -44,7 +45,10 @@ export function CheckoutShipping() {
   const { vehicle } = useVehicle();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const [shipping, setShipping] = useState<ShippingDetails>(INITIAL_SHIPPING);
+  const [shippingState, setShipping] = useState<ShippingDetails>(INITIAL_SHIPPING);
+  // A pickup-only part forces collection, whatever was picked before.
+  const pickupOnly = hasPickupOnly(items);
+  const shipping: ShippingDetails = pickupOnly ? { ...shippingState, deliveryMethod: "pickup" } : shippingState;
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Before redux-persist rehydrates, an empty cart may not really be empty.
@@ -128,7 +132,7 @@ const vehicleLabel = vehicle?.make
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
           <div>
-            <ShippingForm values={shipping} onChange={updateShipping} />
+            <ShippingForm values={shipping} onChange={updateShipping} pickupOnly={pickupOnly} />
             {error && (
               <p role="alert" className="mt-4 text-sm font-medium text-danger">
                 {error}

@@ -6,6 +6,8 @@ import type { DeliveryMethod } from "@/types/checkout";
 interface DeliveryMethodSectionProps {
   value: DeliveryMethod;
   onChange: (method: DeliveryMethod) => void;
+  // Cart holds an in-store pickup only product, so delivery isn't offered.
+  pickupOnly?: boolean;
 }
 
 const ICONS: Record<DeliveryMethod, LucideIcon> = {
@@ -13,7 +15,7 @@ const ICONS: Record<DeliveryMethod, LucideIcon> = {
   pickup: Store,
 };
 
-export function DeliveryMethodSection({ value, onChange }: DeliveryMethodSectionProps) {
+export function DeliveryMethodSection({ value, onChange, pickupOnly }: DeliveryMethodSectionProps) {
   return (
     <div className="rounded-2xl border border-border bg-bg-2 p-6">
       <div className="mb-6 flex items-center gap-2">
@@ -24,6 +26,7 @@ export function DeliveryMethodSection({ value, onChange }: DeliveryMethodSection
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {DELIVERY_METHOD_OPTIONS.map((opt) => {
           const isSelected = value === opt.value;
+          const disabled = pickupOnly && opt.value === "delivery";
           const Icon = ICONS[opt.value];
           return (
             <button
@@ -31,9 +34,11 @@ export function DeliveryMethodSection({ value, onChange }: DeliveryMethodSection
               type="button"
               onClick={() => onChange(opt.value)}
               aria-pressed={isSelected}
+              disabled={disabled}
               className={cn(
                 "flex items-start gap-3 rounded-xl border p-4 text-left transition-colors",
                 isSelected ? "border-accent bg-accent/10" : "border-border bg-bg-3 hover:border-fg-muted",
+                disabled && "cursor-not-allowed opacity-50 hover:border-border",
               )}
             >
               <span
@@ -52,6 +57,11 @@ export function DeliveryMethodSection({ value, onChange }: DeliveryMethodSection
           );
         })}
       </div>
+      {pickupOnly && (
+        <p className="mt-4 text-sm text-fg-muted">
+          Your cart has an in store pickup only part, so this order must be collected.
+        </p>
+      )}
     </div>
   );
 }

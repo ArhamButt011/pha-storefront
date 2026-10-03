@@ -134,21 +134,25 @@ export function Navbar({ onInquiry }: Props) {
               activeClassName="bg-bg-3 text-accent"
             />
           ))}
-          <Link
-            to="/cart"
+          <NavLinkItem
+            href="/cart"
             onClick={() => setMenuOpen(false)}
+            label={
+              <>
+                <span className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Cart
+                </span>
+                {cartCount > 0 && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold text-accent-fg">
+                    {cartCount}
+                  </span>
+                )}
+              </>
+            }
             className="flex items-center justify-between rounded-lg px-4 py-3 text-base font-medium text-fg-muted transition-colors hover:bg-bg-3 hover:text-accent"
-          >
-            <span className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              Cart
-            </span>
-            {cartCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold text-accent-fg">
-                {cartCount}
-              </span>
-            )}
-          </Link>
+            activeClassName="bg-bg-3 text-accent"
+          />
         </nav>
 
         <div className="mt-auto flex flex-col gap-3">

@@ -4,6 +4,7 @@ import type { Route } from "./+types/Home";
 import { Hero } from "@/sections/Hero";
 import { VehicleSelector } from "@/sections/VehicleSelector";
 import { Categories } from "@/sections/Categories";
+import { FeaturedCollections } from "@/sections/FeaturedCollections";
 import { Brands } from "@/sections/Brands";
 import { Products } from "@/sections/Products";
 import { WhyChooseUs } from "@/sections/WhyChooseUs";
@@ -12,18 +13,20 @@ import { getCategories } from "@/lib/api/categories";
 import { getProducts } from "@/lib/api/product";
 import { getCategoryImage } from "@/lib/categoryImages";
 import { mapApiProductToProduct } from "@/utils/mapApiProduct";
+import { toCollectionLinks } from "@/utils/featuredCollections";
+import { FEATURED_COLLECTIONS } from "@/constants/collections";
 import { getOrigin } from "@/lib/seo";
 import type { CategoryWithImage } from "@/types/category";
 
-// Matches each section's own grid layout: Categories is a single
-// lg:grid-cols-5 row, Products is two full lg:grid-cols-4 rows.
+// Fills each grid: one 5-column Categories row, two 4-column Products rows.
 const FEATURED_CATEGORIES_COUNT = 5;
 const FEATURED_PRODUCTS_COUNT = 8;
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const [categoriesRes, productsRes] = await Promise.all([
+  const [categoriesRes, productsRes, collectionsRes] = await Promise.all([
     getCategories({ limit: FEATURED_CATEGORIES_COUNT, page: 1 }),
     getProducts({ page: 1, limit: FEATURED_PRODUCTS_COUNT }),
+    getCategories({ slugs: FEATURED_COLLECTIONS.map((c) => c.slug).join(","), limit: FEATURED_COLLECTIONS.length }),
   ]);
 
   const featuredCategories: CategoryWithImage[] = categoriesRes.data.items.map((cat, index) => ({
@@ -34,6 +37,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   return {
     featuredCategories,
     featuredProducts: productsRes.data.items.map(mapApiProductToProduct),
+    featuredCollections: toCollectionLinks(collectionsRes.data.items),
     origin: getOrigin(request),
   };
 }
@@ -65,6 +69,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       <Hero />
       <VehicleSelector />
       <Categories categories={loaderData.featuredCategories} />
+      <FeaturedCollections collections={loaderData.featuredCollections} />
       <Brands />
       <Products products={loaderData.featuredProducts} />
       <WhyChooseUs />

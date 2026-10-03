@@ -1,6 +1,7 @@
-import { Truck, RotateCcw, CreditCard } from "lucide-react";
+import { Truck, RotateCcw, CreditCard, Store } from "lucide-react";
 import { formatCurrency } from "@/utils/currency";
-import { CALCULATED_SHIPPING_LABEL, SHIPPING_METHOD } from "@/constants/shipping";
+import { CALCULATED_SHIPPING_LABEL, PICKUP_ONLY_LABEL, SHIPPING_METHOD } from "@/constants/shipping";
+import { PICKUP_LOCATION } from "@/constants/checkout";
 import type { ShippingMethod } from "@/types/apiProduct";
 
 export interface ShippingReturnsPaymentsProps {
@@ -14,15 +15,17 @@ const PAYMENTS_TEXT = "Secure checkout via Stripe — all major credit and debit
 // Marketplace-style postage block, limited to facts this store can verify.
 export function ShippingReturnsPayments({ shippingCost, shippingMethod }: ShippingReturnsPaymentsProps) {
   const calculated = shippingMethod === SHIPPING_METHOD.CALCULATED;
+  const postage =
+    shippingMethod === SHIPPING_METHOD.PICKUP
+      ? { icon: Store, label: "Pickup", value: PICKUP_ONLY_LABEL, detail: `Collect from ${PICKUP_LOCATION.address}` }
+      : {
+          icon: Truck,
+          label: "Postage",
+          value: calculated ? CALCULATED_SHIPPING_LABEL : shippingCost ? formatCurrency(shippingCost) : "Free Shipping",
+          detail: calculated ? "Courier rate for your postcode, shown before you pay." : "Fast dispatch from our Melbourne HQ",
+        };
   const rows = [
-    {
-      icon: Truck,
-      label: "Postage",
-      value: calculated ? CALCULATED_SHIPPING_LABEL : shippingCost ? formatCurrency(shippingCost) : "Free Shipping",
-      detail: calculated
-        ? "Courier rate for your postcode, shown before you pay."
-        : "Fast dispatch from our Melbourne HQ",
-    },
+    postage,
     {
       icon: RotateCcw,
       label: "Returns",
