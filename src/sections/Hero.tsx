@@ -13,10 +13,10 @@ export function Hero() {
     >
       <div
         className="absolute inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&h=1200&fit=crop')" }}
+        style={{ backgroundImage: "url('/images/hero.webp')" }}
       />
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-bg via-bg/80 to-bg/50" />
-      <div className="absolute inset-0 z-0 bg-gradient-to-r from-bg via-bg/40 to-transparent" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-t from-bg/80 via-transparent to-transparent" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-r from-bg/45 via-transparent to-transparent" />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl">
@@ -35,8 +35,7 @@ export function Hero() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="gap-2">
-              {/* An unsubmitted vehicle draft shouldn't follow the user into
-                  the shop — clear it so /shop starts unfiltered. */}
+              {/* Clear any vehicle draft so /shop starts unfiltered. */}
               <Link to="/shop" onClick={() => setVehicle(null)}>
                 Shop Parts
                 <ArrowRight className="h-5 w-5" />
