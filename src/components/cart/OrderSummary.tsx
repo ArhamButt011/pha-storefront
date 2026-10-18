@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { Lock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/currency";
 import { CALCULATED_SHIPPING_LABEL } from "@/constants/shipping";
@@ -10,10 +10,12 @@ interface OrderSummaryProps {
   /** Some lines are priced by courier quote, known only at checkout */
   hasCalculatedShipping?: boolean;
   onCheckout?: () => void;
+  /** Automatic discount the server quoted for this cart, in dollars */
+  discount?: { label: string; amount: number } | null;
 }
 
-export function OrderSummary({ subtotal, shipping, hasCalculatedShipping = false, onCheckout }: OrderSummaryProps) {
-  const total = subtotal + shipping;
+export function OrderSummary({ subtotal, shipping, hasCalculatedShipping = false, onCheckout, discount = null }: OrderSummaryProps) {
+  const total = subtotal + shipping - (discount?.amount ?? 0);
 
   return (
     <div className="rounded-2xl border border-border bg-bg-2 p-6">
@@ -24,6 +26,15 @@ export function OrderSummary({ subtotal, shipping, hasCalculatedShipping = false
           <span className="text-fg-muted">Subtotal</span>
           <span className="font-semibold text-fg">{formatCurrency(subtotal)}</span>
         </div>
+        {discount && (
+          <div className="flex items-center justify-between rounded-lg bg-danger/10 px-3 py-2">
+            <span className="flex items-center gap-1.5 font-semibold text-danger">
+              <Zap className="h-3.5 w-3.5 fill-current" />
+              {discount.label}
+            </span>
+            <span className="font-bold text-danger">−{formatCurrency(discount.amount)}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between border-b border-border pb-3">
           <span className="text-fg-muted">Express Shipping</span>
           {hasCalculatedShipping ? (

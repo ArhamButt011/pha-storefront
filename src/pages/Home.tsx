@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import type { Route } from "./+types/Home";
 import { Hero } from "@/sections/Hero";
+import { HeroCarousel } from "@/sections/HeroCarousel";
+import { SaleTicker } from "@/components/layout/SaleTicker";
+import { useStorefrontContent } from "@/context/StorefrontContentContext";
 import { VehicleSelector } from "@/sections/VehicleSelector";
 import { Categories } from "@/sections/Categories";
 import { FeaturedCollections } from "@/sections/FeaturedCollections";
@@ -57,6 +60,7 @@ export function meta({ data }: Route.MetaArgs) {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { hash } = useLocation();
+  const { hero_slides, hero_settings, flash_sale } = useStorefrontContent();
 
   useEffect(() => {
     if (!hash) return;
@@ -66,8 +70,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   return (
     <main>
-      <Hero />
+      {hero_slides.length > 0 ? <HeroCarousel slides={hero_slides} settings={hero_settings} sale={flash_sale} /> : <Hero />}
       <VehicleSelector />
+      {flash_sale && <SaleTicker sale={flash_sale} className="mt-12" />}
       <Categories categories={loaderData.featuredCategories} />
       <FeaturedCollections collections={loaderData.featuredCollections} />
       <Brands />

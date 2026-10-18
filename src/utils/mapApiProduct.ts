@@ -6,13 +6,13 @@ export const PLACEHOLDER_IMG =
   "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?w=500&h=500&fit=crop";
 
 function formatYearRange(yearFrom: number | null, yearTo: number | null): string {
-  if (yearFrom && yearTo) return yearFrom === yearTo ? `${yearFrom}` : `${yearFrom} – ${yearTo}`;
-  if (yearFrom) return `${yearFrom} – Present`;
+  if (yearFrom && yearTo) return yearFrom === yearTo ? `${yearFrom}` : `${yearFrom} to ${yearTo}`;
+  if (yearFrom) return `${yearFrom} to present`;
   if (yearTo) return `Up to ${yearTo}`;
   return "—";
 }
 
-// Formatting only; the server already picked and deduped the fitments.
+// Formatting only, the server already picked and deduped the fitments.
 function fitmentToRow(f: ApiVehicle): VehicleFitmentRow {
   return {
     make: f.make || "—",
@@ -22,7 +22,7 @@ function fitmentToRow(f: ApiVehicle): VehicleFitmentRow {
   };
 }
 
-// Item-specific rows; part numbers get their own PartIdentifiers section.
+// Item-specific rows, part numbers get their own PartIdentifiers section.
 function buildSpecs(item: ApiProduct) {
   const specs: { label: string; value: string }[] = [];
   const aspects = item.listings?.[0]?.aspects;
@@ -48,6 +48,7 @@ export function mapApiProductToProduct(item: ApiProduct): Product {
     id: item._id,
     categorySlug: primaryCategory?.slug ?? "",
     categoryId: primaryCategory?._id,
+    categoryIds: item.categories?.map((c) => c._id) ?? [],
 
     slug: item.slug,
     categoryName: primaryCategory?.name,
@@ -77,7 +78,7 @@ vehicleFit: item.vehicle ?? null,
     shippingCost: item.shipping_cost ?? null,
     shippingMethod: item.shipping_method,
     stockCount: item.stock_count ?? null,
-    // Server-resolved; marketplace-only overrides are excluded from display.
+    // Server-resolved, marketplace-only overrides are excluded from display.
     condition: display?.condition ?? item.condition ?? undefined,
     conditionNotes: display?.condition_notes ?? undefined,
     authenticity: display?.authenticity ?? item.authenticity ?? undefined,

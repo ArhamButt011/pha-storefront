@@ -22,6 +22,19 @@
   --color-ok:        hsl(var(--ok));
   --color-ok-fg:     hsl(var(--ok-fg));
 
+  /* Dashboard-chosen announcement themes, same in light and dark. */
+  --color-promo-indigo:   hsl(239 70% 56%);
+  --color-promo-amber:    hsl(38 95% 52%);
+  --color-promo-amber-fg: hsl(30 20% 8%);
+  --color-promo-carbon:   hsl(222 22% 8%);
+  --color-promo-fg:       hsl(0 0% 100%);
+
+  /* Text/icons over photos and gradients, and the dark scrim beneath them. */
+  --color-on-media: hsl(0 0% 100%);
+  --color-scrim:    hsl(0 0% 0%);
+  /* Dark text over light photos, the "dark text" hero option. */
+  --color-media-ink: hsl(222 22% 8%);
+
   --radius-xs:   0.25rem;
   --radius-sm:   0.375rem;
   --radius:      0.5rem;
@@ -38,6 +51,9 @@
   --animate-float:     float 6s ease-in-out infinite;
   --animate-pulse-ring: pulseRing 2s ease-out infinite;
   --animate-fade-up:   fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+  --animate-ken-burns: kenBurns 9s ease-out forwards;
+  --animate-progress:  progressFill linear forwards;
+  --animate-sheen:     sheen 3.5s ease-in-out infinite;
 }
 
 /* ─── Keyframes ───────────────────────────────────────────────────────────── */
@@ -56,6 +72,18 @@
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(40px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes kenBurns {
+  from { transform: scale(1.12); }
+  to   { transform: scale(1); }
+}
+@keyframes progressFill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes sheen {
+  0%, 60% { transform: translateX(-120%) skewX(-20deg); }
+  100%    { transform: translateX(320%) skewX(-20deg); }
 }
 @keyframes counterUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -211,7 +239,7 @@
 .stagger.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.35s; }
 .stagger.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.45s; }
 .stagger.visible > *:nth-child(6) { opacity:1; transform:translateY(0); transition-delay:0.55s; }
-/* Catch-all for anything beyond the 6th staggered item — without this, any
+/* Catch-all for anything beyond the 6th staggered item. Without this, any
    .stagger grid with more than 6 children (e.g. Featured Parts) leaves the
    7th+ items stuck at opacity:0 forever, since no more specific rule ever
    matches them. */

@@ -17,12 +17,15 @@ import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
 import { formatCurrency } from "@/utils/currency";
+import { FlashSaleCard } from "@/components/common/FlashSaleCard";
+import { useStorefrontContent } from "@/context/StorefrontContentContext";
+import { isProductOnSale, saleNote, salePrice } from "@/utils/flashSale";
 import { getOrigin, safeJsonLd, stripHtml, mapAvailability, mapItemCondition } from "@/lib/seo";
 import type { ApiProduct } from "@/types/apiProduct";
 
 function buildProductJsonLd(product: ApiProduct, origin: string) {
   const canonicalUrl = `${origin}/product/${product.slug}`;
-  // Same MPN the Merchant feed sends (override, else product); not the SKU.
+  // Same MPN the Merchant feed sends (override, else product), not the SKU.
   const mpn = product.display?.mpn ?? product.mpn ?? null;
 
   return {
@@ -54,7 +57,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     const res = await getProductBySlug(slug!);
     return { product: res.data, origin: getOrigin(request) };
   } catch (err) {
-    // Only a real 404 is a 404; Google de-indexes it, so outages must 500.
+    // Only a real 404 is a 404, Google de-indexes it, so outages must 500.
     if (err instanceof ApiError && err.status === 404) {
       throw new Response("Not Found", { status: 404 });
     }
@@ -85,6 +88,7 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [qty, setQty] = useState(1);
+  const { flash_sale } = useStorefrontContent();
   const [added, setAdded] = useState(false);
 
   const product = mapApiProductToProduct(loaderData.product);
@@ -92,6 +96,8 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
 
   const category = getCategoryBySlug(product.categorySlug);
   const gallery = product.gallery ?? [product.img];
+  const sale = flash_sale?.show_product_badges && isProductOnSale(product.categoryIds, flash_sale) ? flash_sale : null;
+  const discounted = sale ? salePrice(product.price, sale) : null;
 
   const infoRows = [
     // SKU and Warranty appear further down, so they're not repeated here.
@@ -122,7 +128,7 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
   return (
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-20 lg:pt-28 sm:px-6 lg:px-8">
       {/* React 19 hoists <link>/<title>/<meta> rendered anywhere in the tree
-          into <head> — the route module's `links` export can't do this
+          into <head>: the route module's `links` export can't do this
           since it has no access to loader data (needed for the slug). */}
       <link rel="canonical" href={`${loaderData.origin}/product/${loaderData.product.slug}`} />
       <script
@@ -168,6 +174,15 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
             </div>
           )}
 
+          {discounted !== null ? (
+            <div className="mt-6 flex flex-wrap items-baseline gap-3">
+              <span className="font-display text-4xl font-black text-danger">{formatCurrency(discounted)}</span>
+              <span className="text-lg text-fg-muted/60 line-through">{formatCurrency(product.price)}</span>
+              <span className="rounded-full bg-danger px-3 py-1 text-xs font-black uppercase text-danger-fg">
+                Save {formatCurrency(product.price - discounted)}
+              </span>
+            </div>
+          ) : (
           <div className="mt-6 flex flex-wrap items-baseline gap-3">
             <span className="text-3xl font-black text-accent">{formatCurrency(product.price)}</span>
             {product.oldPrice && (
@@ -181,6 +196,15 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
               </>
             )}
           </div>
+          )}
+
+          {sale && (
+            <FlashSaleCard
+              sale={sale}
+              className="mt-5"
+              note={discounted !== null ? "Sale price applied at checkout." : `${saleNote(sale)}.`}
+            />
+          )}
 
           <ProductConditionQuantityRow
             condition={product.condition}

@@ -1,14 +1,16 @@
 import { User, Mail, Phone } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { IconInput } from "@/components/ui/icon-input";
 
 interface ContactSectionProps {
   fullName: string;
   email: string;
   phone: string;
-  onChange: (patch: { fullName?: string; email?: string; phone?: string }) => void;
+  marketingOptIn: boolean;
+  onChange: (patch: { fullName?: string; email?: string; phone?: string; marketingOptIn?: boolean }) => void;
 }
 
-export function ContactSection({ fullName, email, phone, onChange }: ContactSectionProps) {
+export function ContactSection({ fullName, email, phone, marketingOptIn, onChange }: ContactSectionProps) {
   return (
     <div className="rounded-2xl border border-border bg-bg-2 p-6">
       <div className="mb-6 flex items-center gap-2">
@@ -49,6 +51,15 @@ export function ContactSection({ fullName, email, phone, onChange }: ContactSect
             />
           </div>
         </div>
+
+        <label className="flex cursor-pointer items-start gap-2 text-sm text-fg-muted">
+          <Checkbox
+            checked={marketingOptIn}
+            onChange={(e) => onChange({ marketingOptIn: e.target.checked })}
+            className="mt-0.5"
+          />
+          <span>Email me offers and news. You can unsubscribe at any time.</span>
+        </label>
       </div>
     </div>
   );

@@ -12,7 +12,13 @@ interface ShippingFormProps {
 export function ShippingForm({ values, onChange, pickupOnly }: ShippingFormProps) {
   return (
     <div className="space-y-6">
-      <ContactSection fullName={values.fullName} email={values.email} phone={values.phone} onChange={onChange} />
+      <ContactSection
+        fullName={values.fullName}
+        email={values.email}
+        phone={values.phone}
+        marketingOptIn={values.marketingOptIn}
+        onChange={onChange}
+      />
 
       <DeliveryMethodSection
         value={values.deliveryMethod}

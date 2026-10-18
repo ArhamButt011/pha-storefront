@@ -34,6 +34,8 @@ export interface Product {
   slug: string;
   categorySlug: string;
   categoryId?: string;
+  /** Every category the product is in, drives flash-sale eligibility. */
+  categoryIds?: string[];
   categoryName?: string;
   brand: string;
   partType: string;
@@ -58,7 +60,7 @@ make?: string | null;
   supersededPartNumbers?: string[];
   shippingCost?: number | null;
   shippingMethod?: ShippingMethod;
-  /** Raw available units from the backend; null = untracked/unlimited. */
+  /** Raw available units from the backend, null = untracked/unlimited. */
   stockCount?: number | null;
   brandFull?: string;
   warranty?: string;

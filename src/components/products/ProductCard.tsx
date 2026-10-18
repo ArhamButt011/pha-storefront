@@ -6,6 +6,9 @@ import { productToCartItem } from "@/utils/productToCartItem";
 import { STOCK_DOT } from "@/constants/stock";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { Product } from "@/data/products";
+import { useStorefrontContent } from "@/context/StorefrontContentContext";
+import { isProductOnSale, saleNote, salePrice } from "@/utils/flashSale";
+import { formatCurrency } from "@/utils/currency";
 
 const BADGE_LABEL: Record<NonNullable<Product["badge"]>, string> = {
   "top-rated": "Top Rated",
@@ -21,6 +24,9 @@ export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const outOfStock = product.stock.status === "out-of-stock";
+  const { flash_sale } = useStorefrontContent();
+  const sale = flash_sale?.show_product_badges && isProductOnSale(product.categoryIds, flash_sale) ? flash_sale : null;
+  const discounted = sale ? salePrice(product.price, sale) : null;
 
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault();
@@ -41,7 +47,12 @@ export function ProductCard({ product }: { product: Product }) {
     <Link to={`/product/${product.slug}`} className="product-card flex flex-col overflow-hidden rounded-2xl bg-bg-2">
       <div className="relative h-48 overflow-hidden shine">
         <img src={product.img} alt={product.title} className="card-img h-full w-full object-cover" loading="lazy" />
-        {product.badge && (
+        {sale ? (
+          <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-danger to-accent px-3 py-1 text-xs font-black uppercase tracking-wide text-on-media shadow-glow">
+            <Zap className="h-3 w-3 fill-current" />
+            {sale.discount_type === "percent" ? `-${sale.discount_value}%` : "Flash sale"}
+          </span>
+        ) : product.badge && (
           <span className={cn("absolute left-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide", BADGE_CLASS[product.badge])}>
             {BADGE_LABEL[product.badge]}
           </span>
@@ -66,9 +77,15 @@ export function ProductCard({ product }: { product: Product }) {
 
         <div className="mt-auto flex items-center justify-between gap-2">
           <div className="flex items-baseline gap-2">
-            <span className="text-xl font-black text-accent">A${product.price.toLocaleString()}</span>
-            {product.oldPrice && (
-              <span className="text-sm text-fg-muted/60 line-through">A${product.oldPrice.toLocaleString()}</span>
+            <span className={cn("text-xl font-black", discounted !== null ? "text-danger" : "text-accent")}>
+              {discounted !== null ? formatCurrency(discounted) : `A$${product.price.toLocaleString()}`}
+            </span>
+            {discounted !== null ? (
+              <span className="text-sm text-fg-muted/60 line-through">{formatCurrency(product.price)}</span>
+            ) : (
+              product.oldPrice && (
+                <span className="text-sm text-fg-muted/60 line-through">A${product.oldPrice.toLocaleString()}</span>
+              )
             )}
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -91,6 +108,9 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
 
+        {sale && discounted === null && (
+          <p className="mt-2 text-xs font-bold uppercase text-danger">{saleNote(sale)}</p>
+        )}
         <div className="mt-3 flex items-center gap-2 text-xs text-fg-muted">
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", STOCK_DOT[product.stock.status])} />
           {product.stock.label}

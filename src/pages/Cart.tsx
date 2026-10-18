@@ -2,11 +2,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { CartItemCard } from "@/components/cart/CartItemCard";
 import { OrderSummary } from "@/components/cart/OrderSummary";
+import { useDiscountQuote } from "@/hooks/useDiscountQuote";
+import { quotedDiscountLine } from "@/utils/discountQuote";
 import { EmptyCart } from "@/components/cart/EmptyCart";
 import { useCart } from "@/hooks/useCart";
 
 function Cart() {
   const { items, totalItems, totalPrice, totalShipping, hasCalculatedShipping } = useCart();
+  // No code here: shows the automatic discount the cart already qualifies for.
+  const quote = useDiscountQuote({ items, code: "", shippingCents: Math.round(totalShipping * 100) });
   const navigate = useNavigate();
 
   return (
@@ -41,6 +45,7 @@ function Cart() {
               shipping={totalShipping}
               hasCalculatedShipping={hasCalculatedShipping}
               onCheckout={() => navigate("/checkout")}
+              discount={quotedDiscountLine(quote)}
             />
           </div>
         </div>

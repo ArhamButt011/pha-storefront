@@ -10,7 +10,7 @@ export interface AddressFields {
   postcode: string;
 }
 
-/** POST /shipping/quote response; amounts in cents. */
+/** POST /shipping/quote response, amounts in cents. */
 export interface ApiShippingQuote {
   shipping_cost: number;
   standard_cost: number;
@@ -19,7 +19,7 @@ export interface ApiShippingQuote {
   currency: string;
 }
 
-// Checkout's shipping line; `amount` is in dollars like the rest of the cart.
+// Checkout's shipping line, `amount` is in dollars like the rest of the cart.
 export type ShippingQuoteState =
   | { status: "idle" }
   | { status: "needs_address" }
@@ -36,4 +36,28 @@ export interface ShippingDetails {
   addressType: AddressType;
   billingSameAsShipping: boolean;
   billingAddress: AddressFields;
+  // "Email me offers and news", unticked by default (consent must be opt-in).
+  marketingOptIn: boolean;
 }
+
+// POST /order/discount-quote: the order's one discount and its saving.
+export interface DiscountQuote {
+  discount: {
+    name: string;
+    code: string | null;
+    is_automatic: boolean;
+    discount_type: "percent" | "fixed" | "free_shipping";
+    discount_value: number;
+    // Which of the shopper's orders qualify (1 = first), null is open.
+    min_order_number: number | null;
+    max_order_number: number | null;
+  } | null;
+  amount: number; // cents
+  shipping_waived: boolean;
+}
+
+export type DiscountQuoteState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ready"; quote: DiscountQuote }
+  | { status: "error"; message: string };

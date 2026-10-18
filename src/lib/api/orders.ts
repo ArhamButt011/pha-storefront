@@ -1,6 +1,6 @@
 import { apiClient } from "./client";
 import type { BeResponse } from "./base";
-import type { AddressType, DeliveryMethod } from "@/types/checkout";
+import type { AddressType, DeliveryMethod, DiscountQuote } from "@/types/checkout";
 
 export interface OrderItemPayload {
   product: string;
@@ -26,9 +26,12 @@ export interface CreateOrderPayload {
   items: OrderItemPayload[];
   customer: OrderCustomerPayload;
   delivery_method: DeliveryMethod;
-  // Omit for pickup; the backend rejects these fields rather than ignoring them.
+  // Omit for pickup, the backend rejects these fields rather than ignoring them.
   shipping_address?: OrderAddressPayload;
   billing_address?: OrderAddressPayload | null;
+  // Any discount code, the server validates it and prices the discount.
+  promo_code?: string;
+  marketing_opt_in?: boolean;
 }
 
 export type OrderStatus =
@@ -48,7 +51,7 @@ export interface ApiOrderItem {
   quantity: number;
 }
 
-// From the linked Payment; card_brand/last4 only once payment succeeded.
+// From the linked Payment, card_brand/last4 only once payment succeeded.
 export interface ApiOrderPayment {
   _id: string;
   status: string;
@@ -65,12 +68,12 @@ export interface ApiOrder {
   items: ApiOrderItem[];
   customer: OrderCustomerPayload;
   delivery_method: DeliveryMethod;
-  // null when delivery_method is "pickup" — there's nowhere to ship.
+  // null when delivery_method is "pickup" (there's nowhere to ship).
   shipping_address: OrderAddressPayload | null;
   billing_address: OrderAddressPayload | null;
   subtotal: number; // cents, GST-inclusive
   shipping_cost: number; // cents
-  tax_amount: number; // cents — GST component of subtotal, display-only
+  tax_amount: number; // cents: GST part of the subtotal, display only
   total: number; // cents
   currency: string;
   status: OrderStatus;
@@ -79,7 +82,7 @@ export interface ApiOrder {
   payment: ApiOrderPayment | null;
 }
 
-// Only in the create-order response; GET /order/:id strips it.
+// Only in the create-order response, GET /order/:id strips it.
 export interface ApiOrderCreated extends ApiOrder {
   guest_access_token: string;
 }
@@ -97,5 +100,18 @@ export const getOrder = async (orderId: string, token: string) => {
     `/order/${orderId}`,
     { params: { token } },
   );
+  return data;
+};
+
+export interface DiscountQuotePayload {
+  items: OrderItemPayload[];
+  promo_code?: string;
+  shipping_cents?: number;
+  customer_email?: string;
+}
+
+/** Which discount the server would apply to this cart, and how much. */
+export const quoteDiscount = async (payload: DiscountQuotePayload) => {
+  const { data } = await apiClient.post<BeResponse<DiscountQuote>>("/order/discount-quote", payload);
   return data;
 };

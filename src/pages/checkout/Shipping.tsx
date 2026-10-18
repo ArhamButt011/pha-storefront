@@ -6,6 +6,11 @@ import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { FitmentGuaranteeBanner } from "@/components/checkout/FitmentGuaranteeBanner";
 import { ShippingForm } from "@/components/checkout/ShippingForm";
 import { CheckoutOrderSummary } from "@/components/checkout/CheckoutOrderSummary";
+import { PromoCodeField } from "@/components/checkout/PromoCodeField";
+import { useStorefrontContent } from "@/context/StorefrontContentContext";
+import { useDiscountQuote } from "@/hooks/useDiscountQuote";
+import { quotedDiscountLine } from "@/utils/discountQuote";
+import { checkoutShippingTotal } from "@/utils/shipping";
 import { useCart } from "@/hooks/useCart";
 import { useHasRehydrated } from "@/hooks/useHasRehydrated";
 import { useShippingQuote } from "@/hooks/useShippingQuote";
@@ -27,6 +32,7 @@ const INITIAL_SHIPPING: ShippingDetails = {
   addressType: "residential",
   billingSameAsShipping: true,
   billingAddress: { ...EMPTY_ADDRESS },
+  marketingOptIn: false,
 };
 
 function isAddressComplete(a: AddressFields) {
@@ -51,9 +57,15 @@ export function CheckoutShipping() {
   const shipping: ShippingDetails = pickupOnly ? { ...shippingState, deliveryMethod: "pickup" } : shippingState;
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { flash_sale: sale } = useStorefrontContent();
+  // Never pre-filled: a code only applies when the shopper enters it.
+  const [promoCode, setPromoCode] = useState("");
+  const appliedCode = promoCode.trim().toUpperCase();
   // Before redux-persist rehydrates, an empty cart may not really be empty.
   const hasRehydrated = useHasRehydrated();
   const shippingQuote = useShippingQuote(items, shipping.shippingAddress, shipping.addressType, shipping.deliveryMethod);
+  const shippingCents = Math.round(checkoutShippingTotal(items, shipping.deliveryMethod, shippingQuote) * 100);
+  const discountQuote = useDiscountQuote({ items, code: promoCode, shippingCents, email: shipping.email });
 
   useEffect(() => {
     if (!hasRehydrated) return;
@@ -76,13 +88,18 @@ const vehicleLabel = vehicle?.make
       return;
     }
 
+    if (appliedCode && discountQuote.status === "error") {
+      setError("Fix or remove the promo code before continuing.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
     const isPickup = shipping.deliveryMethod === "pickup";
 
     try {
-      // Only ids and quantities; the server re-derives every price.
+      // Only ids and quantities, the server re-derives every price.
       const res = await createOrder({
         items: items.map((item) => ({ product: item.id, quantity: item.quantity })),
         customer: {
@@ -91,6 +108,8 @@ const vehicleLabel = vehicle?.make
           phone: shipping.phone,
         },
         delivery_method: shipping.deliveryMethod,
+        ...(appliedCode ? { promo_code: appliedCode } : {}),
+        marketing_opt_in: shipping.marketingOptIn,
         // The backend rejects address fields on pickup, even as null.
         ...(isPickup
           ? {}
@@ -133,6 +152,9 @@ const vehicleLabel = vehicle?.make
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
           <div>
             <ShippingForm values={shipping} onChange={updateShipping} pickupOnly={pickupOnly} />
+            <div className="mt-6">
+              <PromoCodeField value={promoCode} onChange={setPromoCode} quote={discountQuote} suggestedCode={sale?.code} />
+            </div>
             {error && (
               <p role="alert" className="mt-4 text-sm font-medium text-danger">
                 {error}
@@ -148,6 +170,7 @@ const vehicleLabel = vehicle?.make
               shippingQuote={shippingQuote}
               onContinue={handleContinue}
               submitting={submitting}
+              discount={quotedDiscountLine(discountQuote)}
             />
           </div>
         </div>

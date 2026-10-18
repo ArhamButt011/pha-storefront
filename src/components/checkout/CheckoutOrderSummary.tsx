@@ -2,7 +2,7 @@ import { ArrowRight, ShieldCheck, BadgeCheck, Headphones, Loader2 } from "lucide
 import { Button } from "@/components/ui/button";
 import { TRUST_BADGES } from "@/constants/checkout";
 import { formatCurrency } from "@/utils/currency";
-import { flatShippingTotal, hasCalculatedShipping } from "@/utils/shipping";
+import { checkoutShippingTotal, hasCalculatedShipping } from "@/utils/shipping";
 import type { CartItem } from "@/store/cartSlice";
 import type { DeliveryMethod, ShippingQuoteState } from "@/types/checkout";
 
@@ -13,11 +13,13 @@ interface CheckoutOrderSummaryProps {
   subtotal: number;
   vehicleMake?: string;
   deliveryMethod?: DeliveryMethod;
-  /** Live quote for the entered address; wins over the cart's flat rates */
+  /** Live quote for the entered address, wins over the cart's flat rates */
   shippingQuote?: ShippingQuoteState;
   onContinue?: () => void;
   submitting?: boolean;
   disabled?: boolean;
+  /** The server-quoted discount line, in dollars, omitted when none. */
+  discount?: { label: string; amount: number } | null;
 }
 
 export function CheckoutOrderSummary({
@@ -29,13 +31,14 @@ export function CheckoutOrderSummary({
   onContinue,
   submitting = false,
   disabled = false,
+  discount = null,
 }: CheckoutOrderSummaryProps) {
   const isPickup = deliveryMethod === "pickup";
   const quoted = shippingQuote.status === "ready" ? shippingQuote : null;
-  const shipping = isPickup ? 0 : (quoted?.amount ?? flatShippingTotal(items));
+  const shipping = checkoutShippingTotal(items, deliveryMethod, shippingQuote);
   // No price yet for courier-rated lines, so the order can't be placed.
   const awaitingQuote = !isPickup && !quoted && hasCalculatedShipping(items);
-  const total = subtotal + shipping;
+  const total = subtotal + shipping - (discount?.amount ?? 0);
   const shippingLabel = isPickup ? "Pickup" : quoted?.courier ? `Shipping (${quoted.courier})` : "Shipping (Express)";
   const pendingText =
     shippingQuote.status === "loading" ? "Calculating…" : shippingQuote.status === "error" ? "Unavailable" : "Enter postcode";
@@ -75,6 +78,14 @@ export function CheckoutOrderSummary({
             </span>
           )}
         </div>
+        {discount && (
+          <div className="flex items-center justify-between">
+            <span className="text-fg-muted">{discount.label}</span>
+            <span className="font-semibold text-ok">
+              −{formatCurrency(discount.amount)}
+            </span>
+          </div>
+        )}
         {awaitingQuote && shippingQuote.status === "needs_address" && (
           <p className="text-xs text-fg-muted">Enter your postcode and suburb to see the courier price.</p>
         )}

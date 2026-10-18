@@ -10,6 +10,8 @@ import { useVehicle } from "@/context/VehicleContext";
 
 interface Props {
   onInquiry: () => void;
+  // Sits below the fixed AnnouncementBar (h-9) when one is showing.
+  offsetForAnnouncement?: boolean;
 }
 
 const NAV_LINKS = [
@@ -19,7 +21,7 @@ const NAV_LINKS = [
   { label: "About Us", href: "/#about" },
 ];
 
-export function Navbar({ onInquiry }: Props) {
+export function Navbar({ onInquiry, offsetForAnnouncement = false }: Props) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const { totalItems: cartCount } = useCart();
@@ -38,7 +40,7 @@ export function Navbar({ onInquiry }: Props) {
   return (
     <>
       <nav
-        className={`fixed top-0 z-50 w-full pt-3 transition-all duration-300 ${
+        className={`fixed ${offsetForAnnouncement ? "top-9" : "top-0"} z-50 w-full pt-3 transition-all duration-300 ${
           scrolled
             ? "bg-bg/95 shadow-lg backdrop-blur-md border-b border-border"
             : "bg-transparent"
