@@ -1,4 +1,5 @@
-import type { FlashSale } from "@/types/storefront";
+import { PROMO_THEME_CLASS } from "@/constants/storefront";
+import type { FlashSale, PromoTheme } from "@/types/storefront";
 
 export function isProductOnSale(categoryIds: string[] | undefined, sale: FlashSale | null): sale is FlashSale {
   if (!sale) return false;
@@ -51,4 +52,11 @@ export function saleNote(sale: FlashSale) {
 
 export function saleTickerText(sale: FlashSale) {
   return sale.ticker_text || `${saleHeadline(sale)} ${saleHowTo(sale)}`;
+}
+
+/** Class and inline colours for a promotion theme, preset or custom. */
+export function promoThemeStyle(theme: PromoTheme, bgColor: string, textColor: string) {
+  return theme === "custom"
+    ? { className: "", style: { backgroundColor: bgColor, color: textColor } }
+    : { className: PROMO_THEME_CLASS[theme], style: undefined };
 }

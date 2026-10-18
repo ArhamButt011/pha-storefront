@@ -7,7 +7,7 @@ import { STOCK_DOT } from "@/constants/stock";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { Product } from "@/data/products";
 import { useStorefrontContent } from "@/context/StorefrontContentContext";
-import { isProductOnSale, saleNote, salePrice } from "@/utils/flashSale";
+import { isProductOnSale, promoThemeStyle, saleNote, salePrice } from "@/utils/flashSale";
 import { formatCurrency } from "@/utils/currency";
 
 const BADGE_LABEL: Record<NonNullable<Product["badge"]>, string> = {
@@ -27,6 +27,7 @@ export function ProductCard({ product }: { product: Product }) {
   const { flash_sale } = useStorefrontContent();
   const sale = flash_sale?.show_product_badges && isProductOnSale(product.categoryIds, flash_sale) ? flash_sale : null;
   const discounted = sale ? salePrice(product.price, sale) : null;
+  const badge = sale ? promoThemeStyle(sale.badge_theme, sale.badge_bg_color, sale.badge_text_color) : null;
 
   function handleAdd(e: React.MouseEvent) {
     e.preventDefault();
@@ -48,7 +49,10 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative h-48 overflow-hidden shine">
         <img src={product.img} alt={product.title} className="card-img h-full w-full object-cover" loading="lazy" />
         {sale ? (
-          <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-gradient-to-r from-danger to-accent px-3 py-1 text-xs font-black uppercase tracking-wide text-on-media shadow-glow">
+          <span
+            className={cn("absolute left-3 top-3 flex items-center gap-1 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide shadow-glow", badge?.className)}
+            style={badge?.style}
+          >
             <Zap className="h-3 w-3 fill-current" />
             {sale.discount_type === "percent" ? `-${sale.discount_value}%` : "Flash sale"}
           </span>

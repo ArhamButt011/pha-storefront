@@ -1,7 +1,7 @@
-import { CheckCircle2, HeartHandshake, Loader2, Sparkles, Tag, XCircle } from "lucide-react";
+import { Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatCurrency } from "@/utils/currency";
+import { PromoCodeStatus } from "@/components/checkout/PromoCodeStatus";
 import type { DiscountQuoteState } from "@/types/checkout";
 
 interface PromoCodeFieldProps {
@@ -11,50 +11,6 @@ interface PromoCodeFieldProps {
   quote: DiscountQuoteState;
   // Promoted sale code, offered as a one-tap "Apply" tip.
   suggestedCode?: string | null;
-}
-
-function QuoteStatus({ value, quote }: Pick<PromoCodeFieldProps, "value" | "quote">) {
-  if (quote.status === "loading") {
-    return (
-      <span className="flex items-center gap-1.5 text-fg-muted">
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-        Checking…
-      </span>
-    );
-  }
-  if (quote.status === "error") {
-    return (
-      <span className="flex items-center gap-1.5 text-danger">
-        <XCircle className="h-3.5 w-3.5" />
-        {quote.message}
-      </span>
-    );
-  }
-  if (quote.status !== "ready" || !quote.quote.discount) return null;
-  const { discount, amount } = quote.quote;
-  const saving = formatCurrency(amount / 100);
-  if ((discount.min_order_number ?? 1) >= 2) {
-    return (
-      <span className="flex items-center gap-1.5 text-ok">
-        <HeartHandshake className="h-3.5 w-3.5" />
-        Welcome back! {discount.name}: −{saving}
-      </span>
-    );
-  }
-  if (discount.is_automatic || !value.trim()) {
-    return (
-      <span className="flex items-center gap-1.5 text-ok">
-        <Sparkles className="h-3.5 w-3.5" />
-        {discount.name} applied automatically: −{saving}
-      </span>
-    );
-  }
-  return (
-    <span className="flex items-center gap-1.5 text-ok">
-      <CheckCircle2 className="h-3.5 w-3.5" />
-      {discount.code} applied: −{saving}
-    </span>
-  );
 }
 
 export function PromoCodeField({ value, onChange, quote, suggestedCode }: PromoCodeFieldProps) {
@@ -73,7 +29,7 @@ export function PromoCodeField({ value, onChange, quote, suggestedCode }: PromoC
         autoComplete="off"
       />
       <div className="mt-2 min-h-5 text-xs">
-        <QuoteStatus value={value} quote={quote} />
+        <PromoCodeStatus value={value} quote={quote} />
       </div>
       {suggestedCode && value.trim().toUpperCase() !== suggestedCode ? (
         <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-accent/40 bg-accent/5 px-3 py-2 text-xs">

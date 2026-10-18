@@ -17,9 +17,10 @@ import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { useCart } from "@/hooks/useCart";
 import { productToCartItem } from "@/utils/productToCartItem";
 import { formatCurrency } from "@/utils/currency";
+import { cn } from "@/utils/cn";
 import { FlashSaleCard } from "@/components/common/FlashSaleCard";
 import { useStorefrontContent } from "@/context/StorefrontContentContext";
-import { isProductOnSale, saleNote, salePrice } from "@/utils/flashSale";
+import { isProductOnSale, promoThemeStyle, saleNote, salePrice } from "@/utils/flashSale";
 import { getOrigin, safeJsonLd, stripHtml, mapAvailability, mapItemCondition } from "@/lib/seo";
 import type { ApiProduct } from "@/types/apiProduct";
 
@@ -98,6 +99,7 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
   const gallery = product.gallery ?? [product.img];
   const sale = flash_sale?.show_product_badges && isProductOnSale(product.categoryIds, flash_sale) ? flash_sale : null;
   const discounted = sale ? salePrice(product.price, sale) : null;
+  const saveBadge = sale ? promoThemeStyle(sale.badge_theme, sale.badge_bg_color, sale.badge_text_color) : null;
 
   const infoRows = [
     // SKU and Warranty appear further down, so they're not repeated here.
@@ -178,7 +180,7 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
             <div className="mt-6 flex flex-wrap items-baseline gap-3">
               <span className="font-display text-4xl font-black text-danger">{formatCurrency(discounted)}</span>
               <span className="text-lg text-fg-muted/60 line-through">{formatCurrency(product.price)}</span>
-              <span className="rounded-full bg-danger px-3 py-1 text-xs font-black uppercase text-danger-fg">
+              <span className={cn("rounded-full px-3 py-1 text-xs font-black uppercase", saveBadge?.className)} style={saveBadge?.style}>
                 Save {formatCurrency(product.price - discounted)}
               </span>
             </div>

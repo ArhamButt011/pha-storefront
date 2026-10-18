@@ -7,7 +7,8 @@ export type HeroHeight = "compact" | "standard" | "tall";
 export type AnnouncementTheme = "indigo" | "crimson" | "amber" | "emerald" | "carbon" | "custom";
 export type AnnouncementIcon = "none" | "sparkles" | "truck" | "tag" | "zap" | "gift";
 export type TickerSpeed = "slow" | "normal" | "fast";
-export type TickerTheme = "brand" | "crimson" | "carbon" | "custom";
+// Shared by the ticker, sale card and sale badge.
+export type PromoTheme = "brand" | "crimson" | "carbon" | "custom";
 export type DiscountType = "percent" | "fixed" | "free_shipping";
 
 export interface HeroSlide {
@@ -68,10 +69,18 @@ export interface FlashSale {
   max_order_number: number | null;
   ticker_text: string;
   ticker_speed: TickerSpeed;
-  ticker_theme: TickerTheme;
+  ticker_theme: PromoTheme;
   // Used when ticker_theme is "custom".
   ticker_bg_color: string;
   ticker_text_color: string;
+  // Product page sale card, colours used when card_theme is "custom".
+  card_theme: PromoTheme;
+  card_bg_color: string;
+  card_text_color: string;
+  // Sale tags and the "Save" pill, colours used when badge_theme is "custom".
+  badge_theme: PromoTheme;
+  badge_bg_color: string;
+  badge_text_color: string;
   show_countdown: boolean;
   show_hero_card: boolean;
   show_product_badges: boolean;

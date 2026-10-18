@@ -7,7 +7,7 @@ import type {
   HeroSettings,
   StorefrontContent,
   TickerSpeed,
-  TickerTheme,
+  PromoTheme,
 } from "@/types/storefront";
 
 export const DEFAULT_HERO_SETTINGS: HeroSettings = {
@@ -63,7 +63,8 @@ export const HERO_FOCUS_CLASS: Record<HeroImageFocus, string> = {
 // Below this width the phone photo (if any) is used.
 export const HERO_MOBILE_MEDIA = "(max-width: 767px)";
 
-export const TICKER_THEME_CLASS: Record<TickerTheme, string> = {
+// Ticker, sale card and badge presets, "custom" colours are applied inline.
+export const PROMO_THEME_CLASS: Record<PromoTheme, string> = {
   brand: "bg-gradient-to-r from-danger via-accent to-danger text-danger-fg",
   crimson: "bg-danger text-danger-fg",
   carbon: "bg-promo-carbon text-promo-fg",

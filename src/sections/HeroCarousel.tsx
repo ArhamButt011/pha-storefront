@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FlashSaleCard } from "@/components/common/FlashSaleCard";
+import { SmartLink } from "@/components/common/SmartLink";
 import { HERO_FOCUS_CLASS, HERO_HEIGHT_CLASS, HERO_MOBILE_MEDIA } from "@/constants/storefront";
 import type { FlashSale, HeroAlign, HeroSettings, HeroSlide, HeroVertical } from "@/types/storefront";
 import { cn } from "@/utils/cn";
-import { isExternalUrl, padTwo } from "@/utils/format";
+import { padTwo } from "@/utils/format";
 
 const ALIGN_CLASS: Record<HeroAlign, string> = {
   left: "items-start text-left mr-auto",
@@ -19,18 +19,6 @@ const VERTICAL_CLASS: Record<HeroVertical, string> = {
   center: "items-center",
   bottom: "items-end pb-40",
 };
-
-function SlideLink({ url, className, children }: { url: string; className?: string; children: React.ReactNode }) {
-  return isExternalUrl(url) ? (
-    <a href={url} className={className}>
-      {children}
-    </a>
-  ) : (
-    <Link to={url || "/shop"} className={className}>
-      {children}
-    </Link>
-  );
-}
 
 interface HeroCarouselProps {
   slides: HeroSlide[];
@@ -113,10 +101,10 @@ export function HeroCarousel({ slides, settings, sale }: HeroCarouselProps) {
             <div className={cn("mt-8 flex flex-col gap-3 sm:flex-row", slide.align === "center" && "sm:justify-center")}>
               {slide.cta_label && (
                 <Button asChild size="lg" className="gap-2 shadow-glow">
-                  <SlideLink url={slide.cta_url}>
+                  <SmartLink to={slide.cta_url || "/shop"}>
                     {slide.cta_label}
                     <ArrowRight className="h-5 w-5" />
-                  </SlideLink>
+                  </SmartLink>
                 </Button>
               )}
               {slide.secondary_cta_label && (
@@ -129,7 +117,7 @@ export function HeroCarousel({ slides, settings, sale }: HeroCarouselProps) {
                     dark ? "border-media-ink/30 text-media-ink hover:bg-media-ink/10" : "border-on-media/30 bg-on-media/5 text-on-media hover:bg-on-media/15",
                   )}
                 >
-                  <SlideLink url={slide.secondary_cta_url}>{slide.secondary_cta_label}</SlideLink>
+                  <SmartLink to={slide.secondary_cta_url || "/shop"}>{slide.secondary_cta_label}</SmartLink>
                 </Button>
               )}
             </div>

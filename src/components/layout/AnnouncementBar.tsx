@@ -1,10 +1,9 @@
 import { ArrowRight, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { SmartLink } from "@/components/common/SmartLink";
 import { Button } from "@/components/ui/button";
 import { ANNOUNCEMENT_ICONS, ANNOUNCEMENT_THEME_CLASS } from "@/constants/storefront";
 import type { Announcement } from "@/types/storefront";
 import { cn } from "@/utils/cn";
-import { isExternalUrl } from "@/utils/format";
 
 interface AnnouncementBarProps {
   announcement: Announcement;
@@ -34,16 +33,12 @@ export function AnnouncementBar({ announcement, onDismiss }: AnnouncementBarProp
 
   return (
     <div className={cn("fixed inset-x-0 top-0 z-60 flex h-9", ANNOUNCEMENT_THEME_CLASS[theme])} style={custom}>
-      {!link_url ? (
-        <div className={className}>{content}</div>
-      ) : isExternalUrl(link_url) ? (
-        <a href={link_url} className={className}>
+      {link_url ? (
+        <SmartLink to={link_url} className={className}>
           {content}
-        </a>
+        </SmartLink>
       ) : (
-        <Link to={link_url} className={className}>
-          {content}
-        </Link>
+        <div className={className}>{content}</div>
       )}
       {dismissible && (
         <Button

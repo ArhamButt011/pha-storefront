@@ -1,7 +1,7 @@
 import { Zap } from "lucide-react";
 import { CountdownTiles } from "@/components/common/CountdownTiles";
-import { saleTickerText } from "@/utils/flashSale";
-import { TICKER_DURATION_SECONDS, TICKER_THEME_CLASS } from "@/constants/storefront";
+import { promoThemeStyle, saleTickerText } from "@/utils/flashSale";
+import { TICKER_DURATION_SECONDS } from "@/constants/storefront";
 import type { FlashSale } from "@/types/storefront";
 import { cn } from "@/utils/cn";
 
@@ -10,11 +10,12 @@ const REPEATS = 6;
 
 export function SaleTicker({ sale, className }: { sale: FlashSale; className?: string }) {
   const text = saleTickerText(sale);
+  const theme = promoThemeStyle(sale.ticker_theme, sale.ticker_bg_color, sale.ticker_text_color);
 
   return (
     <div
-      className={cn("relative z-10 flex items-stretch overflow-hidden shadow-glow", TICKER_THEME_CLASS[sale.ticker_theme], className)}
-      style={sale.ticker_theme === "custom" ? { backgroundColor: sale.ticker_bg_color, color: sale.ticker_text_color } : undefined}
+      className={cn("relative z-10 flex items-stretch overflow-hidden shadow-glow", theme.className, className)}
+      style={theme.style}
     >
       <div className="z-10 flex shrink-0 items-center gap-3 bg-scrim/40 px-4 py-2 backdrop-blur-sm sm:px-6">
         <span className="relative flex h-2.5 w-2.5">
