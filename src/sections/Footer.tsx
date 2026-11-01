@@ -128,12 +128,12 @@ export function Footer() {
           <p className="text-xs text-fg-muted">
             Powered by{" "}
             <a
-              href="https://autopartspro.au/"
+              href="https://partsmanager.com.au/"
               target="_blank"
               rel="noreferrer"
               className="font-medium text-fg transition-colors hover:text-accent"
             >
-              AutoPartsPro
+              Parts Manager
             </a>
           </p>
         </div>
