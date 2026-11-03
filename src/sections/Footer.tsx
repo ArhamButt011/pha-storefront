@@ -44,7 +44,7 @@ export function Footer() {
             <div className="mb-4 flex items-center gap-3">
               <img src="/branding/logo.svg" alt="Parts Hub Australia" className="h-12 w-12 rounded-lg object-contain" />
               <span className="font-display text-base font-bold tracking-wider text-accent">
-                PARTS HUB
+                PARTS HUB AUSTRALIA
               </span>
             </div>
             <p className="mb-6 text-sm leading-relaxed text-fg-muted">

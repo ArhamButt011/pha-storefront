@@ -9,7 +9,7 @@ import { SUPPORT_EMAIL } from "@/constants/contact";
 export function meta({}: Route.MetaArgs) {
   const title = "Shipping Policy | Parts Hub Australia";
   const description =
-    "Read Parts Hub Australia's shipping policy — return window, condition requirements, and how refunds are processed.";
+    "Read Parts Hub Australia's shipping policy — dispatch times, delivery costs, tracking, and in-store pickup.";
   return [
     { title },
     { name: "description", content: description },
@@ -41,7 +41,7 @@ export default function ShippingPolicy() {
       </div>
 
       <div className="mt-8 flex flex-col items-start gap-3 rounded-2xl border border-border bg-bg-2 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-        <p className="text-sm text-fg-muted">Questions about your order? Get in touch and we'll help.</p>
+        <p className="text-sm text-fg-muted">Questions about your delivery? Get in touch and we'll help.</p>
         <Button asChild className="gap-2 shrink-0">
           <a href={`mailto:${SUPPORT_EMAIL}`}>
             <Mail className="h-4 w-4" />
