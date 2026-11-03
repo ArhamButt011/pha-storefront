@@ -18,6 +18,7 @@ export default [
     route("bundles", "pages/BundlesListing.tsx"),
     route("cart", "pages/Cart.tsx"),
     route("returns-policy", "pages/ReturnsPolicy.tsx"),
+    route("shipping-policy", "pages/ShippingPolicy.tsx"),
     route("checkout", "pages/checkout/Shipping.tsx"),
     route("checkout/payment", "pages/checkout/Payment.tsx"),
     route("checkout/confirmation", "pages/checkout/Confirmation.tsx"),

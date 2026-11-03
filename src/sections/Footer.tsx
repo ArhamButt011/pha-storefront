@@ -11,7 +11,7 @@ import { SUPPORT_EMAIL } from "@/constants/contact";
 // non-navigating placeholder until it does.
 const CUSTOMER_SERVICE_LINKS: { label: string; to: string | null }[] = [
   { label: "Returns Policy", to: "/returns-policy" },
-  { label: "Shipping Info", to: null },
+  { label: "Shipping Policy", to: "/shipping-policy" },
 ];
 
 export function Footer() {
