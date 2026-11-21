@@ -7,6 +7,7 @@ import { ImageGallery } from "@/components/product/ImageGallery";
 import { FitmentBadge } from "@/components/product/FitmentBadge";
 import { ProductTabs } from "@/components/product/ProductTabs";
 import { ProductConditionQuantityRow } from "@/components/product/ProductConditionQuantityRow";
+import { AcceptedPayments } from "@/components/product/AcceptedPayments";
 import { ShippingReturnsPayments } from "@/components/product/ShippingReturnsPayments";
 import { SimilarItems } from "@/components/product/SimilarItems";
 import { Button } from "@/components/ui/button";
@@ -244,6 +245,8 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
               Buy Now
             </Button>
           </div>
+
+          <AcceptedPayments />
 
           <ShippingReturnsPayments shippingCost={product.shippingCost} shippingMethod={product.shippingMethod} />
 

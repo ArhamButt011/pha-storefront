@@ -10,7 +10,7 @@ export interface ShippingReturnsPaymentsProps {
 }
 
 const RETURNS_TEXT = "30-day returns accepted on unused parts in original packaging.";
-const PAYMENTS_TEXT = "Secure checkout via Stripe — all major credit and debit cards accepted.";
+const PAYMENTS_TEXT = "Secure checkout via Stripe — major cards, Afterpay and Zip Pay accepted.";
 
 // Marketplace-style postage block, limited to facts this store can verify.
 export function ShippingReturnsPayments({ shippingCost, shippingMethod }: ShippingReturnsPaymentsProps) {
@@ -35,7 +35,7 @@ export function ShippingReturnsPayments({ shippingCost, shippingMethod }: Shippi
     {
       icon: CreditCard,
       label: "Payments",
-      value: "Cards accepted",
+      value: "Cards, Afterpay & Zip Pay",
       detail: PAYMENTS_TEXT,
     },
   ];
