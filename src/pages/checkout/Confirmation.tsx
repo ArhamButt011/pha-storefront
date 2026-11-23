@@ -10,6 +10,7 @@ import { PrecisionGuaranteedCard } from "@/components/checkout/confirmation/Prec
 import { ConfirmationSummaryLinks } from "@/components/checkout/confirmation/ConfirmationSummaryLinks";
 import { Button } from "@/components/ui/button";
 import { getOrder, type ApiOrder } from "@/lib/api/orders";
+import { trackPurchase } from "@/lib/analytics";
 import { ApiError } from "@/lib/api/client";
 import { clearCart } from "@/store/cartSlice";
 import { resetCheckout } from "@/store/checkoutSlice";
@@ -104,8 +105,9 @@ export function OrderConfirmation() {
       clearedRef.current = true;
       dispatch(clearCart());
       dispatch(resetCheckout());
+      if (order) trackPurchase(order);
     }
-  }, [phase, dispatch]);
+  }, [phase, dispatch, order]);
 
   if (phase === "loading" || phase === "polling") {
     return (

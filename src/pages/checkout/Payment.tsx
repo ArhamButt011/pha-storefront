@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { createPaymentIntent } from "@/lib/api/payments";
 import { getOrder, type ApiOrder } from "@/lib/api/orders";
 import { getStripe } from "@/lib/stripe";
+import { formatTransactionValue } from "@/lib/analytics";
 import { setOrder } from "@/store/checkoutSlice";
 import type { AppDispatch, RootState } from "@/store/store";
 
@@ -23,10 +24,13 @@ function PaymentForm({
   orderId,
   guestToken,
   orderNumber,
+  totalCents,
 }: {
   orderId: string;
   guestToken: string;
   orderNumber: string | null;
+  // Optional: the order fetch is non-fatal, so it may not have loaded.
+  totalCents: number | null;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -46,6 +50,10 @@ function PaymentForm({
     const returnUrl = new URL("/checkout/confirmation", window.location.origin);
     returnUrl.searchParams.set("order_id", orderId);
     returnUrl.searchParams.set("token", guestToken);
+    // Client's revenue tracking reads this; set before payment is confirmed.
+    if (totalCents !== null) {
+      returnUrl.searchParams.set("transaction_value", formatTransactionValue(totalCents));
+    }
 
     const { error } = await stripe.confirmPayment({
       elements,
@@ -221,7 +229,12 @@ export function CheckoutPayment() {
 
           {!loading && !error && clientSecret && publishableKey && (
             <Elements stripe={getStripe(publishableKey)} options={options}>
-              <PaymentForm orderId={orderId} guestToken={guestToken} orderNumber={orderNumber} />
+              <PaymentForm
+                orderId={orderId}
+                guestToken={guestToken}
+                orderNumber={orderNumber}
+                totalCents={order?.total ?? null}
+              />
             </Elements>
           )}
         </div>
