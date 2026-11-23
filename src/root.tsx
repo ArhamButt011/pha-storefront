@@ -16,6 +16,7 @@ import { VehicleProvider } from "@/context/VehicleContext";
 import { createServerStore } from "@/store/store";
 import { getBrowserStore, startPersisting } from "@/store/browserStore";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { STRIP_URL_SECRETS_SCRIPT } from "@/lib/guestOrderAccess";
 
 // Runs before hydration (inline, in <head>) so a light-mode visitor never
 // sees a flash of the default dark theme. Dark is still the default: the
@@ -48,6 +49,8 @@ export function Layout({ children }: { children: ReactNode }) {
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
+        {/* Must run before GTM so its first page_view never carries the token. */}
+        <script dangerouslySetInnerHTML={{ __html: STRIP_URL_SECRETS_SCRIPT }} />
         {/* Google Tag Manager */}
         {GTM_ID && <script dangerouslySetInnerHTML={{ __html: GTM_SCRIPT }} />}
         {/* End Google Tag Manager */}

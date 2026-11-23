@@ -16,6 +16,7 @@ import { useHasRehydrated } from "@/hooks/useHasRehydrated";
 import { useShippingQuote } from "@/hooks/useShippingQuote";
 import { useVehicle } from "@/context/VehicleContext";
 import { createOrder } from "@/lib/api/orders";
+import { guestOrderQuery, saveGuestToken } from "@/lib/guestOrderAccess";
 import { setOrder } from "@/store/checkoutSlice";
 import { hasPickupOnly } from "@/utils/shipping";
 import type { AppDispatch } from "@/store/store";
@@ -128,8 +129,8 @@ const vehicleLabel = vehicle?.make
         }),
       );
 
-      const params = new URLSearchParams({ order_id: order._id, token: order.guest_access_token });
-      navigate(`/checkout/payment?${params.toString()}`);
+      saveGuestToken(order._id, order.guest_access_token);
+      navigate(`/checkout/payment?${guestOrderQuery(order._id, order.guest_access_token)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not place your order. Please try again.");
       setSubmitting(false);

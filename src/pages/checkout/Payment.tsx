@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2, ShieldCheck } from "lucide-react";
 import {
@@ -17,6 +17,8 @@ import { createPaymentIntent } from "@/lib/api/payments";
 import { getOrder, type ApiOrder } from "@/lib/api/orders";
 import { getStripe } from "@/lib/stripe";
 import { formatTransactionValue } from "@/lib/analytics";
+import { guestOrderQuery, saveGuestToken } from "@/lib/guestOrderAccess";
+import { useGuestOrderRef } from "@/hooks/useGuestOrderRef";
 import { setOrder } from "@/store/checkoutSlice";
 import type { AppDispatch, RootState } from "@/store/store";
 
@@ -47,13 +49,14 @@ function PaymentForm({
     // The confirmation page must be able to bootstrap entirely from this
     // URL — a 3DS challenge does a full-page redirect away and back, so
     // nothing in Redux/component state is guaranteed to survive.
-    const returnUrl = new URL("/checkout/confirmation", window.location.origin);
-    returnUrl.searchParams.set("order_id", orderId);
-    returnUrl.searchParams.set("token", guestToken);
-    // Client's revenue tracking reads this; set before payment is confirmed.
-    if (totalCents !== null) {
-      returnUrl.searchParams.set("transaction_value", formatTransactionValue(totalCents));
-    }
+    // Token goes in the URL only if storage can't hold it across the redirect.
+    saveGuestToken(orderId, guestToken);
+    // Client's revenue tracking reads transaction_value; set before payment.
+    const extra = totalCents !== null ? { transaction_value: formatTransactionValue(totalCents) } : undefined;
+    const returnUrl = new URL(
+      `/checkout/confirmation?${guestOrderQuery(orderId, guestToken, extra)}`,
+      window.location.origin,
+    );
 
     const { error } = await stripe.confirmPayment({
       elements,
@@ -105,7 +108,7 @@ function PaymentForm({
 export function CheckoutPayment() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const [searchParams] = useSearchParams();
+  const { orderId: paramOrderId, token: paramGuestToken, ready: refReady } = useGuestOrderRef();
   const { orderId: sliceOrderId, guestToken: sliceGuestToken, orderNumber } = useSelector(
     (s: RootState) => s.checkout,
   );
@@ -115,8 +118,6 @@ export function CheckoutPayment() {
   // and token as URL query params too — fall back to those so refreshing
   // /checkout/payment resumes the same payment instead of bouncing to
   // /checkout.
-  const paramOrderId = searchParams.get("order_id");
-  const paramGuestToken = searchParams.get("token");
   const orderId = sliceOrderId ?? paramOrderId;
   const guestToken = sliceGuestToken ?? paramGuestToken;
 
@@ -150,6 +151,7 @@ export function CheckoutPayment() {
     // Neither the slice nor the URL carries an order reference — genuinely
     // nothing to resume. Send them back to start a new order.
     if (!orderId || !guestToken) {
+      if (!refReady) return;
       navigate("/checkout", { replace: true });
       return;
     }
@@ -183,7 +185,7 @@ export function CheckoutPayment() {
     return () => {
       cancelled = true;
     };
-  }, [orderId, guestToken, sliceOrderId, sliceGuestToken, orderNumber, dispatch, navigate]);
+  }, [orderId, guestToken, sliceOrderId, sliceGuestToken, orderNumber, dispatch, navigate, refReady]);
 
   if (!orderId || !guestToken) return null;
 

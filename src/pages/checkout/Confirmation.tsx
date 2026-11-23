@@ -11,6 +11,8 @@ import { ConfirmationSummaryLinks } from "@/components/checkout/confirmation/Con
 import { Button } from "@/components/ui/button";
 import { getOrder, type ApiOrder } from "@/lib/api/orders";
 import { trackPurchase } from "@/lib/analytics";
+import { guestOrderQuery } from "@/lib/guestOrderAccess";
+import { useGuestOrderRef } from "@/hooks/useGuestOrderRef";
 import { ApiError } from "@/lib/api/client";
 import { clearCart } from "@/store/cartSlice";
 import { resetCheckout } from "@/store/checkoutSlice";
@@ -23,15 +25,16 @@ const POLL_TIMEOUT_MS = 30_000;
 const PRECISION_IMG =
   "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?w=400&h=400&fit=crop";
 
-type Phase = "loading" | "polling" | "ready" | "timeout" | "cancelled" | "error";
+type Phase = "loading" | "polling" | "ready" | "timeout" | "cancelled" | "declined" | "error";
 
 export function OrderConfirmation() {
   // Source of truth is the URL, never Redux — stripe.confirmPayment() can do
   // a full-page 3DS redirect that wipes any in-memory/non-persisted state.
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch<AppDispatch>();
-  const orderId = searchParams.get("order_id");
-  const token = searchParams.get("token");
+  const { orderId, token, ready } = useGuestOrderRef();
+  // Stripe sets this when Afterpay/Zip/3DS redirects back; "failed" = no charge.
+  const redirectStatus = searchParams.get("redirect_status");
 
   const [order, setOrderState] = useState<ApiOrder | null>(null);
   const [phase, setPhase] = useState<Phase>("loading");
@@ -39,6 +42,11 @@ export function OrderConfirmation() {
   const clearedRef = useRef(false);
 
   useEffect(() => {
+    if (!ready) return;
+    if (orderId && token && redirectStatus === "failed") {
+      setPhase("declined");
+      return;
+    }
     if (!orderId || !token) {
       setPhase("error");
       setErrorMessage("Missing order reference — this link looks incomplete.");
@@ -98,7 +106,7 @@ export function OrderConfirmation() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [orderId, token]);
+  }, [orderId, token, ready, redirectStatus]);
 
   useEffect(() => {
     if (phase === "ready" && !clearedRef.current) {
@@ -139,6 +147,29 @@ export function OrderConfirmation() {
           <Button variant="outline" asChild className="mt-2">
             <Link to="/shop">Continue Shopping</Link>
           </Button>
+        </main>
+      </div>
+    );
+  }
+
+  if (phase === "declined" && orderId && token) {
+    return (
+      <div className="min-h-screen bg-bg">
+        <main className="mx-auto flex max-w-xl flex-col items-center gap-3 px-4 py-24 text-center sm:px-6">
+          <XCircle className="h-8 w-8 text-danger" />
+          <h1 className="text-lg font-bold text-fg">Payment wasn't approved</h1>
+          <p className="text-sm text-fg-muted">
+            Your payment was declined or cancelled, so you haven't been charged. You can try again or choose a
+            different payment method.
+          </p>
+          <div className="mt-2 flex gap-3">
+            <Button asChild>
+              <Link to={`/checkout/payment?${guestOrderQuery(orderId, token)}`}>Try Again</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/cart">Return to Cart</Link>
+            </Button>
+          </div>
         </main>
       </div>
     );
@@ -217,7 +248,9 @@ export function OrderConfirmation() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" asChild>
-                <Link to={`/checkout/invoice?order_id=${order._id}&token=${token}`}>View Order Status</Link>
+                <Link to={`/checkout/invoice?${token ? guestOrderQuery(order._id, token) : `order_id=${order._id}`}`}>
+                  View Order Status
+                </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <Link to="/shop">Continue Shopping</Link>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Loader2, AlertTriangle, Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InvoiceTitleBlock } from "@/components/checkout/invoice/InvoiceTitleBlock";
@@ -8,6 +8,8 @@ import { InvoicePickupCard } from "@/components/checkout/invoice/InvoicePickupCa
 import { InvoiceItemsTable, type InvoiceItem } from "@/components/checkout/invoice/InvoiceItemsTable";
 import { InvoicePaymentAndTotals } from "@/components/checkout/invoice/InvoicePaymentAndTotals";
 import { getOrder, type ApiOrder, type OrderAddressPayload } from "@/lib/api/orders";
+import { guestOrderQuery } from "@/lib/guestOrderAccess";
+import { useGuestOrderRef } from "@/hooks/useGuestOrderRef";
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -25,15 +27,14 @@ function toInvoiceAddress(fullName: string, addr: OrderAddressPayload): InvoiceA
 }
 
 export function Invoice() {
-  const [searchParams] = useSearchParams();
-  const orderId = searchParams.get("order_id");
-  const token = searchParams.get("token");
+  const { orderId, token, ready } = useGuestOrderRef();
 
   const [order, setOrder] = useState<ApiOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!ready) return;
     if (!orderId || !token) {
       setError("Missing order reference — this link looks incomplete.");
       setLoading(false);
@@ -55,7 +56,7 @@ export function Invoice() {
     return () => {
       cancelled = true;
     };
-  }, [orderId, token]);
+  }, [orderId, token, ready]);
 
   if (loading) {
     return (
@@ -97,7 +98,7 @@ export function Invoice() {
       <main className="mx-auto max-w-5xl space-y-6 px-4 pb-10 pt-20 sm:px-6 lg:px-8 lg:pt-28">
         <div className="flex items-center justify-between gap-3 print:hidden">
           <Link
-            to={`/checkout/confirmation?order_id=${orderId}&token=${token}`}
+            to={`/checkout/confirmation?${orderId && token ? guestOrderQuery(orderId, token) : ""}`}
             className="flex items-center gap-1.5 text-sm font-medium text-fg-muted transition-colors hover:text-fg"
           >
             <ArrowLeft className="h-4 w-4" />
