@@ -1,5 +1,9 @@
+import type { SeoMeta } from "@/types/seo";
+
 export interface ApiCategory {
   _id: string;
+  description?: string;
+  seo?: SeoMeta;
   id: string;
   name: string;
   slug: string;

@@ -23,6 +23,7 @@ export const EMPTY_STOREFRONT_CONTENT: StorefrontContent = {
   hero_settings: DEFAULT_HERO_SETTINGS,
   announcement: null,
   flash_sale: null,
+  signup_popup: null,
 };
 
 // Background + text pair per dashboard-chosen theme, "custom" is inline.
@@ -45,6 +46,13 @@ export const ANNOUNCEMENT_ICONS: Record<Exclude<AnnouncementIcon, "none">, Lucid
 
 // sessionStorage key: a closed banner stays closed for the visit.
 export const BANNER_DISMISSED_KEY = "pha-banner-dismissed";
+
+// JSON { at, version, subscribed }: when and which popup was last closed.
+export const SIGNUP_POPUP_SEEN_KEY = "pha-signup-popup-seen";
+// ?popup=preview shows it at once, so owners can check it after editing.
+export const SIGNUP_POPUP_PREVIEW_PARAM = "popup";
+// The popup never interrupts buying.
+export const SIGNUP_POPUP_HIDDEN_PATHS = ["/cart", "/checkout"];
 
 export const HERO_HEIGHT_CLASS: Record<HeroHeight, string> = {
   compact: "min-h-[50vh] lg:min-h-[60vh]",

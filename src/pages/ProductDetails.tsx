@@ -22,7 +22,8 @@ import { cn } from "@/utils/cn";
 import { FlashSaleCard } from "@/components/common/FlashSaleCard";
 import { useStorefrontContent } from "@/context/StorefrontContentContext";
 import { isProductOnSale, promoThemeStyle, saleNote, salePrice } from "@/utils/flashSale";
-import { getOrigin, safeJsonLd, stripHtml, mapAvailability, mapItemCondition } from "@/lib/seo";
+import { buildMeta, getOrigin, safeJsonLd, stripHtml, mapAvailability, mapItemCondition } from "@/lib/seo";
+import { redirectOrNotFound } from "@/lib/redirects";
 import type { ApiProduct } from "@/types/apiProduct";
 
 function buildProductJsonLd(product: ApiProduct, origin: string) {
@@ -60,30 +61,22 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     return { product: res.data, origin: getOrigin(request) };
   } catch (err) {
     // Only a real 404 is a 404, Google de-indexes it, so outages must 500.
-    if (err instanceof ApiError && err.status === 404) {
-      throw new Response("Not Found", { status: 404 });
-    }
+    if (err instanceof ApiError && err.status === 404) return redirectOrNotFound(request);
     throw err;
   }
 }
 
-export function meta({ data }: Route.MetaArgs) {
+export function meta({ data, matches }: Route.MetaArgs) {
   if (!data) return [];
-  const { product, origin } = data;
-  const canonicalUrl = `${origin}/product/${product.slug}`;
-  const title = `${product.title} | Parts Hub Australia`;
-  const description = stripHtml(product.description).slice(0, 300) || product.title;
-  const image = product.attachments?.[0]?.url;
-
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:type", content: "product" },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    { property: "og:url", content: canonicalUrl },
-    ...(image ? [{ property: "og:image", content: image }] : []),
-  ];
+  const { product } = data;
+  return buildMeta(matches, {
+    title: product.title,
+    description: stripHtml(product.description) || product.title,
+    image: product.attachments?.[0]?.url,
+    path: `/product/${product.slug}`,
+    type: "product",
+    seo: product.seo,
+  });
 }
 
 export default function ProductDetails({ loaderData }: Route.ComponentProps) {
@@ -130,10 +123,6 @@ export default function ProductDetails({ loaderData }: Route.ComponentProps) {
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-20 lg:pt-28 sm:px-6 lg:px-8">
-      {/* React 19 hoists <link>/<title>/<meta> rendered anywhere in the tree
-          into <head>: the route module's `links` export can't do this
-          since it has no access to loader data (needed for the slug). */}
-      <link rel="canonical" href={`${loaderData.origin}/product/${loaderData.product.slug}`} />
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger

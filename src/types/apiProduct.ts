@@ -1,3 +1,4 @@
+import type { SeoMeta } from "@/types/seo";
 export interface ApiAttachment {
   _id: string;
   url: string;
@@ -62,6 +63,7 @@ export interface ApiProductDisplay {
 export type ShippingMethod = "standard" | "calculated" | "pickup";
 
 export interface ApiProduct {
+  seo?: SeoMeta;
   _id: string;
   title: string;
   slug: string;

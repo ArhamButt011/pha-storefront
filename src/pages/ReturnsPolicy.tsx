@@ -1,22 +1,18 @@
 import { Mail } from "lucide-react";
 import type { Route } from "./+types/ReturnsPolicy";
+import { buildMeta } from "@/lib/seo";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { RETURNS_POLICY_POINTS } from "@/constants/returnsPolicy";
 import { SUPPORT_EMAIL } from "@/constants/contact";
 
-// Static content, no loader — same pattern as BundlesListing. Still gets a
-// `meta` export since this is real, crawlable content worth indexing.
-export function meta({}: Route.MetaArgs) {
-  const title = "Returns Policy | Parts Hub Australia";
-  const description =
-    "Read Parts Hub Australia's returns policy — eligibility window, condition requirements, and how refunds are processed.";
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-  ];
+// Static content, no loader; still gets meta since it's worth indexing.
+export function meta({ matches }: Route.MetaArgs) {
+  return buildMeta(matches, {
+    title: "Returns Policy",
+    description: "Our returns policy: eligibility window, condition requirements, and how refunds are processed.",
+    path: "/returns-policy",
+  });
 }
 
 export default function ReturnsPolicy() {

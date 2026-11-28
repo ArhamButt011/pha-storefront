@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
+import { SignupPopup } from "@/components/layout/SignupPopup";
 import { useStorefrontContent } from "@/context/StorefrontContentContext";
 import { useAnnouncementVisibility } from "@/hooks/useAnnouncementVisibility";
 import { Footer } from "@/sections/Footer";
@@ -10,7 +11,7 @@ import { Navbar } from "@/sections/Navbar";
 /** Banner, navbar, page and footer, rendered inside Layout's providers. */
 export function LayoutChrome({ onInquiry }: { onInquiry: () => void }) {
   // const { open, setOpen } = useSearchModal();
-  const { announcement } = useStorefrontContent();
+  const { announcement, signup_popup } = useStorefrontContent();
   const banner = useAnnouncementVisibility(announcement);
 
   return (
@@ -21,6 +22,7 @@ export function LayoutChrome({ onInquiry }: { onInquiry: () => void }) {
         <Outlet />
         <Footer />
       </div>
+      {signup_popup && <SignupPopup popup={signup_popup} />}
       {/* <SearchFiltersModal open={open} onOpenChange={setOpen} /> */}
     </>
   );

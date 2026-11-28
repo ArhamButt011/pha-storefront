@@ -18,6 +18,7 @@ const NAV_LINKS = [
   { label: "Shop by Category", href: "/categories" },
   { label: "Shop", href: "/shop" },
   // { label: "Popular Bundles", href: "/bundles" },
+  { label: "Blog", href: "/blog" },
   { label: "About Us", href: "/#about" },
 ];
 

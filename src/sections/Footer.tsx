@@ -6,17 +6,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { subscribeNewsletter } from "@/lib/api/newsletter";
 import { SUPPORT_EMAIL } from "@/constants/contact";
+import { BLOG_PATH, CONTENT_PAGE_PATH } from "@/constants/seo";
+import { useSeo } from "@/context/SeoContext";
 
-// `to: null` means the page doesn't exist yet — renders as a plain,
-// non-navigating placeholder until it does.
+// `to: null` renders a non-navigating placeholder until the page exists.
 const CUSTOMER_SERVICE_LINKS: { label: string; to: string | null }[] = [
   { label: "Returns Policy", to: "/returns-policy" },
   { label: "Shipping Policy", to: "/shipping-policy" },
+  { label: "Blog", to: BLOG_PATH },
 ];
 
 export function Footer() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { footer_pages: footerPages } = useSeo();
+  // Pages flagged "show in footer" in the dashboard follow the fixed links.
+  const serviceLinks = [...CUSTOMER_SERVICE_LINKS, ...footerPages.map((p) => ({ label: p.title, to: `${CONTENT_PAGE_PATH}/${p.slug}` }))];
 
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
@@ -73,7 +78,7 @@ export function Footer() {
           <div>
             <h4 className="mb-5 font-display text-xs font-bold uppercase tracking-wider text-fg">Customer Service</h4>
             <ul className="space-y-3">
-              {CUSTOMER_SERVICE_LINKS.map((l) =>
+              {serviceLinks.map((l) =>
                 l.to ? (
                   <li key={l.label}>
                     <Link to={l.to} className="text-sm text-fg-muted transition-colors hover:text-accent">

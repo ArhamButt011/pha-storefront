@@ -7,7 +7,7 @@ import { CategoryCardSkeleton } from "@/components/categories/CategoryCardSkelet
 import { Input } from "@/components/ui/input";
 import { getCategories } from "@/lib/api/categories";
 import { getCategoryImage } from "@/lib/categoryImages";
-import { getOrigin } from "@/lib/seo";
+import { buildMeta, getOrigin } from "@/lib/seo";
 import type { CategoryWithImage } from "@/types/category";
 
 const SEARCH_DEBOUNCE_MS = 400;
@@ -21,36 +21,23 @@ export async function loader({ request }: Route.LoaderArgs) {
   return { categories, origin: getOrigin(request) };
 }
 
-export function meta({ data }: Route.MetaArgs) {
-  const canonicalUrl = data ? `${data.origin}/categories` : undefined;
-  return [
-    { title: "Shop by Category | Parts Hub Australia" },
-    {
-      name: "description",
-      content:
-        "Browse automotive parts by category — engine, suspension, brakes, exhaust and more, all fitted to your vehicle.",
-    },
-    ...(canonicalUrl
-      ? [
-          { property: "og:title", content: "Shop by Category | Parts Hub Australia" },
-          { property: "og:url", content: canonicalUrl },
-        ]
-      : []),
-  ];
+export function meta({ matches }: Route.MetaArgs) {
+  return buildMeta(matches, {
+    title: "Shop by Category",
+    description: "Browse automotive parts by category: engine, suspension, brakes, exhaust and more, all fitted to your vehicle.",
+    path: "/categories",
+    pageKey: "categories",
+  });
 }
 
 export default function CategoriesGrid({ loaderData }: Route.ComponentProps) {
   const [query, setQuery] = useState("");
-  // Mirrors the query box's raw text into a debounced value below, so the
-  // API is only called once the person pauses typing rather than on every
-  // keystroke.
+  // Debounced, so the API is only called once they pause typing.
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [categories, setCategories] = useState<CategoryWithImage[]>(loaderData.categories);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // The loader already fetched the unfiltered (debouncedQuery === "") list
-  // server-side — skip the redundant duplicate fetch that would otherwise
-  // fire on mount for that same, already-satisfied query.
+  // The loader already fetched the unfiltered list; skip refetching it.
   const skipNextFetch = useRef(true);
 
   useEffect(() => {
@@ -70,11 +57,7 @@ export default function CategoriesGrid({ loaderData }: Route.ComponentProps) {
       setLoading(true);
       setError(null);
       try {
-        // The category API now enforces limit/page server-side (it used to
-        // ignore them), so a generous limit is passed explicitly here to
-        // keep this page showing the full category list. `search` is sent
-        // straight through as a real query param — matching happens on the
-        // server rather than by filtering the already-fetched list here.
+        // The API pages results, so ask for all; search matches server-side.
         const res = await getCategories({
           limit: 100,
           page: 1,
