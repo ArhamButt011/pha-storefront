@@ -6,6 +6,8 @@ import {
   Scripts,
   ScrollRestoration,
   isRouteErrorResponse,
+  useLocation,
+  useRouteLoaderData,
   type ErrorResponse,
 } from "react-router";
 import { Provider } from "react-redux";
@@ -17,21 +19,14 @@ import { createServerStore } from "@/store/store";
 import { getBrowserStore, startPersisting } from "@/store/browserStore";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { STRIP_URL_SECRETS_SCRIPT } from "@/lib/guestOrderAccess";
+import { EMPTY_SEO_SETTINGS, LAYOUT_ROUTE_ID, NOINDEX_PATH_PREFIXES } from "@/constants/seo";
+import { buildOrganizationJsonLd, safeJsonLd } from "@/lib/seo";
+import type { LayoutSeoData } from "@/types/seo";
 
-// Runs before hydration (inline, in <head>) so a light-mode visitor never
-// sees a flash of the default dark theme. Dark is still the default: the
-// server always renders `class="dark"` on <html> already, so this only
-// ever needs to *remove* the class for someone who has actually chosen
-// light (or whose system preference is light and they've never overridden
-// it) — kept in manual sync with useTheme.ts's getInitialTheme(), which
-// this necessarily duplicates since it must run outside the React bundle.
+// NOTE: picks the theme pre-hydration so light mode never flashes (useTheme).
 const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("pha-theme");var d=s==="light"?false:s==="dark"?true:window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
 
-// Google Tag Manager — snippet as supplied by the SEO team, verbatim apart
-// from the container ID being interpolated. Goes as high in <head> as
-// possible; the <noscript> iframe fallback sits right after <body> opens.
-// Per-tenant (like VITE_TENANT_SLUG) and optional: unset => no GTM at all,
-// so local dev and tenants without a container don't send any tracking.
+// Google Tag Manager as supplied by the SEO team; unset ID means no GTM.
 const GTM_ID = import.meta.env.VITE_GTM_ID;
 const GTM_SCRIPT = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -40,31 +35,30 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','${GTM_ID}');`;
 
 export function Layout({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  const layoutData = useRouteLoaderData(LAYOUT_ROUTE_ID) as LayoutSeoData | undefined;
+  const seo = layoutData?.seo ?? EMPTY_SEO_SETTINGS;
+  const noindex = NOINDEX_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
   return (
-    // suppressHydrationWarning: the inline theme script above may mutate
-    // this element's class attribute before React hydrates, which would
-    // otherwise be flagged as a mismatch — this is the standard, documented
-    // way to opt that one attribute out of hydration warnings (same pattern
-    // as next-themes / the Remix Indie Stack).
+    // The theme script may change <html>'s class before hydration.
     <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
         {/* Must run before GTM so its first page_view never carries the token. */}
         <script dangerouslySetInnerHTML={{ __html: STRIP_URL_SECRETS_SCRIPT }} />
-        {/* Google Tag Manager */}
         {GTM_ID && <script dangerouslySetInnerHTML={{ __html: GTM_SCRIPT }} />}
-        {/* End Google Tag Manager */}
         <link rel="icon" type="image/svg+xml" href="/branding/logo.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        {/* Site-wide fallback — SSR routes override via their own `meta` export,
-            which <Meta/> renders after this (later tag wins for <title> / a
-            duplicate name="description"), so non-SSR routes (cart/checkout)
-            keep exactly this. */}
-        <title>Parts Hub Australia | Premium Automotive Parts</title>
-        <meta
-          name="description"
-          content="Australia's #1 destination for premium automotive parts. Genuine parts, fast delivery, expert support."
-        />
+        {noindex ? <meta name="robots" content="noindex,follow" /> : null}
+        {seo.google_verification ? <meta name="google-site-verification" content={seo.google_verification} /> : null}
+        {seo.bing_verification ? <meta name="msvalidate.01" content={seo.bing_verification} /> : null}
+        {layoutData?.origin ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: safeJsonLd(buildOrganizationJsonLd(seo, layoutData.origin)) }}
+          />
+        ) : null}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
@@ -76,7 +70,6 @@ export function Layout({ children }: { children: ReactNode }) {
         <Links />
       </head>
       <body>
-        {/* Google Tag Manager (noscript) */}
         {GTM_ID && (
           <noscript>
             <iframe
@@ -87,7 +80,6 @@ export function Layout({ children }: { children: ReactNode }) {
             />
           </noscript>
         )}
-        {/* End Google Tag Manager (noscript) */}
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -97,17 +89,12 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  // A fresh, unpersisted store per render on the server (this component
-  // instance is re-created for every request), a persisted singleton in the
-  // browser — see store.ts / browserStore.ts for why.
+  // Fresh store per server render, persisted singleton in the browser.
   const [store] = useState(() =>
     typeof document === "undefined" ? createServerStore() : getBrowserStore().store,
   );
 
-  // Deliberately NOT inside the useState initializer above (see
-  // browserStore.ts's own comment on the #418 hydration race this fixes) —
-  // an effect is guaranteed to run after the commit, so redux-persist's
-  // localStorage read can never land mid-hydration.
+  // In an effect, not the initializer, to avoid the #418 hydration race.
   useEffect(() => {
     startPersisting();
   }, []);

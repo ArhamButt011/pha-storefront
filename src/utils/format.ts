@@ -7,3 +7,8 @@ export function padTwo(n: number) {
 export function isExternalUrl(url: string) {
   return /^https?:\/\//.test(url);
 }
+
+/** "28 Nov 2026" in Australian order. */
+export function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+}

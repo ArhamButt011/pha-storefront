@@ -18,7 +18,7 @@ import { getCategoryImage } from "@/lib/categoryImages";
 import { mapApiProductToProduct } from "@/utils/mapApiProduct";
 import { toCollectionLinks } from "@/utils/featuredCollections";
 import { FEATURED_COLLECTIONS } from "@/constants/collections";
-import { getOrigin } from "@/lib/seo";
+import { buildMeta, getLayoutSeo, getOrigin } from "@/lib/seo";
 import type { CategoryWithImage } from "@/types/category";
 
 // Fills each grid: one 5-column Categories row, two 4-column Products rows.
@@ -45,17 +45,14 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 }
 
-export function meta({ data }: Route.MetaArgs) {
-  const title = "Parts Hub Australia | Premium Automotive Parts";
-  const description =
-    "Australia's #1 destination for premium automotive parts. Genuine parts, fast delivery, expert support.";
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-    ...(data ? [{ property: "og:url", content: data.origin }] : []),
-  ];
+export function meta({ matches }: Route.MetaArgs) {
+  const { seo } = getLayoutSeo(matches);
+  return buildMeta(matches, {
+    title: `${seo.site_name} | Premium Automotive Parts`,
+    rawTitle: true,
+    path: "/",
+    pageKey: "home",
+  });
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {

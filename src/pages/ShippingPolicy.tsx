@@ -1,21 +1,18 @@
 import { Mail } from "lucide-react";
 import type { Route } from "./+types/ShippingPolicy";
+import { buildMeta } from "@/lib/seo";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { SHIPPING_POLICY_SECTIONS } from "@/constants/shippingPolicy";
 import { SUPPORT_EMAIL } from "@/constants/contact";
 
-// Static content, no loader — same pattern as ReturnsPolicy.
-export function meta({}: Route.MetaArgs) {
-  const title = "Shipping Policy | Parts Hub Australia";
-  const description =
-    "Read Parts Hub Australia's shipping policy — dispatch times, delivery costs, tracking, and click & collect.";
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-  ];
+// Static content, no loader, like ReturnsPolicy.
+export function meta({ matches }: Route.MetaArgs) {
+  return buildMeta(matches, {
+    title: "Shipping Policy",
+    description: "Our shipping policy: dispatch times, delivery costs, tracking, and click & collect.",
+    path: "/shipping-policy",
+  });
 }
 
 export default function ShippingPolicy() {

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Route } from "./+types/BundlesListing";
+import { buildMeta } from "@/lib/seo";
 import { Breadcrumb } from "@/components/common/Breadcrumb";
 import { BundlesHero } from "@/components/bundles/BundlesHero";
 import { BundleCard } from "@/components/bundles/BundleCard";
@@ -7,18 +8,14 @@ import { WhyChooseBundles } from "@/components/bundles/WhyChooseBundles";
 import { BUNDLES } from "@/data/bundles";
 import { MAKES } from "@/data/vehicles";
 
-// NOTE: no loader — this page's data (BUNDLES/MAKES) is static, local
-// module data with no backend fetch to move server-side; it already
-// server-renders fully as soon as the route is SSR'd.
-export function meta({}: Route.MetaArgs) {
-  const title = "Popular Bundles | Parts Hub Australia";
-  const description = "Curated performance part bundles for popular makes — built to fit together, priced to bundle.";
-  return [
-    { title },
-    { name: "description", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
-  ];
+// NOTE: no loader; bundles are static module data, already server-rendered.
+export function meta({ matches }: Route.MetaArgs) {
+  return buildMeta(matches, {
+    title: "Popular Bundles",
+    description: "Curated performance part bundles for popular makes, built to fit together and priced to bundle.",
+    path: "/bundles",
+    pageKey: "bundles",
+  });
 }
 
 export default function BundlesListing() {

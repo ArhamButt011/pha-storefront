@@ -86,9 +86,30 @@ export interface FlashSale {
   show_product_badges: boolean;
 }
 
+// What the popup advertises; the code itself only comes back on signup.
+export interface SignupPopupOffer {
+  discount_type: DiscountType;
+  discount_value: number;
+  minimum_order: number;
+}
+
+export interface SignupPopup {
+  delay_seconds: number;
+  headline: string;
+  body: string;
+  button_label: string;
+  success_message: string;
+  image_url: string;
+  collect_first_name: boolean;
+  frequency_days: number;
+  placement: "all_pages" | "home_only";
+  offer: SignupPopupOffer | null;
+}
+
 export interface StorefrontContent {
   hero_slides: HeroSlide[];
   hero_settings: HeroSettings;
   announcement: Announcement | null;
   flash_sale: FlashSale | null;
+  signup_popup: SignupPopup | null;
 }
