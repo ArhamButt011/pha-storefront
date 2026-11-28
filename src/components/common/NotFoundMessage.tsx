@@ -2,15 +2,23 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, SearchX } from "lucide-react";
 import { buttonClassName } from "@/components/ui/button-styles";
 
+interface NotFoundMessageProps {
+  title?: string;
+  message?: string;
+}
+
 /** Friendly 404 body, shown inside the normal navbar and footer. */
-export function NotFoundMessage() {
+export function NotFoundMessage({
+  title = "Page not found",
+  message = "The page you're looking for has moved or no longer exists.",
+}: NotFoundMessageProps) {
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-2xl flex-col items-center justify-center gap-4 px-4 pb-16 pt-32 text-center">
       <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent">
         <SearchX className="h-8 w-8" />
       </span>
-      <h1 className="font-display text-3xl font-black text-fg">Page not found</h1>
-      <p className="text-fg-muted">The page you're looking for has moved or no longer exists.</p>
+      <h1 className="font-display text-3xl font-black text-fg">{title}</h1>
+      <p className="text-fg-muted">{message}</p>
       <div className="flex flex-wrap justify-center gap-3 pt-2">
         <Link to="/shop" className={buttonClassName({ variant: "primary" })}>
           Browse parts

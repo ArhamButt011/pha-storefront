@@ -16,6 +16,7 @@ export default [
     route("blog/tag/:tag", "pages/BlogTag.tsx"),
     route("blog/:slug", "pages/BlogPost.tsx"),
     route("pages/:slug", "pages/CustomPage.tsx"),
+    route("feedback/:token", "pages/FeedbackPage.tsx"),
     route("cart", "pages/Cart.tsx"),
     route("returns-policy", "pages/ReturnsPolicy.tsx"),
     route("shipping-policy", "pages/ShippingPolicy.tsx"),
