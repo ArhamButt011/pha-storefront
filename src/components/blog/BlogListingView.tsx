@@ -1,4 +1,4 @@
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Breadcrumb, type BreadcrumbItem } from "@/components/common/Breadcrumb";
 import { ArticleCard } from "@/components/blog/ArticleCard";
 import { ArticleTagLinks } from "@/components/blog/ArticleTagLinks";
@@ -39,21 +39,7 @@ export function BlogListingView({ heading, intro, articles, tags, activeTag }: B
         <p className="mt-3 text-fg-muted">{intro}</p>
       </header>
 
-      {tags.length ? (
-        <div className="mb-8 flex flex-wrap items-center gap-2">
-          <Link
-            to={BLOG_PATH}
-            className={
-              activeTag
-                ? "rounded-full border border-border px-3 py-1 text-xs font-semibold text-fg-muted transition-colors hover:border-accent/50 hover:text-accent"
-                : "rounded-full border border-accent bg-accent/15 px-3 py-1 text-xs font-semibold text-accent"
-            }
-          >
-            All
-          </Link>
-          <ArticleTagLinks tags={tags.map((t) => t.tag)} active={activeTag} />
-        </div>
-      ) : null}
+      <ArticleTagLinks tags={tags.map((t) => t.tag)} active={activeTag} showAll className="mb-8" />
 
       {articles.items.length ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

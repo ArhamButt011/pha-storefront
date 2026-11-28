@@ -5,7 +5,6 @@ import type { Route } from "./+types/FeedbackPage";
 import { NotFoundMessage } from "@/components/common/NotFoundMessage";
 import { FeedbackItemRow } from "@/components/feedback/FeedbackItemRow";
 import { Button } from "@/components/ui/button";
-import { buttonClassName } from "@/components/ui/button-styles";
 import { FEEDBACK_PATH, HAPPY_RATING, RATING_MAX, RATING_MIN } from "@/constants/feedback";
 import { ApiError } from "@/lib/api/client";
 import { getFeedbackForm, submitFeedback } from "@/lib/api/feedback";
@@ -105,14 +104,16 @@ export default function FeedbackPage({ loaderData }: Route.ComponentProps) {
         <p className="text-fg-muted">Your feedback goes straight to {form.store_name || "our team"} and helps us stock better parts.</p>
         <div className="flex flex-wrap justify-center gap-3 pt-2">
           {happy ? (
-            <Link to={`/product/${happy.product_slug}`} className={buttonClassName({ variant: "outline" })}>
-              <Heart className="mr-2 h-4 w-4" />
-              Love it? Tell others
-            </Link>
+            <Button asChild variant="outline">
+              <Link to={`/product/${happy.product_slug}`}>
+                <Heart className="mr-2 h-4 w-4" />
+                Love it? Tell others
+              </Link>
+            </Button>
           ) : null}
-          <Link to="/shop" className={buttonClassName({ variant: "primary" })}>
-            Keep shopping
-          </Link>
+          <Button asChild>
+            <Link to="/shop">Keep shopping</Link>
+          </Button>
         </div>
       </main>
     );

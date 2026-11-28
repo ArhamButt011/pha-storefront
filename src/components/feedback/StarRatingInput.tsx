@@ -1,5 +1,6 @@
 import { useState, type KeyboardEvent } from "react";
 import { Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { RATING_LABELS, RATING_MAX, RATING_MIN } from "@/constants/feedback";
 import { cn } from "@/utils/cn";
 
@@ -29,9 +30,11 @@ export function StarRatingInput({ value, onChange, label, disabled }: StarRating
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
       <div role="radiogroup" aria-label={label} className="flex gap-1" onKeyDown={handleKey} onMouseLeave={() => setHover(null)}>
         {STARS.map((n) => (
-          <button
+          <Button
             key={n}
             type="button"
+            variant="ghost"
+            size="icon"
             role="radio"
             aria-checked={value === n}
             aria-label={`${n} out of ${RATING_MAX}: ${RATING_LABELS[n]}`}
@@ -39,10 +42,10 @@ export function StarRatingInput({ value, onChange, label, disabled }: StarRating
             disabled={disabled}
             onMouseEnter={() => setHover(n)}
             onClick={() => onChange(n)}
-            className="rounded-md p-0.5 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-not-allowed"
+            className="h-auto w-auto rounded-md p-0.5 hover:scale-110 hover:bg-transparent"
           >
             <Star className={cn("h-7 w-7 sm:h-9 sm:w-9", n <= shown ? "fill-accent text-accent" : "text-bg-3")} />
-          </button>
+          </Button>
         ))}
       </div>
       {shown ? <span className="text-sm font-medium text-fg-muted">{RATING_LABELS[shown]}</span> : null}

@@ -7,6 +7,7 @@ import { NavLinkItem } from "@/components/layout/NavLinkItem";
 import { HeaderSearchBar } from "@/components/search/HeaderSearchBar";
 import { useCart } from "@/hooks/useCart";
 import { useVehicle } from "@/context/VehicleContext";
+import { BLOG_PATH } from "@/constants/seo";
 
 interface Props {
   onInquiry: () => void;
@@ -18,7 +19,7 @@ const NAV_LINKS = [
   { label: "Shop by Category", href: "/categories" },
   { label: "Shop", href: "/shop" },
   // { label: "Popular Bundles", href: "/bundles" },
-  { label: "Blog", href: "/blog" },
+  { label: "Blog", href: BLOG_PATH },
   { label: "About Us", href: "/#about" },
 ];
 

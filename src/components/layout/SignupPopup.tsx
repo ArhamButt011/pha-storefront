@@ -8,6 +8,7 @@ import { useSignupPopup } from "@/hooks/useSignupPopup";
 import { subscribeNewsletter } from "@/lib/api/newsletter";
 import type { SignupPopup as SignupPopupContent } from "@/types/storefront";
 import { saleHeadline } from "@/utils/flashSale";
+import { formatDate } from "@/utils/format";
 
 interface SignupPopupProps {
   popup: SignupPopupContent;
@@ -21,8 +22,6 @@ interface SignupResult {
   expired: boolean;
 }
 
-const formatExpiry = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
 
 function noCodeMessage(done: SignupResult) {
   if (done.alreadyUsed) return "You've already used your welcome offer with this email. Thanks for being with us!";
@@ -99,7 +98,7 @@ export function SignupPopup({ popup }: SignupPopupProps) {
                   <p className="text-xs text-fg-muted">
                     Works once, with {done.email} at checkout
                     {popup.offer?.minimum_order ? ` on orders over $${popup.offer.minimum_order}` : ""}
-                    {done.expiresAt ? `. Valid until ${formatExpiry(done.expiresAt)}.` : "."}
+                    {done.expiresAt ? `. Valid until ${formatDate(done.expiresAt)}.` : "."}
                   </p>
                 </div>
               ) : (

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, SearchX } from "lucide-react";
-import { buttonClassName } from "@/components/ui/button-styles";
+import { Button } from "@/components/ui/button";
 
 interface NotFoundMessageProps {
   title?: string;
@@ -20,13 +20,15 @@ export function NotFoundMessage({
       <h1 className="font-display text-3xl font-black text-fg">{title}</h1>
       <p className="text-fg-muted">{message}</p>
       <div className="flex flex-wrap justify-center gap-3 pt-2">
-        <Link to="/shop" className={buttonClassName({ variant: "primary" })}>
-          Browse parts
-        </Link>
-        <Link to="/" className={buttonClassName({ variant: "outline" })}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Home
-        </Link>
+        <Button asChild>
+          <Link to="/shop">Browse parts</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Home
+          </Link>
+        </Button>
       </div>
     </main>
   );

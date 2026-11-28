@@ -1,7 +1,6 @@
 import type { Route } from "./+types/BlogTag";
 import { BlogListingView } from "@/components/blog/BlogListingView";
-import { tagPath } from "@/components/blog/ArticleTagLinks";
-import { loadArticleListing, pageSuffix } from "@/lib/blog";
+import { loadArticleListing, pageSuffix, tagPath } from "@/lib/blog";
 import { redirectOrNotFound } from "@/lib/redirects";
 import { buildMeta } from "@/lib/seo";
 

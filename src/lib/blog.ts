@@ -1,3 +1,4 @@
+import { BLOG_PATH } from "@/constants/seo";
 import { listArticleTags, listArticles } from "@/lib/api/seo";
 import type { ArticlePage, ArticleTagCount } from "@/types/seo";
 
@@ -13,6 +14,9 @@ export async function loadArticleListing(request: Request, tag?: string): Promis
   ]);
   return { articles, tags };
 }
+
+/** /blog/tag/<tag>, encoded for tags with spaces or symbols. */
+export const tagPath = (tag: string) => `${BLOG_PATH}/tag/${encodeURIComponent(tag)}`;
 
 /** "?page=2" for page 2+, so paginated URLs canonicalise to themselves. */
 export const pageSuffix = (page: number) => (page > 1 ? `?page=${page}` : "");
